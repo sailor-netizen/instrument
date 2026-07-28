@@ -14,14 +14,45 @@ import { H, P, Tag } from "./primitives.jsx";
 
 /** The page shell: title, one line of orientation, then content. Every view had hand-rolled this same
  *  header + canvas pair (10 copies), which is exactly how headers drift apart. */
-export function View({ title, sub, children, className = "" }) {
+export function View({ title, sub, actions, children, className = "" }) {
   return (
     <div className={`i-view ${className}`}>
       <header className="i-view-head">
-        <H level={1}>{title}</H>
-        {sub ? <div className="i-view-sub">{sub}</div> : null}
+        <div className="i-view-titles">
+          <H level={1}>{title}</H>
+          {sub ? <div className="i-view-sub">{sub}</div> : null}
+        </div>
+        {/* actions sit ON the title row rather than under it. A dev tool that spends 150px of every
+            screen on a heading and a sentence has spent it on the least useful thing there. */}
+        {actions ? <div className="i-view-actions">{actions}</div> : null}
       </header>
       {children}
+    </div>
+  );
+}
+
+/** The context strip: what you are working on, its live state, and the action that state implies.
+ *
+ *  Every screen used to open with a title and no orientation — you could not tell which branch you
+ *  were on or whether there was uncommitted work without leaving the app. This is the one row that
+ *  answers that, and it sits above the page title rather than inside any screen, because the answer
+ *  is the same on all of them.
+ *
+ *  `items` are {label, value, tone?} facts. `action` is the thing the state implies (review a dirty
+ *  tree, deploy a clean one) — one primary, never a menu. */
+export function ContextBar({ scope, items = [], action, children, className = "" }) {
+  const facts = items.filter((i) => i && i.value !== undefined && i.value !== null && i.value !== "");
+  return (
+    <div className={`i-ctxbar ${className}`}>
+      {scope ? <span className="i-ctx-scope">{scope}</span> : null}
+      {facts.map((i) => (
+        <span key={i.label} className={`i-ctx-fact${i.tone ? ` tone-${i.tone}` : ""}`}>
+          <span className="i-ctx-k">{i.label}</span>
+          <span className="i-ctx-v">{i.value}</span>
+        </span>
+      ))}
+      {children}
+      {action ? <span className="i-ctx-act">{action}</span> : null}
     </div>
   );
 }

@@ -204,7 +204,26 @@
                border-radius: var(--i-radius); padding: var(--i-4); max-width: var(--i-measure); }
 
 .i-view { display: flex; flex-direction: column; gap: var(--i-4); max-width: 100%; }
-.i-view-head { display: flex; flex-direction: column; gap: var(--i-1); }
+.i-view-head { display: flex; align-items: flex-end; justify-content: space-between;
+               gap: var(--i-4); flex-wrap: wrap; }
+.i-view-titles { display: flex; flex-direction: column; gap: var(--i-1); min-width: 0; }
+.i-view-actions { display: flex; align-items: center; gap: var(--i-2); flex-wrap: wrap; }
 .i-view-sub { font-family: var(--i-prose); font-size: var(--i-small); color: var(--i-dim);
               max-width: var(--i-measure); }
 .i-split { display: flex; align-items: center; justify-content: space-between; gap: var(--i-3); }
+
+/* Context strip — the reference is a dev tool's status bar: scope, live facts, one implied action,
+   all on one line. Machine voice throughout, because every value on it is emitted by a machine. */
+.i-ctxbar { display: flex; align-items: center; gap: var(--i-3); flex-wrap: wrap;
+            font-family: var(--i-mono); font-size: var(--i-row);
+            padding: var(--i-2) 0 var(--i-3); border-bottom: var(--x-rule-w) solid var(--i-line); }
+.i-ctx-scope { font-weight: 700; color: var(--i-ink); }
+.i-ctx-fact { display: inline-flex; align-items: baseline; gap: var(--i-1); color: var(--i-dim); }
+.i-ctx-k { font-size: var(--i-micro); letter-spacing: var(--x-label-track);
+           text-transform: var(--x-label-case); color: var(--i-faint); }
+.i-ctx-v { color: var(--i-ink); }
+.i-ctx-fact.tone-signal  .i-ctx-v { color: var(--i-signal); }
+.i-ctx-fact.tone-machine .i-ctx-v { color: var(--i-machine); }
+.i-ctx-fact.tone-crit    .i-ctx-v { color: var(--i-crit); }
+.i-ctx-fact.tone-ok      .i-ctx-v { color: var(--i-ok); }
+.i-ctx-act { margin-left: auto; display: flex; align-items: center; gap: var(--i-2); }

@@ -18,6 +18,7 @@ export {
   Callout,
   Card,
   Cards,
+  ContextBar,
   Finding,
   KV,
   LoadError,

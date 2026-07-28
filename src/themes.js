@@ -12,6 +12,22 @@
 
 export const THEMES = [
   {
+    id: "blueprint",
+    name: "Blueprint",
+    blurb: "A drafting sheet: fine grid, hard outlines, everything numbered.",
+    surface: "outline",
+    shell: "titleblock",
+    scheme: "light",
+    grid: "fine",
+    annotate: 1,
+    hover: "mark",
+    sectionRule: "none",
+    band: "rows",
+    leader: 0,
+    emphasis: "fill",
+    hero: 0,
+  },
+  {
     id: "instrument",
     name: "Instrument",
     blurb: "Hairline planes on a carbon field. The house voice.",
@@ -91,25 +107,12 @@ export const THEMES = [
     emphasis: "wash",
     hero: 1,
   },
-  {
-    id: "blueprint",
-    name: "Blueprint",
-    blurb: "A drafting sheet: fine grid, hard outlines, everything numbered.",
-    surface: "outline",
-    shell: "titleblock",
-    scheme: "light",
-    grid: "fine",
-    annotate: 1,
-    hover: "mark",
-    sectionRule: "none",
-    band: "rows",
-    leader: 0,
-    emphasis: "fill",
-    hero: 0,
-  },
 ];
 
-export const DEFAULT_THEME = "instrument";
+// Blueprint is the house UI: this is a workspace for driving agents over a real fleet, and a
+// drafting sheet — dense, annotated, everything numbered and cross-referenced — is what that
+// work actually looks like. The others stay one select away.
+export const DEFAULT_THEME = "blueprint";
 const KEY = "instrument.theme";
 
 export const themeById = (id) => THEMES.find((t) => t.id === id) || THEMES[0];

@@ -111,6 +111,14 @@
   --i-radius: 0;
   --i-radius-sm: 0;
   --i-radius-pill: 0;
+
+  /* Condensed for the main UI: a drafting sheet packs its information, it does not float it. The page
+     header was spending a full band on a heading and a sentence — --x-title brings it back in line
+     with the figures it sits above, and the density/type pair tightens the whole field together. */
+  --x-title: 1.6rem;
+  --i-density: 0.82;
+  --i-type-scale: 0.94;
+  --x-stat-floor: 11rem;
 }
 
 /* ----------------------------------------------------------------------------------------------
