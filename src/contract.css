@@ -164,20 +164,14 @@
    ---------------------------------------------------------------------------------------------- */
 
 /* outline — no fill, hard edge, square. The drawing-office register. */
-[data-surface="outline"] .i-panel,
-[data-surface="outline"] .i-card,
-[data-surface="outline"] .i-row,
-[data-surface="outline"] .i-stat {
+[data-surface="outline"] :is(.i-panel, .i-card, .i-row, .i-stat, .i-finding, .i-loaderror) {
   background: none;
   border: var(--x-rule-w) solid var(--i-line-hi);
   border-radius: 0;
 }
 
 /* rule — the box dissolves into a top rule and whitespace. Swiss and Editorial both live here. */
-[data-surface="rule"] .i-panel,
-[data-surface="rule"] .i-card,
-[data-surface="rule"] .i-row,
-[data-surface="rule"] .i-stat {
+[data-surface="rule"] :is(.i-panel, .i-card, .i-row, .i-stat, .i-finding, .i-loaderror) {
   background: none;
   border: 0;
   border-top: var(--x-rule-w) solid var(--i-line);
@@ -190,10 +184,7 @@
 [data-surface="rule"] .i-row + .i-row { border-top-color: var(--i-line); }
 
 /* none — nothing draws a container. Density and alignment do all the work. */
-[data-surface="none"] .i-panel,
-[data-surface="none"] .i-card,
-[data-surface="none"] .i-row,
-[data-surface="none"] .i-stat {
+[data-surface="none"] :is(.i-panel, .i-card, .i-row, .i-stat, .i-finding, .i-loaderror) {
   background: none;
   border: 0;
   border-radius: 0;

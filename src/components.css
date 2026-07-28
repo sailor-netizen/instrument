@@ -22,9 +22,19 @@
              letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
              color: var(--i-signal); }
 
+/* THE SURFACE, declared ONCE. Every component that draws a container gets it here and nowhere else.
+   It used to be hand-written on six classes while the three [data-surface] mode blocks listed only
+   four of them — so on any non-tile theme (including blueprint, the default) findings and load-errors
+   kept a filled rounded tile beside square outlined panels, and on terminal they were the only boxes
+   left on screen. A shared selector is what makes "switch the surface" mean all of it. */
+:is(.i-panel, .i-card, .i-row, .i-stat, .i-finding, .i-loaderror) {
+  background: var(--i-plane);
+  border: var(--x-rule-w) solid var(--i-line);
+  border-radius: var(--i-radius);
+}
+
 /* Panel: translucent plane + hairline. No shadow — depth is the wash showing through. */
-.i-panel { background: var(--i-plane); border: 1px solid var(--i-line);
-           border-radius: var(--i-radius); padding: var(--i-4); }
+.i-panel { padding: var(--i-4); }
 .i-panel.tier-2 { background: var(--i-plane-2); }
 /* The tone→stripe mapping hangs off .i-striped, not off .i-panel: Panel and Row both opt in with the
    same class, and scoping it to one of them made the other's stripe silently render with no colour. */
@@ -106,9 +116,7 @@
    a theme raised its figure, "$2.9433" outgrew its column, and it collided with the next stat.
    min() keeps the theme's chosen size as a ceiling and lets the column impose the real limit. */
 .i-stat { display: flex; flex-direction: column; gap: var(--i-2); align-items: flex-start;
-          text-align: left; font: inherit; color: inherit; background: var(--i-plane);
-          border: 1px solid var(--i-line); border-radius: var(--i-radius);
-          padding: var(--i-3) var(--i-4); }
+          text-align: left; font: inherit; color: inherit; padding: var(--i-3) var(--i-4); }
 .i-stat.is-link { cursor: pointer; transition: border-color var(--i-fast), transform var(--i-fast); }
 .i-stat.is-link:hover { border-color: var(--i-line-hi); transform: translateY(-2px); }
 .i-stat-fit { container-type: inline-size; display: flex; flex-direction: column;
@@ -126,8 +134,7 @@
 .i-cards { display: grid; gap: var(--i-3);
            grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--x-card-floor)), 1fr)); }
 .i-card { display: flex; flex-direction: column; gap: var(--i-2); align-items: flex-start;
-          text-align: left; font: inherit; color: inherit; background: var(--i-plane);
-          border: 1px solid var(--i-line); border-radius: var(--i-radius); padding: var(--i-4); }
+          text-align: left; font: inherit; color: inherit; padding: var(--i-4); }
 .i-card.is-link { cursor: pointer; transition: border-color var(--i-fast), transform var(--i-fast); }
 .i-card.is-link:hover { border-color: var(--i-line-hi); transform: translateY(-2px); }
 .i-card.is-on { border-color: var(--i-machine); background: var(--i-machine-wash); }
@@ -142,8 +149,7 @@
 
 .i-rows { display: flex; flex-direction: column; gap: var(--i-2); }
 .i-row { display: flex; flex-direction: column; gap: var(--i-2); width: 100%; text-align: left;
-         font: inherit; color: inherit; background: var(--i-plane); border: 1px solid var(--i-line);
-         border-radius: var(--i-radius); padding: var(--i-3) var(--i-4); }
+         font: inherit; color: inherit; padding: var(--i-3) var(--i-4); }
 .i-row.is-link { cursor: pointer; transition: border-color var(--i-fast), background var(--i-fast); }
 .i-row.is-link:hover { border-color: var(--i-line-hi); }
 .i-row.is-on { border-color: var(--i-machine); background: var(--i-machine-wash); }
@@ -190,8 +196,7 @@
                 color: var(--i-dim); border-bottom-color: var(--i-rail); }
 
 .i-finding { display: grid; grid-template-columns: max-content minmax(8rem, 16rem) 1fr;
-             gap: var(--i-3); align-items: baseline; background: var(--i-plane);
-             border: 1px solid var(--i-line); border-radius: var(--i-radius);
+             gap: var(--i-3); align-items: baseline;
              padding: var(--i-3) var(--i-4); font-size: var(--i-small); }
 .i-finding.is-refuted { opacity: 0.55; }
 .i-finding-where { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-signal);
@@ -200,8 +205,7 @@
 .i-finding-why { color: var(--i-dim); font-style: italic; }
 
 .i-loaderror { display: flex; flex-direction: column; align-items: flex-start; gap: var(--i-2);
-               background: var(--i-plane); border: 1px solid var(--i-line);
-               border-radius: var(--i-radius); padding: var(--i-4); max-width: var(--i-measure); }
+               padding: var(--i-4); max-width: var(--i-measure); }
 
 .i-view { display: flex; flex-direction: column; gap: var(--i-4); max-width: 100%; }
 .i-view-head { display: flex; align-items: flex-end; justify-content: space-between;
