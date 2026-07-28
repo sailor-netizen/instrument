@@ -11,6 +11,7 @@
    the L0 block in tokens.css, which is the only place literals live.
    ============================================================================================ */
 
+export { Drawer, Disclosure, Popover, Tooltip } from "./overlays.jsx";
 export { Shell } from "./shell.jsx";
 export { THEMES, DEFAULT_THEME, applyTheme, storedTheme, themeById } from "./themes.js";
 export { Btn, Empty, Eyebrow, Field, H, P, Panel, Pills, Tag, Well } from "./primitives.jsx";

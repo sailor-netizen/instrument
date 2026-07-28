@@ -1,0 +1,158 @@
+/* ==============================================================================================
+   OVERLAYS + MOTION.  Zero literals, as everywhere.
+
+   MOTION BUDGET for a dense tool. These are not marketing-page numbers:
+     120ms  a control acknowledging a press          (must feel instant)
+     150ms  hover / focus / colour                   (--i-fast)
+     220ms  a surface arriving or leaving            (--i-med)
+     300ms  a full-height side card                  (--i-slow — longest travel, so longest duration)
+
+   WHAT MUST NEVER ANIMATE, because a tool is read and operated rather than admired:
+     - anything that moves text the user is already reading (a list must not reflow under the eye)
+     - anything on a hot path: streaming trace lines, table rows arriving, log output
+     - height of a scrolling region while it scrolls
+   ============================================================================================== */
+
+:root {
+  --i-slow: 300ms var(--i-ease);
+  --i-press: 120ms var(--i-ease);
+  --i-scrim: color-mix(in oklab, var(--i-page) 62%, transparent);
+}
+
+/* prefers-reduced-motion is NOT "turn it all off". Removing every transition takes away the signal
+   that something arrived, which is precisely what a motion-sensitive user still needs. Travel and
+   scale go; opacity — which does not move anything — stays, and stays fast. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --i-fast: 1ms linear; --i-med: 80ms linear; --i-slow: 80ms linear; --i-press: 1ms linear; }
+  .i-drawer, .i-pop { transition-property: opacity, display, overlay !important; translate: none !important; }
+  .i-drawer[open], .i-pop:popover-open { translate: none !important; }
+}
+
+/* Press ------------------------------------------------------------------------------------- */
+/* A control must acknowledge the press itself, not just the result. Scale, not translate: translate
+   on a button inside a row nudges its neighbours, scale is contained. */
+.i-btn, .i-pill, .i-navitem, .i-navkey, .i-sheetitem {
+  transition: border-color var(--i-fast), background var(--i-fast), color var(--i-fast),
+              transform var(--i-press);
+}
+.i-btn:active:not(:disabled), .i-pill:active, .i-navitem:active { transform: scale(0.97); }
+.i-stat.is-link:active, .i-card.is-link:active, .i-row.is-link:active { transform: scale(0.995); }
+
+/* Tooltip ----------------------------------------------------------------------------------- */
+.i-tipwrap { position: relative; display: inline-flex; }
+.i-tip {
+  position: absolute; z-index: 40; pointer-events: none;
+  opacity: 0; visibility: hidden;
+  background: var(--i-plane-2); color: var(--i-ink);
+  border: var(--x-rule-w) solid var(--i-line-hi); border-radius: var(--i-radius-sm);
+  padding: var(--i-1) var(--i-2);
+  font-family: var(--i-mono); font-size: var(--i-micro); white-space: nowrap;
+  transition: opacity var(--i-fast), visibility var(--i-fast), translate var(--i-fast);
+}
+.i-tip.is-top    { bottom: 100%; left: 50%; margin-left: -50%; translate: 50% -2px; }
+.i-tip.is-bottom { top: 100%; left: 50%; margin-left: -50%; translate: 50% 2px; }
+.i-tipwrap:hover .i-tip, .i-tipwrap:focus-within .i-tip { opacity: 1; visibility: visible; }
+.i-tipwrap:hover .i-tip.is-top, .i-tipwrap:focus-within .i-tip.is-top { translate: 50% -6px; }
+.i-tipwrap:hover .i-tip.is-bottom, .i-tipwrap:focus-within .i-tip.is-bottom { translate: 50% 6px; }
+
+/* Popover ----------------------------------------------------------------------------------- */
+.i-pop-anchor { display: inline-flex; }
+.i-pop {
+  margin: 0; padding: var(--i-3); inset: auto;
+  min-width: 14rem; max-width: min(92vw, 26rem);
+  background: var(--i-plane-2); color: var(--i-ink);
+  border: var(--x-rule-w) solid var(--i-line-hi); border-radius: var(--i-radius);
+  /* Fallback position: centred near the top. Ugly-but-correct beats mispositioned — where anchor
+     positioning is missing the surface is still reachable, still dismissable, just not tethered. */
+  position: fixed; top: 20vh; left: 50%; translate: -50% 0;
+  opacity: 0;
+  transition: opacity var(--i-med), translate var(--i-med),
+              display var(--i-med) allow-discrete, overlay var(--i-med) allow-discrete;
+}
+.i-pop:popover-open { opacity: 1; }
+@starting-style { .i-pop:popover-open { opacity: 0; translate: -50% -6px; } }
+
+/* Anchored, where the browser supports it. Everything above still applies underneath. */
+@supports (anchor-name: --a) {
+  .i-pop { position: absolute; translate: none; left: auto; top: auto; position-try-fallbacks: flip-block, flip-inline; }
+  .i-pop.is-bottom { position-area: block-end span-inline-end; margin-block-start: var(--i-2); }
+  .i-pop.is-top    { position-area: block-start span-inline-end; margin-block-end: var(--i-2); }
+  @starting-style { .i-pop:popover-open { opacity: 0; translate: 0 -6px; } }
+  .i-pop:popover-open { translate: 0 0; }
+}
+
+/* Drawer ------------------------------------------------------------------------------------ */
+.i-drawer {
+  border: 0; padding: 0; max-height: 100dvh; height: 100dvh;
+  width: min(94vw, 34rem); max-width: none;
+  margin: 0 0 0 auto;                       /* pin to the inline-end edge */
+  background: var(--i-page); color: var(--i-ink);
+  border-inline-start: var(--x-rule-w) solid var(--i-line-hi);
+  display: flex; flex-direction: column;
+  translate: 100% 0;
+  /* allow-discrete is what makes the EXIT animate: without it display:none applies instantly and the
+     card vanishes rather than leaving. */
+  transition: translate var(--i-slow), display var(--i-slow) allow-discrete,
+              overlay var(--i-slow) allow-discrete;
+}
+.i-drawer.is-left { margin: 0 auto 0 0; translate: -100% 0;
+                    border-inline: 0; border-inline-end: var(--x-rule-w) solid var(--i-line-hi); }
+.i-drawer[open] { translate: 0 0; }
+@starting-style { .i-drawer[open] { translate: 100% 0; } }
+@starting-style { .i-drawer.is-left[open] { translate: -100% 0; } }
+
+.i-drawer::backdrop {
+  background: var(--i-scrim);
+  opacity: 0;
+  transition: opacity var(--i-med), display var(--i-med) allow-discrete, overlay var(--i-med) allow-discrete;
+}
+.i-drawer[open]::backdrop { opacity: 1; }
+@starting-style { .i-drawer[open]::backdrop { opacity: 0; } }
+
+.i-drawer-head {
+  display: flex; align-items: center; gap: var(--i-3);
+  padding: var(--i-4); border-bottom: var(--x-rule-w) solid var(--i-line);
+}
+.i-drawer-title { font-family: var(--i-chrome-face, var(--i-mono)); font-weight: 700;
+                  font-size: var(--i-body); flex: 1; min-width: 0; }
+.i-drawer-x { padding: var(--i-1) var(--i-2); }
+.i-drawer-body { flex: 1; overflow-y: auto; padding: var(--i-4);
+                 display: flex; flex-direction: column; gap: var(--i-4); }
+.i-drawer-foot { padding: var(--i-3) var(--i-4); border-top: var(--x-rule-w) solid var(--i-line);
+                 display: flex; gap: var(--i-2); justify-content: flex-end; }
+
+/* Disclosure -------------------------------------------------------------------------------- */
+/* 0fr -> 1fr is the only expansion that works on content of unknown height. max-height has to guess
+   a number, and it either clips tall content or spends the tail of its duration animating nothing. */
+.i-disc { border-bottom: var(--x-rule-w) solid var(--i-line); }
+.i-disc-head {
+  width: 100%; display: flex; align-items: baseline; gap: var(--i-2);
+  background: none; border: 0; cursor: pointer; text-align: left;
+  padding: var(--i-2) 0; color: inherit; font: inherit;
+}
+.i-disc-caret { color: var(--i-dim); transition: rotate var(--i-fast); }
+.i-disc.is-open .i-disc-caret { rotate: 90deg; }
+.i-disc-label { font-family: var(--i-chrome-face, var(--i-mono)); font-weight: 600;
+                font-size: var(--i-small); }
+.i-disc-meta { margin-left: auto; font-family: var(--i-mono); font-size: var(--i-row);
+               color: var(--i-dim); }
+.i-disc-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--i-med); }
+.i-disc.is-open .i-disc-wrap { grid-template-rows: 1fr; }
+.i-disc-body { overflow: hidden; }
+.i-disc.is-open .i-disc-body { padding-bottom: var(--i-3); }
+
+/* Tiles arriving ---------------------------------------------------------------------------- */
+/* Only on first paint of a collection, and only opacity+scale — a list that animates on every update
+   fights the reader. Deliberately NOT applied to .i-tr or .i-traceline: rows and trace lines arrive
+   while being read, and that is exactly the hot path the budget above forbids animating. */
+@media (prefers-reduced-motion: no-preference) {
+  .i-stats > *, .i-cards > * { animation: i-rise var(--i-med) both; }
+  .i-stats > :nth-child(2), .i-cards > :nth-child(2) { animation-delay: 30ms; }
+  .i-stats > :nth-child(3), .i-cards > :nth-child(3) { animation-delay: 60ms; }
+  .i-stats > :nth-child(4), .i-cards > :nth-child(4) { animation-delay: 90ms; }
+  .i-stats > :nth-child(n + 5), .i-cards > :nth-child(n + 5) { animation-delay: 120ms; }
+}
+@keyframes i-rise {
+  from { opacity: 0; transform: translateY(4px) scale(0.995); }
+  to   { opacity: 1; transform: none; }
+}

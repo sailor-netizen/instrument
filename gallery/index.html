@@ -222,6 +222,66 @@
   </section>
 
   <section class="g-spec">
+    <h2>Overlays</h2>
+    <p>Floating UI with no dependency — the platform does the hard parts now. Tooltip <em>names</em> a
+       control and is never interactive; Popover is a transient anchored surface and leaves the page
+       live behind it; Drawer is modal and focus-trapped, for the detail of a thing in a list.
+       All three still open, close and dismiss where the animation APIs are missing.</p>
+    <div class="g-demo">
+      <span class="i-tipwrap"><span aria-describedby="tip1"><button class="i-btn is-quiet">Hover me</button></span>
+        <span role="tooltip" id="tip1" class="i-tip is-top">Runs the workspace gates</span></span>
+
+      <span class="i-pop-anchor" style="anchor-name: --demo">
+        <button class="i-btn is-quiet" popovertarget="pop1">Popover ▾</button></span>
+      <div id="pop1" popover="auto" class="i-pop is-bottom" style="position-anchor: --demo">
+        <div class="i-eyebrow">Release paths</div>
+        <p class="i-p is-small is-dim">A credential states how it may leave the vault. Values never do.</p>
+        <div class="g-demo"><span class="i-tag tone-mute">inject</span>
+          <span class="i-tag tone-mute">proxy</span></div>
+      </div>
+
+      <button class="i-btn is-primary" id="opendrawer">Open drawer</button>
+    </div>
+
+    <dialog class="i-drawer is-right" id="drawer1">
+      <div class="i-drawer-head"><span class="i-drawer-title">deploy_template</span>
+        <button class="i-btn is-ghost i-drawer-x" aria-label="Close" onclick="drawer1.close()">&#10005;</button></div>
+      <div class="i-drawer-body">
+        <dl class="i-kv">
+          <div class="i-kv-pair"><dt>target</dt><dd>836cd44cd560e171</dd></div>
+          <div class="i-kv-pair"><dt>blast</dt><dd>vessl-02 · LXC 140</dd></div>
+          <div class="i-kv-pair"><dt>rollback</dt><dd>Revert to the previous template revision.</dd></div>
+        </dl>
+        <pre class="i-well">[preflight] template 'warren' + host ok — deploy will run</pre>
+      </div>
+      <div class="i-drawer-foot"><button class="i-btn is-ghost" onclick="drawer1.close()">Deny</button>
+        <button class="i-btn is-primary">Approve</button></div>
+    </dialog>
+  </section>
+
+  <section class="g-spec">
+    <h2>Disclosure</h2>
+    <p>In-place expansion for detail that belongs in the flow. Animated with
+       <code>grid-template-rows: 0fr &rarr; 1fr</code> — the only technique that works on content of
+       unknown height, since <code>max-height</code> has to guess a number and then either clips or
+       eases to nothing.</p>
+    <div class="i-disc" id="disc1">
+      <button class="i-disc-head" aria-expanded="false" onclick="toggleDisc(this)">
+        <span class="i-disc-caret" aria-hidden="true">&#9656;</span>
+        <span class="i-disc-label">ruff</span><span class="i-disc-meta">passed &middot; 0 findings</span></button>
+      <div class="i-disc-wrap"><div class="i-disc-body">
+        <pre class="i-well">All checks passed!</pre></div></div>
+    </div>
+    <div class="i-disc" id="disc2">
+      <button class="i-disc-head" aria-expanded="false" onclick="toggleDisc(this)">
+        <span class="i-disc-caret" aria-hidden="true">&#9656;</span>
+        <span class="i-disc-label">pytest</span><span class="i-disc-meta">passed &middot; 220 tests</span></button>
+      <div class="i-disc-wrap"><div class="i-disc-body">
+        <pre class="i-well">220 passed, 1 warning in 14.21s</pre></div></div>
+    </div>
+  </section>
+
+  <section class="g-spec">
     <h2>Shell</h2>
     <p>The one place structure genuinely branches, and the one part that needs the React layer —
        six layouts (sidebar · topnav · rail · statusbar · topbar · titleblock) chosen by the active
@@ -242,6 +302,15 @@
 
 </div>
 
+<script>
+  // plain handlers so the gallery stays framework-free — the React wrappers live in overlays.jsx
+  document.getElementById("opendrawer").addEventListener("click", () => drawer1.showModal());
+  function toggleDisc(btn) {
+    const d = btn.closest(".i-disc");
+    const open = d.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", String(open));
+  }
+</script>
 <script type="module">
   // The registry is imported, not restated — one source of truth for what a theme IS, shared with
   // every React consumer. A gallery that hardcoded its own list would drift within a week.

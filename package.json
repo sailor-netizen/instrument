@@ -24,7 +24,8 @@
     "./components.css": "./src/components.css",
     "./shell.css": "./src/shell.css",
     "./themes/*.css": "./src/themes/*.css",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./overlays.css": "./src/overlays.css"
   },
   "peerDependencies": {
     "react": ">=18"
