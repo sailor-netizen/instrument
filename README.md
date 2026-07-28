@@ -1,97 +1,124 @@
 # Instrument
 
-Flightdeck's design system. Self-contained: React plus two stylesheets, no other dependency.
+A design system where a **theme owns structure, not just colour**.
 
-## Install
+Most theming stops at a palette. That fails the moment someone dislikes the *shape* of a product,
+because a token swap cannot reach composition — swap tokens on a sidebar-and-cards dashboard and you
+get the same dashboard in a different colour. Here a theme also chooses its surface mode, its
+navigation layout, its density, its background grid and whether items are annotated. Terminal deletes
+every box in the product; Blueprint numbers every item and moves the nav into a drafting title block.
+Same nine screens, and no screen aware that any of it happened.
 
-Copy this folder. Then, once, in your entry file:
-
-```js
-import "./instrument/tokens.css";      // L0 palette + L1 semantic roles
-import "./instrument/components.css";  // the component layer
+```bash
+npm i instrument@file:../instrument      # or copy the folder; both work
 ```
 
-Set one root font-size — Instrument's whole scale is `rem`, so this is the single fluid axis and
-everything (type, spacing, layout measures) tracks it:
+## Two ways in
 
-```css
-html { font-size: clamp(16px, 0.7vw + 9px, 34px); }
+**No framework.** One stylesheet is the whole system. This is the primary path, not a fallback:
+
+```html
+<link rel="stylesheet" href="instrument/src/instrument.css">
+<html data-theme="terminal" data-surface="none" data-shell="statusbar">
+  <button class="i-btn is-primary">Run review</button>
+  <span class="i-tag tone-crit">failed</span>
+</html>
 ```
 
-## Use
+**React**, a convenience layer over exactly that vocabulary — an *optional* peer dependency:
 
 ```jsx
-import { View, Stats, Stat, Cards, Card } from "./instrument";
+import { Shell, View, Stats, Stat, applyTheme } from "instrument";
+import "instrument/css";               // or the parts individually, for tree-shaking
 
-<View title="Cockpit" sub="Working in flightdeck — everything below runs against it.">
-  <Stats>
-    <Stat value={7} label="agent runs" onClick={() => go("runs")} />
-    <Stat value={2} label="awaiting you" hot />
-  </Stats>
-  <Cards>
-    <Card title="Review changes" blurb="A gated agent reads your diff." onClick={run} />
-  </Cards>
-</View>
+applyTheme("blueprint");
+
+<Shell variant="titleblock" nav={NAV} active={tab} onNavigate={go}>
+  <View title="Cockpit" sub="Working in flightdeck.">
+    <Stats><Stat value={7} label="agent runs" onClick={() => go("runs")} /></Stats>
+  </View>
+</Shell>
 ```
 
-## What's in it
+## The gallery
 
-**Primitives** — `H` `P` `Eyebrow` `Panel` `Btn` `Tag` `Field` `Pills` `Empty` `Well`
+```bash
+npm run gallery      # → http://127.0.0.1:4322/gallery/
+```
 
-**Compounds** — the patterns that recurred across real screens:
+Every component in every theme, with a surface override so you can see any component under all four
+surface modes — including the ones its own theme never uses. That is how you find out a new component
+only works in one of them. **It uses no framework**, which is the standing proof that the identity
+lives in CSS and a class vocabulary.
 
-| | For |
-|---|---|
-| `View` | The page shell: title, one line of orientation, content. Every screen. |
-| `Split` | Two things pushed apart on a line — a title and its badge. |
-| `Stats` `Stat` | A metric row. A `Stat` with `onClick` is a route into the view that owns the number. |
-| `Cards` `Card` | A responsive grid of title + badge + blurb. Launchers, catalogs, host lists. |
-| `Rows` `Row` | A list row: title, meta, supporting line. Queues and histories. |
-| `Table` `TRow` | A dense ledger. Header cells come from the same `cols` array, so a column can't drift from its heading. |
-| `Trace` `TraceLine` | The agent trace on its 2px rail — the system saying "a machine did this". |
-| `Finding` | Severity + location + claim, with an optional verification verdict. |
-| `Callout` | A terminal verdict, toned by meaning. |
-| `Section` `Toolbar` `KV` | A titled block · an action bar with a live status · key/value metadata. |
-| `Loading` `LoadError` | So no screen invents its own — and a failed fetch never looks like "none". |
+## The three layers
+
+| | | |
+|---|---|---|
+| **L0** | palette | private literals (`--_`). The only place a hex is legal. |
+| **L1** | roles | semantic tokens (`--i-`). What components actually consume. |
+| **L2** | structure | how components draw and where the shell puts things. `--x-` scalars, plus modes as `data-*` attributes. |
+
+Everything hangs off **one attribute**, `data-theme`, written by `applyTheme()` together with the
+structural attributes it implies. There is no second switch to forget, so the palette can never change
+while the layout doesn't.
+
+## Themes
+
+| | Surface | Shell | Field |
+|---|---|---|---|
+| **Instrument** | tile | sidebar | carbon, dual-scheme. The house voice. |
+| **Swiss Signal** | rule | topnav | paper, a visible column grid, enormous figures, one red |
+| **Terminal** | none | statusbar | near-black, monospace only, numbered jump keys, dense |
+| **Editorial Ops** | rule | rail | cream, a display serif against mono machine text |
+| **Bento Console** | tile | topbar | midnight navy, unequal tiles, composition as hierarchy |
+| **Blueprint** | outline | titleblock | paper, fine grid, hard outlines, everything numbered |
 
 ## The rules that keep it coherent
 
-1. **Components consume `--i-*` roles only.** Literals live in the L0 block of `tokens.css` and
-   nowhere else. That is what makes a re-skin a ten-line edit, and it makes the lint rule statable:
-   *a hex outside L0 is a violation.*
-2. **`tone` is a meaning, not a colour** — `signal` (this wants you, or binds you), `machine` (the
-   system is speaking), `crit`, `ok`, `mute`. If you want to pass "amber", you have not yet decided
-   what it means.
-3. **Two type voices.** Mono is the machine: headings, labels, IDs, numbers, verdicts. Prose is the
-   human: descriptions, help, chat. That split carries most of the identity.
-4. **Emphasis rides on weight, fill, rails and rings — never a new hue.** Hues are the scarce resource.
-5. **No `box-shadow` anywhere.** Depth is translucency plus a hairline plus the page wash showing
+1. **Components consume `--i-*` roles only.** A hex outside a theme file or the L0 block is a
+   violation — which is what makes the lint rule one line.
+2. **`tone` is a meaning, not a colour**: `signal` (this wants you, or binds you) · `machine` (the
+   system is speaking) · `crit` · `ok` · `mute`.
+3. **A theme picks a hue; it never repurposes a role.** `--i-crit` is "this failed" in every theme.
+   This single rule is why themes swap without auditing every screen.
+4. **A component never knows which theme is active.** If it needs to vary, that is a structure axis.
+5. **Two type voices.** Mono is the machine; prose is the human. That split carries most of the
+   identity, and it survives having no web fonts.
+6. **Emphasis rides on weight, fill, rails and rings — never a new hue.** Hues are scarce.
+7. **No `box-shadow` anywhere.** Depth is translucency plus a hairline plus the page wash showing
    through, which is why it stays crisp in dark mode instead of turning to mud.
-6. **Three border weights, three meanings:** 1px boundary, 2px rail or spine, 3px identity stripe.
-7. **Everything is `border-box`**, stated by the library rather than assumed of the host page. A
-   component that sets a width and carries padding otherwise overflows its parent by exactly its
-   padding — which is a bug that looks like a layout mistake and gets "fixed" in the wrong place.
-8. **Grid floors come from content, not item count.** `minmax(min(100%, 8rem), 1fr)` for stats,
-   `13rem` for cards. Tuning a floor so that *this* screen's six items land on one row makes the
-   next screen's four wrap badly.
+8. **Three border weights, three meanings:** 1px boundary · 2px rail or spine · 3px identity stripe.
+9. **Everything is `border-box`**, stated rather than assumed of the host page.
+10. **Grid floors come from content, not item count.** Tuning a floor so *this* screen's six items fit
+    one row breaks the next screen's four.
 
-## Adding to it
+## Extending it
 
-State the need as a sentence about **meaning** ("a run the verifier could not judge"), not appearance
-("a yellowish tag"). If your sentence is about appearance, an existing role already covers it. Prefer a
-second *channel* — fill weight, outline, ring, rail, stripe, glyph — over a new hue.
+See **[AUTHORING.md](AUTHORING.md)** — how to add a component, a theme, a shell variant, or a
+structure axis, and the four invariants that make all of it safe.
 
-A pattern earns a place in `compounds.jsx` when it appears in **three** screens, or when getting it
-wrong carries a real cost. Two occurrences stay a one-off until they prove themselves. These compounds
-were extracted from working screens rather than designed up front — a library designed in advance
-guesses at what screens need; one extracted from them knows.
+The short version: a pattern earns a component when it appears in **three** screens, or when getting
+it wrong carries a real cost. These compounds were *extracted from working screens*, not designed up
+front — a library designed in advance guesses at what screens need; one extracted from them knows.
 
 ## Layout
 
-| File | What it is |
+| Path | |
 |---|---|
-| `tokens.css` | L0 private palette + L1 semantic roles. The only place literals are legal. |
-| `components.css` | The component layer. Zero literals. |
-| `primitives.jsx` | Leaf components — type, panel, button, tag, field, pills, well. |
-| `compounds.jsx` | Patterns extracted from real screens — stats, rows, tables, traces, findings. |
-| `index.js` | The single import surface. |
+| `src/tokens.css` | L0 palette + L1 roles; the house theme lives in `:root` |
+| `src/contract.css` | L2 axes + the surface / hover / grid / annotate modes |
+| `src/themes/*.css` | one file per theme |
+| `src/themes.js` | the registry + `applyTheme()` — imported by React and the gallery alike |
+| `src/shell.jsx` · `shell.css` | the six navigation layouts; the one place structure branches |
+| `src/primitives.jsx` | leaves — type, panel, button, tag, field, pills, well |
+| `src/compounds.jsx` | patterns from real screens — stats, cards, rows, tables, traces, findings |
+| `src/instrument.css` | one import for the whole system, no bundler required |
+| `gallery/index.html` | every component × every theme, framework-free |
+
+## Consumers
+
+- **flightdeck** — `frontend/`, via `file:../../instrument`. Six themes, nine screens.
+
+Adding one: depend on the package (or copy the folder), import the CSS, set `data-theme`. If you find
+yourself editing the library to make your app work, that is a missing axis — see AUTHORING.md.
