@@ -21,6 +21,11 @@ export const THEMES = [
     grid: "none",
     annotate: 0,
     hover: "lift",
+    sectionRule: "none",
+    band: "none",
+    leader: 0,
+    emphasis: "wash",
+    hero: 0,
   },
   {
     id: "swiss",
@@ -32,6 +37,11 @@ export const THEMES = [
     grid: "columns",
     annotate: 0,
     hover: "mark",
+    sectionRule: "trailing",
+    band: "none",
+    leader: 0,
+    emphasis: "fill",
+    hero: 0,
   },
   {
     id: "terminal",
@@ -43,6 +53,11 @@ export const THEMES = [
     grid: "none",
     annotate: 0,
     hover: "invert",
+    sectionRule: "trailing",
+    band: "rows",
+    leader: 0,
+    emphasis: "wash",
+    hero: 0,
   },
   {
     id: "editorial",
@@ -54,6 +69,11 @@ export const THEMES = [
     grid: "none",
     annotate: 0,
     hover: "mark",
+    sectionRule: "trailing",
+    band: "none",
+    leader: 1,
+    emphasis: "wash",
+    hero: 0,
   },
   {
     id: "bento",
@@ -65,6 +85,11 @@ export const THEMES = [
     grid: "none",
     annotate: 0,
     hover: "lift",
+    sectionRule: "none",
+    band: "none",
+    leader: 0,
+    emphasis: "wash",
+    hero: 1,
   },
   {
     id: "blueprint",
@@ -76,6 +101,11 @@ export const THEMES = [
     grid: "fine",
     annotate: 1,
     hover: "mark",
+    sectionRule: "none",
+    band: "rows",
+    leader: 0,
+    emphasis: "fill",
+    hero: 0,
   },
 ];
 
@@ -102,6 +132,11 @@ export function applyTheme(id) {
   el.setAttribute("data-grid", t.grid);
   el.setAttribute("data-annotate", String(t.annotate));
   el.setAttribute("data-hover", t.hover);
+  el.setAttribute("data-section-rule", t.sectionRule);
+  el.setAttribute("data-band", t.band);
+  el.setAttribute("data-leader", String(t.leader));
+  el.setAttribute("data-emphasis", t.emphasis);
+  el.setAttribute("data-hero", String(t.hero));
   el.style.colorScheme = t.scheme;
   try {
     localStorage.setItem(KEY, t.id);

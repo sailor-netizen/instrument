@@ -45,6 +45,11 @@
    SHELL — where navigation lives. Real DOM, so it is a component variant (see shell.jsx):
      sidebar | topnav | rail | statusbar | titleblock
 
+   GRID GEOMETRY — floors come from CONTENT, and a theme that raises --x-figure must raise these too
+     --x-stat-floor    minimum stat column width
+     --x-card-floor    minimum card column width
+     --x-hero          0 | 1   the first stat spans 2x2, carrying the loudest number
+
    SCALARS
      --x-radius        corner radius for tiles (0 disables rounding system-wide)
      --i-density       multiplies the whole spacing ramp
@@ -52,6 +57,11 @@
      --x-grid          none | columns | fine     background grid painted on the stage
      --x-annotate      0 | 1                     item numbers, dimension lines, leader callouts
      --x-hover         lift | mark | invert      what a control does on hover
+     --i-type-scale    multiplies the whole type ramp (counterpart to --i-density, which scales space)
+     --x-section-rule  none | trailing           a hairline running out from a section label
+     --x-band          none | rows               zebra banding in dense tables
+     --x-leader        0 | 1                     dotted leader between a row's title and its meta
+     --x-emphasis      wash | fill               how the primary control carries emphasis
 
    ----------------------------------------------------------------------------------------------
    RULES A THEME MUST NOT BREAK
@@ -88,7 +98,64 @@
   /* Painted by the shell when --x-grid asks for it. Kept here so a theme sets colour, not geometry. */
   --x-grid-line: var(--i-line);
   --x-grid-size: 5rem;
+
+  --x-stat-floor: 8rem;
+  --x-card-floor: 13rem;
+  --x-hero: 0;
+  --x-section-rule: none;
+  --x-band: none;
+  --x-leader: 0;
+  --x-emphasis: wash;
 }
+
+/* ----------------------------------------------------------------------------------------------
+   SECTION RULE.  Under surface `rule` and `none` every boundary disappears, and a bare micro-label
+   separates sections far more weakly than a box did. This is the TUI answer — a label with a
+   hairline running out from it to the end of the measure. Three themes wanted it independently,
+   which is the definition of a missing axis rather than a per-theme override.
+   ---------------------------------------------------------------------------------------------- */
+[data-section-rule="trailing"] .i-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--i-3);
+}
+[data-section-rule="trailing"] .i-eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 0;
+  border-top: var(--x-rule-w) solid var(--i-line);
+}
+
+/* BANDING.  How a pager keeps a dense ledger trackable once nothing draws a box. */
+[data-band="rows"] .i-tr:not(.is-head):nth-child(even) { background: var(--i-plane); }
+
+/* LEADER.  The magazine-index device: a dotted run from a row's title to its figure, so the eye
+   tracks across a wide row without a rule under it. */
+[data-leader="1"] .i-row-top { align-items: baseline; }
+[data-leader="1"] .i-row-title { flex: 0 1 auto; }
+[data-leader="1"] .i-row-top::after {
+  content: "";
+  order: 1;
+  flex: 1 1 auto;
+  margin: 0 var(--i-2);
+  border-bottom: var(--x-rule-w) dotted var(--i-line);
+  transform: translateY(-0.25em);
+}
+[data-leader="1"] .i-row-meta { order: 2; }
+
+/* EMPHASIS.  A theme whose primary control is a solid block of ink with the page punched out of it
+   had to write that as a rule; outline-plus-wash was the only emphasis the system could express. */
+[data-emphasis="fill"] .i-btn.is-primary {
+  background: var(--i-signal);
+  color: var(--i-page);
+  border-color: var(--i-signal);
+}
+[data-emphasis="fill"] .i-btn.is-primary:hover:not(:disabled) { background: var(--i-ink); border-color: var(--i-ink); }
+
+/* HERO.  Bento's rule that nothing is the same size as anything else: the first metric takes a 2x2
+   tile and everything else sizes down from it. Composition as hierarchy, expressed once. */
+[data-hero="1"] .i-stats > :first-child { grid-column: span 2; grid-row: span 2; }
+[data-hero="1"] .i-stats > :first-child .i-stat-fit { height: 100%; justify-content: flex-end; }
 
 /* ----------------------------------------------------------------------------------------------
    SURFACE MODES.  Written once, against the component layer, so no component knows which theme is

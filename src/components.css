@@ -100,7 +100,7 @@
    number plus a short label (9rem), a card carries a sentence (13rem). That is what keeps a six-stat
    row from breaking 4+2 and a four-card row from breaking 3+1 at the widths this app actually runs at. */
 .i-stats { display: grid; gap: var(--i-3);
-           grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); }
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--x-stat-floor)), 1fr)); }
 /* Each stat is its own container, so the figure can size against the space it ACTUALLY has. Without
    this, --x-figure and the grid floor are two numbers that must agree by hand and silently don't:
    a theme raised its figure, "$2.9433" outgrew its column, and it collided with the next stat.
@@ -124,7 +124,7 @@
 .i-stat.is-hot .i-stat-v { color: var(--i-signal); }
 
 .i-cards { display: grid; gap: var(--i-3);
-           grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--x-card-floor)), 1fr)); }
 .i-card { display: flex; flex-direction: column; gap: var(--i-2); align-items: flex-start;
           text-align: left; font: inherit; color: inherit; background: var(--i-plane);
           border: 1px solid var(--i-line); border-radius: var(--i-radius); padding: var(--i-4); }

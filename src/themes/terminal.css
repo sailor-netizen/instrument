@@ -8,13 +8,21 @@
    --i-ok, and it carries the live/attached feel — the prompt, the "0 errors", the selection bar.
    Amber is --i-signal (flags, keys, money, anything that binds you), cyan is --i-machine.
 
+   DENSITY IS THE SIGNATURE, and it takes BOTH levers. The direction sheet runs 13px text on a 20px
+   line inside a 1440px frame; this theme previously tightened --i-density alone and left house-sized
+   type sitting in cramped gaps, which reads as broken rather than dense. --i-type-scale and
+   --i-density now move together at 0.74, which lands the ramp on the sheet almost exactly:
+   body 14px, row 12.1px, label 9.9px, against 13 / 12.5 / 10 in b-terminal/*.html.
+
    Palette is GitHub dark, lifted straight from the direction sheet so the nine app screens land in
    the same register as design/directions/b-terminal/*.html.
    ============================================================================================== */
 
 [data-theme="terminal"] {
   /* TYPE — the whole point. --i-prose deliberately resolves to the machine voice: in a terminal
-     there is no second family, so the split the system normally leans on is spent here on purpose. */
+     there is no second family, so the split the system normally leans on is spent here on purpose.
+     --i-display-face and --i-chrome-face are left alone for the same reason: one family, no
+     exceptions. Scale, tracking and density carry every distinction this theme makes. */
   --i-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", "JetBrains Mono", "SF Mono",
             SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
   --i-prose: var(--i-mono);
@@ -36,8 +44,8 @@
   --i-line-hi: #30363d;
   --i-rail:    #454c56;
 
-  --i-ink:   #e6edf3;
-  --i-dim:   #9aa4af;   /* 7.19:1 on --i-plane — measured, because labels live here */
+  --i-ink:   #e6edf3;   /* 16.0:1 on --i-page — measured */
+  --i-dim:   #9aa4af;   /* 7.19:1 on --i-plane, 7.48:1 on --i-page — labels live here */
   --i-faint: #6e7681;   /* chrome and zeroed values only; never a label, never body */
 
   /* Status is the ONLY thing with a hue, exactly as the sheet has it. */
@@ -49,23 +57,35 @@
   --i-machine-wash: rgba(57, 197, 207, 0.13);
   --i-crit-wash:    rgba(248, 81, 73, 0.13);
 
-  /* STRUCTURE — dense, square, wide-tracked labels, and a figure big enough that scale alone
-     separates a readout from its caption (there is no second family left to do it). */
-  --x-figure: 2.8rem;
+  /* THE SELECTION BAR — htop, not hyperlink. `hover: invert` reads this pair, so the theme states
+     the pair and the contract draws it: a solid live-green bar with the void punched back out of
+     every child. 8.2:1, measured. This is why the theme no longer hand-writes its own hover. */
+  --x-select-bg: var(--i-ok);
+  --x-select-fg: var(--i-well);
+
+  /* STRUCTURE — dense, square, wide-tracked labels. The figure is sized to the SHEET (37px at
+     1440px, i.e. its clamp(26px, 2.6vw, 40px) mid-point) rather than to the house default: at
+     2.8rem it was the loudest thing on a screen whose whole argument is that nothing shouts. */
+  --i-type-scale: 0.74;
+  --i-density: 0.74;
+  --x-figure: 1.95rem;
+  --x-title: 1.5rem;      /* the sheet's 28px banner, and it is set in caps below */
   /* 0px, not 0: tokens.css derives --i-radius-pill through `min(var(--x-radius) * 100, 100px)`, and
      a UNITLESS zero makes that min() a number-vs-length mismatch — an invalid length that only
      looks correct because border-radius falls back to its initial 0. With a unit it computes. */
   --x-radius: 0px;
-  --i-density: 0.82;
   --x-rule-w: 1px;
   --x-label-case: uppercase;
   --x-label-track: 0.2em;
+  --x-stat-floor: 7rem;   /* lowered WITH the figure — a 37px numeral needs no 8rem column */
+  --x-card-floor: 12rem;
   --x-grid-line: var(--i-line);
   --x-grid-size: 1.25rem;   /* inert while grid is "none"; sized as a character cell, not a column */
 }
 
 /* ----------------------------------------------------------------------------------------------
-   The three things tokens and surface modes cannot say.
+   The five things tokens and the shared modes cannot say. Nine rules, no literals, no app classes —
+   everything else this theme does now travels through the contract's own axes.
    ---------------------------------------------------------------------------------------------- */
 
 /* 1. The frame. Both shell strips are banded away from the field, and the status bar sits on the
@@ -73,15 +93,35 @@
 [data-theme="terminal"] .i-cmdline { background: var(--i-plane); }
 [data-theme="terminal"] .i-statusbar { background: var(--i-well); border-top-color: var(--i-line-hi); }
 
-/* 2. The selection bar. `hover: invert` gives a wash; a TUI gives htop — a solid bar with the field
-      colour punched back out of it, every child included. Green because a selected line is live. */
-[data-theme="terminal"] .i-stat.is-link:hover,
-[data-theme="terminal"] .i-card.is-link:hover,
-[data-theme="terminal"] .i-row.is-link:hover { background: var(--i-ok); color: var(--i-well); }
-[data-theme="terminal"] .i-stat.is-link:hover *,
-[data-theme="terminal"] .i-card.is-link:hover *,
-[data-theme="terminal"] .i-row.is-link:hover * { color: inherit; }
+/* 2. The screen name is a banner, not a headline: caps and wide tracking are all a single-family
+      theme has left to make a title read as a title. */
+[data-theme="terminal"] .i-h1 { text-transform: uppercase; letter-spacing: 0.26em; }
 
-/* 3. Banded ledger rows. With no box and no fill, a dense table loses its horizontal tracking; the
-      zebra is what a pager does instead of a border. */
-[data-theme="terminal"] .i-tr:nth-child(even) { background: var(--i-plane); }
+/* 3. ├─ LABEL ────────┤ . data-section-rule:trailing gives the run of hairline; the terminators are
+      the part that makes it box drawing instead of an underline. Dim, not signal — in this theme a
+      hue is a claim, and a section label claims nothing. */
+[data-theme="terminal"] .i-eyebrow { color: var(--i-dim); gap: var(--i-2); }
+[data-theme="terminal"] .i-eyebrow::before { content: "\251C\2500"; color: var(--i-faint); letter-spacing: 0; }
+[data-theme="terminal"] .i-eyebrow::after {
+  height: 1em;                                   /* the box the ┤ is drawn in — one character cell */
+  border: 0 solid var(--i-line-hi);
+  border-right-width: var(--x-rule-w);           /* the ┤ stem */
+  background: linear-gradient(var(--i-line), var(--i-line)) 0 50% / 100% var(--x-rule-w) no-repeat;
+}
+
+/* 4. The metric band: full bleed to the frame, one hairline character grid, no cards. The gap is
+      one rule wide and the rule is a zero-blur ring on the CELL — painting it as a backdrop behind
+      the grid instead lights up a solid block wherever a wrapped row runs short of cells, which is
+      not something a character grid does. (The system's no-shadow rule is about depth; this is a
+      hairline with a spread of one pixel, and `outline` is left free for the focus ring.) */
+[data-theme="terminal"] .i-stats,
+[data-theme="terminal"] .i-cards { gap: var(--x-rule-w); margin-inline: calc(var(--i-4) * -1); }
+[data-theme="terminal"] .i-stat,
+[data-theme="terminal"] .i-card {
+  padding: var(--i-3) var(--i-4);
+  box-shadow: 0 0 0 var(--x-rule-w) var(--i-line);
+}
+
+/* 5. Banded rows. data-band:rows zebras the ledger; a list of rows is the same ledger without a
+      table around it, and with no box and no gap it loses its horizontal tracking the same way. */
+[data-theme="terminal"] .i-rows > .i-row:nth-child(even) { background: var(--i-plane); }

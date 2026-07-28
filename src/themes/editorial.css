@@ -5,10 +5,18 @@
    of face, and the whitespace between them. The human voice is SET in a serif; the machine's is
    TYPED in mono. That one contrast does more work here than every colour in the file.
 
+   THE SIGNATURE IS SCALE, and it was the thing missing. On the sheet the headline is ~5.5x the
+   body text and breaks left of the text block; here the title had been pinned to --i-h1 (1.7rem)
+   and opened every page at the same size as a card. --x-title now carries display scale, --i-h2
+   carries the names a leader has to bridge, and the body ramp is nudged up as a whole — because a
+   magazine is a run of sizes, not one big number on an otherwise uniform page.
+
    Translated from design/directions/c-editorial/{cockpit,runs}.html. Its palette is inherited
    almost literally (warm cream, charcoal ink, dusty crimson, muted ochre); its type is not — the
    sheet loaded Fraunces and Work Sans, and this ships inside an app with no font loading, so the
-   direction survives on the one distinction system stacks reliably give you: serif vs mono.
+   direction survives on the one distinction system stacks reliably give you: serif vs mono. The
+   sheet's SANS role (labels, meta, chrome) is played here by the mono, which is also Instrument's
+   machine voice — so the two-face system maps onto the two faces this product already has.
 
    TWO INKS BECAME FOUR. The sheet is a two-colour press: crimson for alarm, ochre for everything
    secondary, with `ok` set in the same ochre. Instrument's roles will not collapse that way —
@@ -16,7 +24,8 @@
    swatch. So two further inks were mixed in the same muted, printed register rather than borrowed
    from a screen palette: a slate for the machine voice, an olive for outcomes.
 
-   Every value below is measured, not eyeballed. Ink on page 15.03:1 · dim on plane 5.57:1.
+   Every value below is measured, not eyeballed. Ink on page 15.03:1 · dim on plane 5.57:1 ·
+   dim on the hover stock 5.01:1 · signal on page 5.41:1 · machine 6.92:1 · crit 6.41:1 · ok 5.40:1.
    ============================================================================================== */
 
 [data-theme="editorial"] {
@@ -28,15 +37,23 @@
   --_grain: rgba(33, 28, 21, 0.03);
 
   /* --- type ----------------------------------------------------------------------------------
-     Mono is unchanged in kind — it is still the machine. Prose becomes a real serif, and the
-     display tier is set from the same family: a magazine draws its headline from its text face,
-     and there is no third slot to spend. Order favours faces with LINING figures (Iowan on macOS,
-     Palatino Linotype on Windows) because Georgia — the universal fallback — defaults to old-style
-     numerals that would drop 3, 4, 7 and 9 below the baseline in a column of costs. */
+     Mono is unchanged in kind — it is still the machine. Prose becomes a real serif, and BOTH the
+     display tier and the chrome tier are set from it: a magazine draws its headline, its index
+     names and its section furniture from one text face, and there is no third slot to spend.
+     Order favours faces with LINING figures (Iowan on macOS, Palatino Linotype on Windows) because
+     Georgia — the universal fallback — defaults to old-style numerals that would drop 3, 4, 7 and 9
+     below the baseline in a column of costs.
+
+     --i-chrome-face is what makes the split survive past the headline. Card titles, row titles,
+     buttons, tags and column heads are all chrome; before this axis existed they were mono by
+     definition and the serif reached only as far as a theme was willing to restate per selector.
+     What stays mono is everything the system EMITS: eyebrows, stat labels, field labels, kv keys,
+     row meta, traces, wells, ids and paths. */
   --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
   --i-prose: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
              "Times New Roman", Times, serif;
   --i-display-face: var(--i-prose);
+  --i-chrome-face:  var(--i-prose);
 
   /* --- stock ---------------------------------------------------------------------------------
      Planes barely exist under `rule` surface, so these are tints of the same sheet rather than
@@ -77,13 +94,43 @@
   --i-machine-wash: rgba(53, 86, 107, 0.09);
   --i-crit-wash:    rgba(156, 51, 36, 0.07);   /* the sheet's own --accent-wash, unchanged */
 
-  /* --- structure ----------------------------------------------------------------------------- */
-  --x-figure: 3rem;          /* the masthead run of display figures — the direction's loudest note */
+  /* --- the ramp -------------------------------------------------------------------------------
+     THE lever. The sheet sets its page title at clamp(3.4rem, 6.6vw, 6.2rem) against a 1.07rem
+     body — the title does not lead the page, it dwarfs it. 4.9rem lands within a hair of the
+     sheet's rendered headline at this app's fluid root, and still sets the longest title in the
+     product ("Dev Workflow") on one line at the width it actually runs at.
+
+     Sized THROUGH --i-type-scale, never in vw: the root font-size is already fluid, and layering a
+     viewport unit on top of it compounds the scaling. type-scale itself goes up with the body,
+     because the sheet's text is set larger than house default; density moves with it, since
+     tuning one alone is what produces cramped gaps around big type. */
+  --i-type-scale: 1.06;
+  --x-title: calc(4.9rem * var(--i-type-scale));
+  --x-figure: 3rem;          /* the masthead run of display figures — a CEILING; see the floors */
+  --i-density: 1.35;         /* with no boxes left, whitespace is the only thing dividing anything */
+
+  /* Floors stay near house default ON PURPOSE, having been checked rather than assumed. A stat's
+     figure is `min(--x-figure, 18cqi)`, so at the six-up cockpit band the COLUMN COUNT governs, not
+     the ceiling: raising the floor past ~10rem breaks that band 5+1 and buys nothing, because the
+     container query would still hold the figure where it is. --x-figure binds on the four-up
+     ledger totals, which is where the direction's loudest figures actually live.
+
+     The CARD floor comes DOWN, because this theme spends width on a gutter that house default does
+     not have (structure rule 6): at 13rem the four launcher cards plus three gutters no longer fit
+     the stage and the row broke 3+1. 12rem holds four-up at both 1440 and 1280, and still wraps the
+     five-workflow catalog to 4+1 rather than squeezing five columns of prose. */
+  --x-stat-floor: 8rem;
+  --x-card-floor: 12rem;
+
   --x-radius: 0;             /* a magazine has no rounded corners, anywhere */
-  --i-density: 1.25;         /* with no boxes left, whitespace is the only thing dividing anything */
   --x-rule-w: 1px;           /* the hairline; the 2px masthead rule is placed deliberately, below */
   --x-label-case: uppercase;
   --x-label-track: 0.18em;   /* the sheet's tracking on its section labels and column heads */
+
+  /* Hover is `mark` and the selection pair is unused by it — declared so that a theme-level switch
+     to invert would recess onto the sheet's own warm stock instead of a signal wash. */
+  --x-select-bg: var(--i-plane-2);
+  --x-select-fg: var(--i-ink);
 
   /* The registry sets grid:none for this theme, so these are inert — declared so that a laid grid,
      if it were ever switched on, would be struck in the paper's own hairline at its own measure. */
@@ -100,49 +147,94 @@
 }
 
 /* ----------------------------------------------------------------------------------------------
-   STRUCTURE — only what the surface, shell and hover modes cannot say. Five ideas, nothing more.
+   STRUCTURE — only what the tokens, surface, shell and hover modes cannot say.
    ---------------------------------------------------------------------------------------------- */
 
-/* 1 · The page is set, not typed. Names, headlines and figures take the serif; everything the
-   system emits verbatim — ids, paths, labels, traces, wells — stays mono. That split IS the theme.
-   Pointed at --i-display-face rather than --i-prose so it becomes redundant, never wrong, if the
-   component layer ever wires the heading tier to that role itself. */
+/* 1 · The page is SET. --i-display-face and --i-chrome-face carry the serif into titles, names and
+   chrome on their own; what is left here is the heading tier, which components.css still types in
+   mono below .i-h1, and the rail's masthead. */
 [data-theme="editorial"] .i-h,
-[data-theme="editorial"] .i-brand,
-[data-theme="editorial"] .i-card-title,
-[data-theme="editorial"] .i-row-title {
+[data-theme="editorial"] .i-brand {
   font-family: var(--i-display-face);
   font-weight: 500;            /* Palatino and Georgia ship 400/700; 500 resolves to the book cut */
   letter-spacing: -0.015em;
 }
-[data-theme="editorial"] .i-brand { font-size: var(--i-h2); }   /* the rail's masthead */
+[data-theme="editorial"] .i-brand { font-size: var(--i-h2); }
 
-/* Figures are set at book weight — a 700 serif at 3rem reads tabloid, not magazine — and pinned to
-   lining tabular numerals wherever the resolved face offers them. */
-[data-theme="editorial"] .i-stat-v {
+/* 2 · The headline, at the size the whole direction hangs off. Book weight (a 700 serif this large
+   reads tabloid, not magazine), tight leading, and the sheet's optical hang — the display breaks a
+   fraction left of the text block beneath it, which is what makes a page look composed. */
+[data-theme="editorial"] .i-h1 {
   font-weight: 400;
-  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  margin-left: -0.045em;
 }
 
-/* 2 · The masthead rule. `rule` surface gives every element the same hairline; the run of figures
+/* 3 · The standfirst, set as prose and opened by the sheet's drop cap — the one ornament this
+   direction has. Ochre, not crimson: crimson is --i-crit here and crit means "this failed".
+   The head gap is NOT decorative: at this size a descender hangs well below the headline's own
+   line box, and at the house gap the two p's in "Approvals" struck clean through the standfirst.
+   Measure is the sheet's own 47ch, which is also what gives the drop cap two lines to sit in. */
+[data-theme="editorial"] .i-view-head { gap: var(--i-6); }
+[data-theme="editorial"] .i-view-sub {
+  font-size: var(--i-body);
+  line-height: 1.62;
+  max-width: var(--i-measure-tight);
+}
+[data-theme="editorial"] .i-view-sub::first-letter {
+  float: left;
+  font-size: 3.1em;
+  line-height: 0.76;
+  color: var(--i-signal);
+  margin: 0.02em 0.06em 0 0;
+}
+
+/* 4 · The index. A name has to outrank its own metadata before a dotted leader between them means
+   anything — at equal size the leader is decoration. Figures and names both sit at book weight,
+   pinned to lining tabular numerals wherever the resolved face offers them. */
+[data-theme="editorial"] .i-stat-v { font-weight: 400; font-variant-numeric: lining-nums tabular-nums; }
+[data-theme="editorial"] .i-card-title,
+[data-theme="editorial"] .i-row-title { font-size: var(--i-h2); font-weight: 400; }
+[data-theme="editorial"] .i-tr:not(.is-head) > :first-child {
+  font-family: var(--i-display-face);
+  font-size: var(--i-body);
+  font-weight: 400;
+}
+
+/* 5 · The masthead rule. `rule` surface gives every element the same hairline; the run of figures
    and the ledger head take the thick editorial rule instead. This is the move the sheet is built on. */
 [data-theme="editorial"] .i-stat { border-top: 2px solid var(--i-ink); }
 [data-theme="editorial"] .i-tr.is-head { border-bottom-width: 2px; }
 
-/* 3 · `mark` darkens a border to ink — invisible against a rule that is already ink. So the hover
+/* 6 · Columns need air. `rule` surface strips both the gap and the inline padding, so adjacent
+   cards had neither and their sentences ran together mid-word. A gutter, not the sheet's hairline
+   seam: a seam has to stop at the first column of each row, and CSS grid gives a theme no way to
+   know where a row starts — the seam looked right at four-up and misaligned the moment a fifth
+   workflow wrapped. Each card keeps its own rule, which is what `rule` surface means anyway. */
+[data-theme="editorial"] .i-cards { gap: var(--i-4); }
+
+/* 7 · `mark` darkens a border to ink — invisible against a rule that is already ink. So the hover
    is carried by the recessed warm stock, which is the sheet's own answer for a live figure or row. */
 [data-theme="editorial"] .i-stat.is-link:hover,
 [data-theme="editorial"] .i-card.is-link:hover,
 [data-theme="editorial"] .i-row.is-link:hover { background: var(--i-plane-2); }
 
-/* 4 · Laid paper on the metadata rail, bounded by a leader rather than a hairline. */
+/* 8 · Laid paper on the metadata rail, bounded by a leader rather than a hairline. */
 [data-theme="editorial"] .i-rail-col {
   background-color: var(--i-plane);
   background-image: repeating-linear-gradient(0deg, var(--_grain) 0 1px, transparent 1px 5px);
   border-right-color: var(--i-line-hi);
 }
 
-/* 5 · An input's entire affordance is its box, so it takes the boundary that clears 3:1 (3.27:1)
+/* 9 · A selected row, restored. `[data-surface="rule"] .i-row` and `.i-row.is-on` collide at equal
+   specificity (0,2,0), and the surface mode wins the rendered result — so under BOTH rule-surface
+   themes a selected row currently draws no selection at all, which on Approvals means the queue
+   never shows you which proposal the detail panel belongs to. Restated at theme specificity, in the
+   system's own selection role. This belongs in the contract, not here; see the report. */
+[data-theme="editorial"] .i-row.is-on { background: var(--i-machine-wash); }
+
+/* 10 · An input's entire affordance is its box, so it takes the boundary that clears 3:1 (3.27:1)
    while the decorative hairline stays deliberately delicate at 1.51:1. The contract has no role
    for "a control edge" as distinct from "a separator"; this is the one place that costs something. */
 [data-theme="editorial"] .i-input { border-color: var(--i-line-hi); }

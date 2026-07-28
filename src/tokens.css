@@ -101,13 +101,17 @@
   /* ONE fluid axis, and it is the ROOT font-size (set in app.css, measured against real 2707px and
      3840px viewports). The ramp below is therefore plain rem — it is already fluid THROUGH the root.
      Layering clamp() on top of a fluid root compounds the scaling and was a bug in v0.1. */
-  --i-display: 2.6rem;
-  --i-h1:      1.7rem;
-  --i-h2:      1.22rem;
-  --i-body:    1rem;
-  --i-small:   0.87rem;
-  --i-row:     0.86rem;
-  --i-micro:   0.7rem;
+  /* --i-type-scale is the counterpart to --i-density: density scales SPACE, this scales TEXT. A dense
+     theme that only tightened spacing ended up with cramped gaps around house-sized type, which reads
+     as broken rather than dense. Both levers or neither. */
+  --i-type-scale: 1;
+  --i-display: calc(2.6rem  * var(--i-type-scale));
+  --i-h1:      calc(1.7rem  * var(--i-type-scale));
+  --i-h2:      calc(1.22rem * var(--i-type-scale));
+  --i-body:    calc(1rem    * var(--i-type-scale));
+  --i-small:   calc(0.87rem * var(--i-type-scale));
+  --i-row:     calc(0.86rem * var(--i-type-scale));
+  --i-micro:   calc(0.7rem  * var(--i-type-scale));
   --i-measure: 68ch;
   --i-measure-tight: 46ch;
 

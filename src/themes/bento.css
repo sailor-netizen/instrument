@@ -1,37 +1,62 @@
 /* ==============================================================================================
-   BENTO CONSOLE — filled tiles on midnight navy.  (data-theme="bento" · surface tile · shell topbar)
+   BENTO CONSOLE — unequal tiles on midnight navy.  (data-theme="bento" · surface tile · shell topbar)
 
-   THE ONE IDEA: depth is made of LIGHT, not shadow. Every tile is a genuinely filled navy plane
-   that sits a measurable step above the field, and it separates from that field by a lit top edge
-   and a diagonal lift painted into its own background — never by a drop shadow, which is what turns
-   dark UI to mud. This is the one theme where --i-plane reads as a surface rather than a hint.
+   THE ONE IDEA: nothing is the same size as anything else. Composition IS the hierarchy here, so a
+   row of metrics is not a row — it is three tile TIERS.
+
+     HERO   the contract's data-hero cell, 2x2. A figure ~2.4x the next one, a radius two-thirds
+            wider, a lit cyan edge, a gradient plane and a ruler under the number. It is the only
+            tile that looks like that, which is what makes it read as the subject of the page.
+     TILE   the ordinary filled plane.
+     STRIP  every third tile recesses: sunken fill, no glint, small radius, a quarter of the hero's
+            figure, and align-self:end so its top edge floats clear of its neighbours.
+
+   What holds the tiers apart is --x-stat-floor. At the house 8rem, eight columns fit and six
+   metrics collapse into one neat equal row with the hero merely wider — the direction disappears.
+   At 12.5rem the grid can carry four or five columns at most, so rows go ragged, a cell or two is
+   left empty on purpose, and the hero has the width its figure needs. Raising the floor is not a
+   detail of raising --x-figure; it is the move.
+
+   DEPTH IS MADE OF LIGHT, NOT SHADOW. Every raised tile is a genuinely filled navy plane that sits
+   a measurable step above the field and separates from it by a lit top edge plus a diagonal lift
+   painted into its own background. The hero adds a third layer, a cyan corner wash. Three
+   translucent layers over one dark field — never a drop shadow, which is what turns dark UI to mud.
 
    THE VOICES. Cyan is the machine speaking, and in this direction it is also the loudest thing on
-   screen: active nav, identifiers, traces, the edge a control lights up with. Magenta is failure,
-   held in reserve so that when a finding or a denied tool appears it is the only hot pink on the
-   page. Amber keeps --i-signal's meaning — this wants you, this binds you — separated from both at
-   micro sizes, and keeps that meaning stable when the user switches themes.
+   screen: active nav, identifiers, traces, the hero's edge and ruler. Magenta is failure, held in
+   reserve so a finding or a denied tool is the only hot pink on the page. Amber keeps --i-signal's
+   meaning — this wants you, this binds you — separated from both, which is why a tile that is HOT
+   is never recessed and never wears the hero's cyan edge: attention outranks composition.
 
    THE TYPE. No web fonts ship here, and the direction's own fallback chain names Bahnschrift, so
    that is the lever taken: this theme's machine voice is a condensed industrial grotesque, not a
-   typewriter. Figures come out tight and tabular, tracked labels come out narrow and wide-spaced,
-   and it is unmistakably not the house theme. The one place that costs something — verbatim output,
-   where the character grid IS the content — gets a real monospace back, below.
+   typewriter. --i-display-face takes the semibold cut of the same family for figures and the page
+   title, so the loud numerals are heavier than the chrome around them and fall back to the regular
+   cut wherever that instance is not installed. --i-chrome-face is deliberately left on --i-mono:
+   the sheet sets card titles, row titles and badges in its display voice, not its text voice, so
+   splitting the control voice off would move three surfaces further from the reference, not closer.
+   The one place the grotesque costs something — verbatim output, where the character grid IS the
+   content — gets a real monospace back, below.
    ============================================================================================== */
 
 [data-theme="bento"] {
   /* type ---------------------------------------------------------------------------------------
      Bahnschrift (Win10+) is the DIN-derived grotesque the direction sheet itself falls back to;
-     Segoe UI Variable Display / SF via ui-sans-serif carry it elsewhere. --i-display-face is left
-     unset on purpose: it defaults to --i-mono, and here --i-mono already IS the display face. */
+     Segoe UI Variable Display / SF via ui-sans-serif carry it elsewhere. */
   --i-mono: "Bahnschrift", "Segoe UI Variable Display", "DIN Alternate", "Avenir Next Condensed",
             ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --i-display-face: "Bahnschrift SemiBold", "Bahnschrift", "Segoe UI Variable Display",
+                    "DIN Alternate", "Avenir Next Condensed", ui-sans-serif, system-ui,
+                    -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
              Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* L0 — the only literals this theme needs that are not themselves a role. Both are edge light. */
-  --_glint: rgba(158, 209, 255, 0.17);   /* the 1px lit top edge every raised tile carries */
-  --_lift:  rgba(62, 231, 255, 0.05);    /* the diagonal the machine's light lays across a plane */
+  /* L0 — the only literals this theme needs that are not themselves a role. All four are light. */
+  --_glint:    rgba(158, 209, 255, 0.17);   /* the 1px lit top edge every raised tile carries */
+  --_lift:     rgba(62, 231, 255, 0.05);    /* the diagonal the machine's light lays across a plane */
+  --_glint-hi: rgba(62, 231, 255, 0.50);    /* the hero's 2px cyan edge, and its ruler ticks */
+  --_hero:     rgba(110, 175, 255, 0.18);   /* the hero's gradient plane: one step above --i-plane-2 */
+  --_sunk:     rgba(126, 168, 255, 0.03);   /* the strip tier, below the plane but above the field */
 
   /* L1 roles — flat, because this theme is dark-only (themes.js sets color-scheme: dark) ---------
      The planes are translucent on purpose even though they read as opaque fills: at 9% and 13% of
@@ -49,13 +74,15 @@
   --i-wash-machine: rgba(30, 120, 160, 0.22);
 
   /* Hairlines. --i-line-hi is the cyan hover edge — the direction's signature move, and the reason
-     a lifted tile reads as a control rather than as a rendering glitch. */
+     a lifted tile reads as a control rather than as a rendering glitch. It is also the hero's
+     resting edge, which is why hover has somewhere further to go only on the ordinary tiers. */
   --i-line:    rgba(142, 182, 255, 0.13);
   --i-line-hi: rgba(62, 231, 255, 0.32);
   --i-rail:    rgba(142, 182, 255, 0.24);
 
-  --i-ink:   #e9f1ff;
-  --i-dim:   #93a6c6;
+  --i-ink:   #e9f1ff;   /* 17.8:1 on the field, 16.1:1 on a plane */
+  --i-dim:   #93a6c6;   /* 7.4:1 on a plane, 8.0:1 on a strip, 6.3:1 on the hero — measured, not
+                           eyeballed: the strip and the hero are new surfaces and had to be checked */
   --i-faint: #6f82a6;   /* lifted off the direction's #5d6f91: placeholders have to stay readable */
 
   --i-signal:  #f5b544;   /* this wants you / binds you */
@@ -66,10 +93,20 @@
   --i-machine-wash: rgba(62, 231, 255, 0.13);
   --i-crit-wash:    rgba(255, 69, 168, 0.14);
 
-  /* L2 structure ------------------------------------------------------------------------------- */
-  --x-figure: 2.8rem;      /* the loud number. Wired to .i-stat-v below — nothing reads it yet. */
-  --x-radius: 16px;
+  /* L2 structure -------------------------------------------------------------------------------
+     The figure and the floors are ONE decision. --x-figure is the ceiling a numeral may reach;
+     .i-stat-v clamps it against the column it actually got, so on an 8rem floor the clamp always
+     wins and the ceiling is decoration. The floors are what buy the figure its room. */
+  --x-figure:     3.2rem;
+  --x-stat-floor: 12.5rem;
+  --x-card-floor: 15rem;
+  --_figure-hero: 7.4rem;   /* the hero's own ceiling. Bigger than the sheet's 106px because the
+                               hero cell here is wider than the sheet's; its own column clamps it. */
+
+  --x-title: 2.2rem;       /* the sheet's masthead is half again the house h1; it sets the register */
+  --i-type-scale: 0.95;    /* text tightens as the figures grow — that ratio is the whole direction */
   --i-density: 1.1;        /* tiles want air; the direction pads to ~1.1em and gaps at ~1em */
+  --x-radius: 16px;
   --x-rule-w: 1px;         /* depth is fill and edge light, so the rules themselves stay hairlines */
   --x-label-case: uppercase;
   --x-label-track: 0.22em;
@@ -95,10 +132,56 @@
     linear-gradient(158deg, var(--_lift), transparent 64%);
 }
 
-/* The figure IS the theme. --x-figure is the contract's own "single biggest lever" and no component
-   reads it; .i-stat-v is hard-wired to --i-h1. Wired here, with the direction's tight tracking. */
-[data-theme="bento"] .i-stat-v { font-size: var(--x-figure); line-height: 0.86; letter-spacing: -0.045em; }
+/* Figures and headings carry the direction's tight tracking. Note what is NOT here: font-size.
+   This rule used to pin .i-stat-v to a flat var(--x-figure), which overrode the component's
+   min(--x-figure, 18cqi) container clamp — a 53px "$2.9433" then ran straight out of its 138px
+   tile and across the next one. The clamp is the thing that keeps figure and column honest. */
+[data-theme="bento"] .i-stat-v { line-height: 0.86; letter-spacing: -0.045em; }
 [data-theme="bento"] .i-h { letter-spacing: -0.035em; }
+
+/* HERO — tier 1. Geometry first: a radius two-thirds wider than a tile and real padding, so the
+   2x2 cell reads as a different KIND of object rather than a stretched one. Then the light: a 2px
+   cyan edge, a diagonal plane one step above --i-plane-2, and the machine's wash in the corner the
+   sheet lights. Three translucent layers, no shadow. */
+[data-theme="bento"] .i-stats > :first-child {
+  border-radius: calc(var(--x-radius) * 1.7);
+  padding: var(--i-6);
+  background-image:
+    linear-gradient(to bottom, var(--_glint-hi) 0 2px, transparent 2px),
+    linear-gradient(162deg, var(--_hero), transparent 62%),
+    linear-gradient(318deg, var(--i-machine-wash), transparent 24%);
+}
+/* …but a metric that wants you keeps its amber edge. Attention outranks composition. */
+[data-theme="bento"] .i-stats > :first-child:not(.is-hot) { border-color: var(--i-line-hi); }
+[data-theme="bento"] .i-stats > :first-child .i-stat-v {
+  font-size: min(var(--_figure-hero), 24cqi);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+}
+/* The ruler: the sheet's tick strip between the number and its name, painted as the label's own
+   background so it costs no element and no pseudo (annotation owns ::after). */
+[data-theme="bento"] .i-stats > :first-child .i-stat-l {
+  align-self: stretch;
+  color: var(--i-machine);
+  font-size: var(--i-small);
+  padding-top: var(--i-3);
+  background: repeating-linear-gradient(90deg, var(--_glint-hi) 0 1px, transparent 1px 9px)
+              top left / 100% 6px no-repeat;
+}
+
+/* STRIP — tier 3. Every third metric sinks: the glint comes off, the fill drops below the plane,
+   the corner tightens and the figure falls to a quarter of the hero's. align-self:end sits it on
+   the bottom of its row so its top edge floats — the sheet's stagger, from one declaration. */
+[data-theme="bento"] .i-stats > :nth-child(3n):not(.is-hot) {
+  align-self: end;
+  background-image: none;
+  background-color: var(--_sunk);
+  border-radius: var(--i-radius-sm);
+  padding: var(--i-2) var(--i-3);
+}
+[data-theme="bento"] .i-stats > :nth-child(3n):not(.is-hot) .i-stat-v {
+  font-size: min(var(--x-figure) * 0.45, 12cqi);
+}
 
 /* Wide-tracked micro labels are the direction's other signature. --x-label-track reaches only three
    shell elements, none of which exist in the topbar shell, so it is wired to the labels themselves.

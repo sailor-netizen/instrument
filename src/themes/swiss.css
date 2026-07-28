@@ -1,25 +1,36 @@
 /* ==============================================================================================
-   SWISS SIGNAL — paper, a visible column grid, enormous figures, one red.
+   SWISS SIGNAL — paper, a visible TWELVE-COLUMN grid, enormous figures, one red.
 
    THE ONE IDEA: emphasis is BLACK, not colour. Everything the product wants to stress — the active
    route, the focus ring, the hover mark, the "ok" verdict, the primary button — is set in ink on
    bone paper, which leaves exactly one hue in the whole system. That hue is red and it means
    "this failed", so red appears twice on a busy screen and never once on a calm one. --i-signal is
    therefore near-black on purpose: a theme that spends colour on attention has none left for alarm.
+
+   THE SIGNATURE: the figures are enormous and they HANG ON THE PAINTED COLUMN LINES. That only
+   works if three things agree, so they are set together and must move together:
+     · the grid is twelve columns of the stage's CONTENT width (--x-grid-size in %, phased onto the
+       content edge below) — not a fixed pitch drifting across an inset canvas;
+     · --x-stat-floor / --x-card-floor are chosen so auto-fit lands on 2, 3, 4 or 6 tracks, every
+       one of which divides twelve — so every stat starts exactly on a line;
+     · surface=rule already sets those grids to gap 0, so a track edge IS a column line. Do not add
+       a column-gap here; it would slide every figure off the grid it is meant to hang on.
+   --x-figure is the ceiling and the component's container query is the fitter, so a raised floor is
+   what actually makes the numeral big — the two numbers are one decision.
    ============================================================================================== */
 
 [data-theme="swiss"] {
   color-scheme: light;
 
-  /* TYPE. The grotesque is the voice of the sheet — headlines, destinations and every figure. Mono
-     survives only where the machine literally emits characters (paths, ids, logs, wells), which is
-     the one place a second face carries meaning rather than decoration. No web fonts: Arial and
-     Helvetica are the two grotesques that are actually installed everywhere, and they are the right
-     two for this direction anyway. */
+  /* TYPE. The grotesque is the voice of the sheet — headlines, destinations, control labels and
+     every figure. Mono survives only where the machine literally emits characters (paths, ids,
+     logs, wells, timestamps), which is the one place a second face carries meaning rather than
+     decoration. No web fonts: Arial and Helvetica are the two grotesques that are actually
+     installed everywhere, and they are the right two for this direction anyway. */
   --i-prose: "Helvetica Neue", Helvetica, "Arial Nova", Arial, "Liberation Sans", "Segoe UI",
              system-ui, -apple-system, sans-serif;
-  --i-display-face: "Helvetica Neue", Helvetica, "Arial Nova", Arial, "Liberation Sans", "Segoe UI",
-                    system-ui, -apple-system, sans-serif;
+  --i-display-face: var(--i-prose);
+  --i-chrome-face: var(--i-prose);
   --i-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas,
             "Liberation Mono", monospace;
 
@@ -42,9 +53,10 @@
   --i-line-hi: #12110f;
   --i-rail:    #12110f;
 
-  --i-ink:   #12110f;
-  --i-dim:   #56534c;
-  --i-faint: #7a776e;
+  --i-ink:   #12110f;   /* 18.1:1 on paper */
+  --i-dim:   #56534c;   /* 7.4:1 on paper, 7.7:1 on a plane */
+  --i-faint: #6e6b61;   /* 5.1:1 on paper — the tone it replaced fell to 3.8:1 in a well, which is
+                           where this role actually lands: the composer's placeholder. */
 
   /* Signal is ink: on paper, the strongest possible mark IS the attention. Machine sits one step
      back — still dark, still authoritative, but never mistaken for something asking you to act.
@@ -55,48 +67,79 @@
   --i-ok:      #12110f;
   --i-signal-wash:  rgba(18, 17, 15, 0.055);
   --i-machine-wash: rgba(69, 66, 59, 0.06);
-  --i-crit-wash:    rgba(218, 41, 28, 0.07);
+  /* The one red carries no fill. #da291c is the sheet's exact signal and it cannot clear 4.5:1 on a
+     tint of itself at any alpha, so the crit tag and the crit callout state themselves with a red
+     rule on bare paper instead — which is also the only way the sheet ever prints it. */
+  --i-crit-wash:    transparent;
 
-  /* STRUCTURE. The figure is the direction, so it is the biggest number in the file; the column
-     grid is tuned to land ~12 lines across a laptop stage and is drawn at the faintest tone that
-     still reads as measurement rather than dirt. Nothing rounds. */
-  --x-figure: 3.5rem;
+  /* STRUCTURE. The figure is the direction, so it is the biggest number in the file, and the floors
+     are raised with it — a floor left at house size hands the container query a narrow track and it
+     quietly shrinks the numeral back down. 22rem lands three stat tracks and 28rem two card tracks
+     on a laptop stage; both divide twelve. The title is display-scale for the same reason the
+     figure is: this sheet opens on a word set as large as a number. */
+  --x-figure: 5.4rem;
+  --x-title: 3.85rem;
+  --x-stat-floor: 22rem;
+  --x-card-floor: 28rem;
   --x-radius: 0;
   --i-density: 1.15;
   --x-rule-w: 1px;
   --x-label-case: uppercase;
   --x-label-track: 0.16em;
   --x-grid-line: #e8e5dc;
-  --x-grid-size: 6.5rem;
+  --x-grid-size: 8.3333%;   /* one twelfth — the period is a % of the image sized below */
 }
 
 /* ----------------------------------------------------------------------------------------------
-   The four things the surface / hover / grid modes cannot say.
+   The things the surface / hover / grid / section-rule / emphasis modes cannot say.
    ---------------------------------------------------------------------------------------------- */
 
-/* 1. The display voice is the grotesque. Only machine emissions stay monospaced. */
+/* 1. The display voice is the grotesque, and so is every micro-label the components still pin to
+      --i-mono. On a sheet whose whole chrome is tracked capitals, a mono label reads as a caption
+      from a different document. */
 [data-theme="swiss"] .i-h,
 [data-theme="swiss"] .i-brand,
 [data-theme="swiss"] .i-navitem { font-family: var(--i-display-face); font-weight: 700; }
+[data-theme="swiss"] .i-eyebrow,
+[data-theme="swiss"] .i-stat-l,
+[data-theme="swiss"] .i-field-label,
+[data-theme="swiss"] .i-pill,
+[data-theme="swiss"] .i-kv dt { font-family: var(--i-chrome-face); font-weight: 700; }
 [data-theme="swiss"] .i-h { letter-spacing: -0.03em; }
+[data-theme="swiss"] .i-h1 { line-height: 0.94; letter-spacing: -0.038em; }
 [data-theme="swiss"] .i-brand { text-transform: uppercase; letter-spacing: 0.24em; }
+[data-theme="swiss"] .i-card-title { font-size: var(--i-h2); letter-spacing: -0.025em; }
+[data-theme="swiss"] .i-row-title { font-size: var(--i-body); letter-spacing: -0.02em; }
 
-/* 2. Two-tier masthead: identity over a hairline, destinations over the strong rule. */
+/* 2. Two gutters the gap-0 grids cannot supply. A title set this large has no room under its own
+      descenders, so the whole title band gets air instead of the standfirst sitting in them; and a
+      card's badge otherwise lands flush on its track edge, touching the next card's title (Fleet
+      read "HOSTquant-vps1"). Both are insets, not gaps — a column-gap would slide every second
+      card off the painted line it is supposed to start on. */
+[data-theme="swiss"] .i-view-head { gap: var(--i-3); padding-bottom: var(--i-6); }
+[data-theme="swiss"] .i-card { padding-inline-end: var(--i-6); }
+
+/* 3. Two-tier masthead: identity over a hairline, destinations over the strong rule. */
 [data-theme="swiss"] .i-masthead-top { border-bottom: var(--x-rule-w) solid var(--i-line); }
 
-/* 3. The figure stands ON a rule with its label beneath it — the signature of the direction, and
+/* 4. Phase the painted grid onto the CONTENT box. The contract paints from the padding edge, which
+      leaves every line a stage-padding off the columns it is supposed to measure; sizing the image
+      to the content width and starting it at the content edge makes --x-grid-size a true 1/12 and
+      puts the first line under the page title and the last on the right margin. */
+[data-theme="swiss"] .i-stage {
+  background-position: var(--i-8) 0;
+  background-size: calc(100% - 2 * var(--i-8)) 100%;
+}
+
+/* 5. The figure stands ON a rule with its label beneath it — the signature of the direction, and
       the inverse of surface=rule, which puts the rule above the whole block. The label's rule is
-      what goes black when a metric is hot or hovered, so "mark" still marks. Wider columns because
-      a 3.5rem numeral needs room a 2.6rem one does not. */
-[data-theme="swiss"] .i-stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+      what goes black when a metric is hot or hovered, so "mark" still marks. Row-gap only: a
+      column-gap would take the figures off the painted lines. */
+[data-theme="swiss"] .i-stats { row-gap: var(--i-8); }
 [data-theme="swiss"] .i-stat { border-top: 0; gap: 0; }
-[data-theme="swiss"] .i-stat-v { line-height: 0.86; letter-spacing: -0.045em; }
+[data-theme="swiss"] .i-stat-v { line-height: 0.8; letter-spacing: -0.05em; }
 [data-theme="swiss"] .i-stat-l { width: 100%; margin-top: var(--i-4); padding-top: var(--i-2);
                                  border-top: var(--x-rule-w) solid var(--i-line); }
 [data-theme="swiss"] .i-stat.is-hot .i-stat-l,
 [data-theme="swiss"] .i-stat.is-link:hover .i-stat-l { border-top-color: var(--i-ink);
                                                        color: var(--i-ink); }
-
-/* 4. The one filled control on the sheet: an ink block with paper text (18.1:1). */
-[data-theme="swiss"] .i-btn.is-primary { background: var(--i-ink); color: var(--i-page);
-                                         border-color: var(--i-ink); }

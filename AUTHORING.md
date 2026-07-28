@@ -103,10 +103,18 @@ Two files: `src/themes/<id>.css` and one object in `src/themes.js`.
   grid: "fine",             // none | columns | fine
   annotate: 1,              // 0 | 1
   hover: "mark",            // lift | mark | invert
+  sectionRule: "trailing",  // none | trailing   hairline running out from a section label
+  band: "rows",             // none | rows       zebra banding in dense tables
+  leader: 0,                // 0 | 1             dotted leader from a row title to its meta
+  emphasis: "fill",         // wash | fill       how the primary control carries emphasis
+  hero: 0,                  // 0 | 1             first metric takes a 2x2 tile
 }
 ```
 
-Nothing in this object is a colour. Colours are the CSS file's job, always.
+Nothing in this object is a colour. Colours are the CSS file's job, always. **Modes live here, not in
+your CSS** — `applyTheme()` writes them all as `data-*` attributes in one pass, which is what makes a
+half-applied theme impossible. Scalars (`--x-figure`, `--x-stat-floor`, `--i-type-scale`, …) go in the
+CSS file, because the cascade is the right enforcement for those.
 
 ### 2. The CSS file
 
@@ -175,7 +183,9 @@ Symptoms you have this problem:
 - Two themes independently wrote the same override.
 - A component would need to know the theme name.
 
-Every axis currently in `contract.css` got there this way. Worked examples:
+Every axis currently in `contract.css` got there this way — fifteen of them now, and not one was
+designed up front. `CHANGELOG.md` records which theme asked for each, which is what stops the list
+growing on speculation. Worked examples:
 
 - **`--i-chrome-face`** — card titles, buttons, tags and table heads were hardwired to the mono voice,
   so a theme whose display voice isn't the machine voice had to restate it at six selectors.

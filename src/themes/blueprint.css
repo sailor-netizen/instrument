@@ -21,7 +21,17 @@
    --x-grid-line under them. Three inks are spent WITHIN the 1px weight (fine ruling, object line,
    hard object line) — that is the sheet's own hierarchy, not a third weight.
 
-   Measured, not eyeballed: --i-ink on --i-page = 15.72:1, --i-dim on --i-plane = 7.33:1.
+   ANNOTATION IS THE POINT, and item numbers alone were only a third of it. A sheet annotates three
+   ways and this theme now draws all three: part numbers on the quantities (M-01…), balloons with a
+   leader running into the part they number, and a DIMENSION LINE — a ruled span with a tick turned
+   down at each end — closing every block of quantities and every parts list. Dimension lines and
+   leaders are drawn in the object-line ink, one weight below the hard rules that carry structure
+   and one above the fine ruling that divides rows: two weights, three inks, three annotations.
+
+   Measured with the sRGB formula, not eyeballed. Against --i-page / --i-plane / --i-plane-2 /
+   --i-well in that order: --i-ink 15.72 · 14.47 · 16.42 · 14.21; --i-dim 7.15 · 6.58 · 7.47 · 6.46;
+   --i-faint 5.11 · 4.70 · 5.34 · 4.62; --i-machine 5.43 · 5.00 · 5.67 · 4.91. Paper on --i-signal,
+   which is what the filled primary control draws, is 13.54.
    ============================================================================================== */
 
 [data-theme="blueprint"] {
@@ -35,12 +45,19 @@
   --i-prose: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto,
              "Helvetica Neue", Arial, sans-serif;
 
+  /* EVERY numeral on a drawing is dimensioned, which means every numeral has to line up under the
+     one above it. Declared on the theme root so it inherits into figures, ledgers, timestamps and
+     the title block alike, rather than being remembered per component. */
+  font-variant-numeric: tabular-nums;
+
   /* Sheet stock. Flat values, not light-dark(): this theme declares a single colour-scheme.
      The title block sits on cleaner stock than the drawing — that is --i-plane-2's job here. */
   --i-page:    #fbfaf6;   /* the paper the drawing is on */
-  --i-plane:   #fdfdfa;   /* title-block / parts-list stock, a shade brighter */
-  --i-plane-2: #ffffff;
-  --i-well:    #eceff0;   /* a shaded region: verbatim machine output, hatched in cool grey */
+  --i-plane:   #eef1f2;   /* a SHADED region — the band under alternate parts-list rows, and the
+                             fill behind a finding. It was paper-white, which meant the theme
+                             declared `band: rows` and then drew no band at all. */
+  --i-plane-2: #ffffff;   /* title-block stock: the cleanest paper on the sheet */
+  --i-well:    #eceff0;   /* a hatched region: verbatim machine output */
 
   /* A drawing sheet is evenly lit — it has no atmosphere and casts no glow. Both corner washes
      are switched off deliberately; the cyan grid is the only thing tinting the field. */
@@ -56,8 +73,9 @@
 
   --i-ink:   #1b2024;
   --i-dim:   #4e565d;
-  --i-faint: #69737c;     /* annotation grey, pulled down from the sheet's #868e95 (3.18:1) so the
-                             item numbers, placeholders and sheet index clear 4.5:1 as real text */
+  --i-faint: #636c75;     /* annotation grey, pulled down from the sheet's #868e95 (3.18:1) so the
+                             item numbers, placeholders and sheet index clear 4.5:1 as real text —
+                             on the WELL too, which the previous value missed at 4.18:1 */
 
   --i-signal:  #252c32;   /* binds you: the hard line, not a hue — see the header */
   --i-machine: #0a6f92;   /* callout cyan: the system annotating its own drawing */
@@ -68,7 +86,14 @@
   --i-crit-wash:    rgba(194, 24, 43, 0.09);
 
   /* L2 — structure */
-  --x-figure: 3rem;        /* dimensioned quantities are the largest thing on the sheet */
+  --x-figure: 3.4rem;      /* dimensioned quantities are the largest thing on the sheet */
+  --x-title: 2.4rem;       /* …and the sheet title is the second largest. The house 1.7rem opened
+                              every drawing at the size of a paragraph heading. */
+  /* The figure is capped by the column it sits in (18cqi), so raising --x-figure without raising
+     the floor changes nothing — six stats in a 984px stage were rendering at 1.4rem. A drafting
+     sheet would rather run 3 across on two rows than 6 across at annotation size. */
+  --x-stat-floor: 15rem;
+  --x-card-floor: 15rem;
   --x-radius: 0;
   --i-density: 1;          /* the spacing ramp lands on clean rem, commensurate with the grid */
   --x-rule-w: 1px;
@@ -90,6 +115,12 @@
 
 /* ----------------------------------------------------------------------------------------------
    Structural rules — only what tokens and the surface modes cannot say.
+
+   This section runs longer than a theme's should, and the overrun is a message about the contract
+   rather than about the sheet: three of the blocks below (the balloon-and-leader item mark, the
+   dimension line, the boxed block head) are devices any annotated-drawing theme would want, and
+   they are here as per-theme CSS because --x-annotate is a boolean with exactly one behaviour.
+   They belong in contract.css as annotate modes; see the report that shipped with this change.
    ---------------------------------------------------------------------------------------------- */
 
 /* Registration ticks. The direction's signature: an object is held to the sheet by two hard marks
@@ -114,3 +145,69 @@
 
 /* The title block is printed on the cleaner stock, as it is on a real sheet. */
 [data-theme="blueprint"] .i-titleblock { background: var(--i-plane-2); }
+
+/* The drawing's top object line: the head is a caption for the sheet, not a floating title. */
+[data-theme="blueprint"] .i-view-head {
+  padding-bottom: var(--i-3);
+  border-bottom: var(--x-rule-w) solid var(--i-rail);
+}
+
+/* TWO VOICES. Mono is the annotation voice and it does most of the talking, but a sheet writes its
+   NAMES — the drawing title, the part titles — in the drawing-office grotesque. Splitting them is
+   what stops the whole page reading as one undifferentiated printout. */
+[data-theme="blueprint"] .i-h1,
+[data-theme="blueprint"] .i-card-title,
+[data-theme="blueprint"] .i-row-title { font-family: var(--i-prose); font-weight: 600;
+                                        letter-spacing: -0.015em; }
+
+/* Block head: the boxed callout number a draughtsman puts beside each region of the sheet. Cyan,
+   because it is the system annotating its own drawing. Scoped to section headings so the margin's
+   own labels stay plain. */
+[data-theme="blueprint"] .i-section > .i-eyebrow {
+  align-self: flex-start;
+  color: var(--i-machine);
+  border: var(--x-rule-w) solid var(--i-machine);
+  padding: 0.3em 0.6em;
+}
+
+/* DIMENSION LINE. A ruled span with a tick turned down at each end, closing every block of
+   quantities and every parts list — the sheet stating the extent of what it just drew. Drawn as one
+   box with its bottom edge removed, which is the whole figure in one element rather than a pile of
+   them. The parts list gets the same object line along its head, so the ledger is a dimensioned
+   span rather than a list that stops. */
+[data-theme="blueprint"] .i-table { border-top: var(--x-rule-w) solid var(--i-rail); }
+[data-theme="blueprint"] .i-stats::after,
+[data-theme="blueprint"] .i-table::after {
+  content: "";
+  height: 0.55rem;
+  margin-top: var(--i-2);
+  border: var(--x-rule-w) solid var(--i-line-hi);
+  border-bottom: 0;
+}
+[data-theme="blueprint"] .i-stats::after { grid-column: 1 / -1; margin-top: 0; }
+
+/* BALLOON + LEADER. A parts-list item is numbered in a circle at the margin with a leader running
+   in to the part it names. This is also the fix for a real collision: the contract parks the item
+   number top-right, which is exactly where a row's status tag already lives. The leader is a flex
+   item of the row's top line, not an inline mark inside the title — inline, a long title wrapped
+   and left the leader stranded on a line of its own. */
+[data-theme="blueprint"] .i-row { padding-left: calc(var(--i-8) + var(--i-3)); }
+[data-theme="blueprint"] .i-row::after {
+  top: var(--i-2); right: auto; left: var(--i-3);
+  display: grid; place-items: center; width: 1.7rem; height: 1.7rem;
+  border: var(--x-rule-w) solid var(--i-rail); border-radius: 50%;
+  letter-spacing: 0; color: var(--i-ink);
+}
+[data-theme="blueprint"] .i-row-top::before {
+  content: ""; flex: 0 0 var(--i-6); align-self: center;
+  border-top: var(--x-rule-w) solid var(--i-line-hi);
+}
+[data-theme="blueprint"] .i-row-title { margin-right: auto; }
+
+/* A quantity carries a PART number, not a list index — it is an item on the sheet's key. The extra
+   head room is what reserves the top-right corner for it: the number shared a line with whatever
+   the object put there, and a nine-digit token count ran through "M-03" while a card's status tag
+   ran through "05". */
+[data-theme="blueprint"] .i-stat,
+[data-theme="blueprint"] .i-card { padding-top: var(--i-6); }
+[data-theme="blueprint"] .i-stat::after { content: "M-" counter(i-item, decimal-leading-zero); }

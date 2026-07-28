@@ -1,6 +1,6 @@
 {
   "name": "instrument",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A themeable design system where a theme owns structure, not just colour.",
   "license": "UNLICENSED",
   "private": true,
@@ -12,7 +12,8 @@
     "src",
     "gallery",
     "README.md",
-    "AUTHORING.md"
+    "AUTHORING.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": "./src/index.js",
