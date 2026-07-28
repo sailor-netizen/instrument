@@ -1,0 +1,224 @@
+/* ============================================================================================
+   INSTRUMENT — Flightdeck's own design system.  v0.2
+   ============================================================================================
+
+   WHY IT EXISTS.  Flightdeck previously wore Flightline, the shared fleet system. That system is
+   fine, but it made this product read as a generic dark dashboard: solid-filled boxes nested in
+   solid-filled boxes, hierarchy carried by borders instead of by type. Flightdeck is a WORKSPACE —
+   you live in it, watch machines work in it, and approve what they did. It earns its own voice.
+
+   THE IDENTITY.  "Instruments, not decoration." A machine voice in monospace; a human voice in
+   prose type; one signal colour that means ATTENTION and one that means THE MACHINE IS SPEAKING.
+   Surfaces are drawn with hairlines over near-transparent fills, so density reads as an instrument
+   panel rather than a stack of cards. Borrowed in spirit from the cookbook's visual guide
+   (fable5-cookbook/visual/style.css) — its editorial-technical register, its restraint with colour,
+   its fluid type — but adapted for a dense tool rather than a long read.
+
+   HOW IT EVOLVES.  This file is the single source of truth and the only place literal values live.
+   Rules:
+     1. Components consume SEMANTIC tokens (--i-signal, --i-line), never literals and never the
+        raw palette. A component that needs a new literal means the system is missing a role — add
+        the role here rather than a one-off in the component.
+     2. Every colour resolves through light-dark(), driven by ONE `color-scheme` declaration. Themes
+        can never desync because there is only one signal.
+     3. Scale is fluid through ONE axis — the root font-size. The ramp here is plain rem; layering
+        clamp() on top of a fluid root compounds the scaling (that was a v0.1 bug).
+     3b. Adding a role: state the need as a sentence about MEANING ("a run the verifier could not
+        judge"), not appearance ("a yellowish tag"). If the sentence is about appearance, an existing
+        role already covers it. Prefer a second CHANNEL — fill weight, outline, ring, rail, stripe,
+        glyph — over a new hue; hues are the scarce resource and adding one needs a changelog note.
+     4. Bump the version comment when a role is added or a value changes meaning. The visual gate
+        (npm run gate) is what verifies a change did not break contrast or sizing.
+   ============================================================================================ */
+
+:root {
+  /* ==========================================================================================
+     L0 — THE PRIVATE PALETTE.  Literals only, `--_` prefixed, NEVER consumed by a component.
+     This is the only place a hex or rgba is legal in the entire frontend, which makes a re-skin
+     a ten-line edit here instead of an audit, and makes the lint rule trivial to state:
+     "a hex outside the L0 block is a violation."
+     ========================================================================================== */
+  --_paper: #eeece7;   /* warm bone. DELIBERATELY darker than a naive #f2f0ec: a 62%-white plane
+                          has to lift OFF the page, and the light theme washes out if it doesn't. */
+  --_carbon: #0c0f13;
+  --_ink-lt: #12151b;   --_ink-dk: #e8ebf2;
+  --_dim-lt: #525b6b;   --_dim-dk: #98a2b3;   /* load-bearing pair, measured — re-measure, never eyeball */
+  --_faint-lt: #7c8598; --_faint-dk: #6b7688;
+  --_amber-lt: #a35e0c; --_amber-dk: #eaa640; /* light value is dark on purpose: a TEXT colour first */
+  --_teal-lt: #1a6f64;  --_teal-dk: #6cc0b4;
+  --_red-lt: #bf3b2e;   --_red-dk: #e06a5f;
+  --_green-lt: #3f7c3c; --_green-dk: #77b471;
+
+  /* ==========================================================================================
+     THE ONE THEME SIGNAL.  Every light-dark() below resolves from this single declaration.
+     There must be exactly one in the codebase — a second one anywhere silently wins for its
+     subtree and the themes desync. A future toggle writes
+     document.documentElement.style.colorScheme, it does not add a declaration.
+     ========================================================================================== */
+  color-scheme: dark light;
+
+  /* ==========================================================================================
+     L1 — SEMANTIC ROLES.  Components consume ONLY these.
+     ========================================================================================== */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --i-page:    light-dark(var(--_paper), var(--_carbon));
+  --i-plane:   light-dark(rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.028));
+  --i-plane-2: light-dark(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.05));
+  --i-well:    light-dark(rgba(18, 22, 30, 0.05), rgba(0, 0, 0, 0.28));
+
+  /* Atmosphere: the page is lit from opposite corners by its two voices. Origins sit OFF-canvas so
+     only the falloff shows — that is what stops it reading as a decorative blob. Weaker than the
+     reference's because a workspace is stared at for hours, not scrolled once. */
+  --i-wash-signal:  light-dark(rgba(163, 94, 12, 0.07), rgba(234, 166, 64, 0.055));
+  --i-wash-machine: light-dark(rgba(26, 111, 100, 0.06), rgba(108, 192, 180, 0.05));
+
+  /* THREE BORDER WEIGHTS, and they mean different things:
+     1px --i-line = a boundary · 2px --i-rail = a spine · 3px --i-stripe-w = an identity stripe.
+     There is NO box-shadow anywhere in this system: depth is translucency + hairline + wash,
+     which is why it stays crisp in dark mode instead of turning to mud. */
+  --i-line:    light-dark(rgba(18, 22, 30, 0.16), rgba(255, 255, 255, 0.10));
+  --i-line-hi: light-dark(rgba(18, 22, 30, 0.30), rgba(255, 255, 255, 0.20));
+  --i-rail:    light-dark(rgba(18, 22, 30, 0.24), rgba(255, 255, 255, 0.16));
+  --i-stripe-w: 3px;
+
+  --i-ink:   light-dark(var(--_ink-lt), var(--_ink-dk));
+  --i-dim:   light-dark(var(--_dim-lt), var(--_dim-dk));
+  --i-faint: light-dark(var(--_faint-lt), var(--_faint-dk));
+
+  /* Colour is a CLAIM, never a coat of paint. Amber = this wants you or binds you. Teal = the
+     machine is speaking. Red/green = outcomes. Nothing else in the product gets a hue —
+     selection, progress and emphasis ride on fill weight, rails and rings instead. */
+  --i-signal:  light-dark(var(--_amber-lt), var(--_amber-dk));
+  --i-machine: light-dark(var(--_teal-lt), var(--_teal-dk));
+  --i-crit:    light-dark(var(--_red-lt), var(--_red-dk));
+  --i-ok:      light-dark(var(--_green-lt), var(--_green-dk));
+  --i-signal-wash:  light-dark(rgba(163, 94, 12, 0.10), rgba(234, 166, 64, 0.13));
+  --i-machine-wash: light-dark(rgba(26, 111, 100, 0.09), rgba(108, 192, 180, 0.12));
+  --i-crit-wash:    light-dark(rgba(191, 59, 46, 0.09), rgba(224, 106, 95, 0.13));
+
+  /* ONE fluid axis, and it is the ROOT font-size (set in app.css, measured against real 2707px and
+     3840px viewports). The ramp below is therefore plain rem — it is already fluid THROUGH the root.
+     Layering clamp() on top of a fluid root compounds the scaling and was a bug in v0.1. */
+  --i-display: 2.6rem;
+  --i-h1:      1.7rem;
+  --i-h2:      1.22rem;
+  --i-body:    1rem;
+  --i-small:   0.87rem;
+  --i-row:     0.86rem;
+  --i-micro:   0.7rem;
+  --i-measure: 68ch;
+  --i-measure-tight: 46ch;
+
+  --i-density: 1;
+  --i-1: calc(0.25rem * var(--i-density));
+  --i-2: calc(0.5rem  * var(--i-density));
+  --i-3: calc(0.75rem * var(--i-density));
+  --i-4: calc(1rem    * var(--i-density));
+  --i-6: calc(1.5rem  * var(--i-density));
+  --i-8: calc(2rem    * var(--i-density));
+  --i-section: clamp(1.75rem, 1rem + 2.2vw, 3rem);
+
+  /* Radius derives from the ONE structural axis so a theme sets it once. --x-radius: 0 squares the
+     entire product, including pills, which is what Swiss/Terminal/Editorial/Blueprint all need. */
+  --i-radius: var(--x-radius);
+  --i-radius-sm: calc(var(--x-radius) * 0.7);
+  --i-radius-pill: max(calc(var(--x-radius) * 0.7), min(var(--x-radius) * 100, 100px));
+
+  --i-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --i-fast: 150ms var(--i-ease);
+  --i-med:  260ms var(--i-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --i-fast: 1ms linear; --i-med: 1ms linear; }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   PRIMITIVES — the small vocabulary every view composes from. Adding a view should almost never
+   mean adding CSS; it should mean combining these.
+   --------------------------------------------------------------------------------------------- */
+
+/* Eyebrow: the system labelling a region. Mono, wide-tracked, signal-coloured. */
+.i-eyebrow {
+  font-family: var(--i-mono);
+  font-size: var(--i-micro);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--i-signal);
+  font-weight: 600;
+}
+
+/* Machine text: identifiers, paths, ids, anything the system emits verbatim. */
+.i-machine {
+  font-family: var(--i-mono);
+  font-size: var(--i-small);
+  color: var(--i-machine);
+  word-break: break-word;
+}
+
+/* A measured number. Tabular so columns of them line up. */
+.i-num {
+  font-family: var(--i-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--i-ink);
+}
+
+/* Plane: a raised region. Hairline + near-transparent fill — NOT a filled card. */
+.i-plane {
+  background: var(--i-plane);
+  border: 1px solid var(--i-line);
+  border-radius: var(--i-radius);
+}
+
+/* Rule: the primary separator. Prefer this over wrapping things in boxes. */
+.i-rule { border-top: 1px solid var(--i-line); }
+
+/* Well: recessed, for verbatim output (logs, diffs, dry-runs). */
+.i-well {
+  background: var(--i-well);
+  border: 1px solid var(--i-line);
+  border-radius: var(--i-radius-sm);
+  font-family: var(--i-mono);
+  font-size: var(--i-small);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Tag: a small stated fact (status, mode, count). Outline, never a solid blob. */
+.i-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--i-1);
+  font-family: var(--i-mono);
+  font-size: var(--i-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--i-dim);
+  border: 1px solid var(--i-line);
+  border-radius: var(--i-radius-pill);
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.i-tag.is-signal { color: var(--i-signal); border-color: color-mix(in oklab, var(--i-signal) 45%, transparent); background: var(--i-signal-wash); }
+.i-tag.is-machine { color: var(--i-machine); border-color: color-mix(in oklab, var(--i-machine) 45%, transparent); background: var(--i-machine-wash); }
+.i-tag.is-crit { color: var(--i-crit); border-color: color-mix(in oklab, var(--i-crit) 45%, transparent); background: var(--i-crit-wash); }
+.i-tag.is-ok { color: var(--i-ok); border-color: color-mix(in oklab, var(--i-ok) 45%, transparent); }
+
+/* Interactive lift — the one motion the product uses for "this is a control". */
+.i-lift { transition: transform var(--i-fast), border-color var(--i-fast), background var(--i-fast); }
+.i-lift:hover { transform: translateY(-2px); border-color: var(--i-line-hi); }
+
+/* Rail: a 2px spine marking a run/trace/group. The second border weight. */
+.i-rail { border-left: 2px solid var(--i-rail); padding-left: var(--i-3); }
+
+/* Stripe: a plane's identity edge, full-bleed inside a rounded box via ::before (a border cannot
+   be full-bleed under a radius). Colour always comes from a SEMANTIC role. */
+.i-striped { position: relative; overflow: hidden; }
+.i-striped::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: var(--i-stripe-w);
+  background: var(--i-stripe, var(--i-line));
+}

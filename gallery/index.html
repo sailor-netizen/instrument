@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" data-theme="instrument" data-surface="tile" data-shell="sidebar"
+      data-grid="none" data-annotate="0" data-hover="lift">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — gallery</title>
+
+<!-- ONE link is the whole system. This page uses NO framework on purpose: it is the standing proof
+     that the identity lives in CSS and a class vocabulary, and that React is a convenience layer over
+     it rather than a requirement. If this page ever needs a build step, something has gone wrong. -->
+<link rel="stylesheet" href="../src/instrument.css">
+
+<style>
+  /* gallery chrome only — never a pattern to copy */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+  .g-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: var(--i-4); flex-wrap: wrap;
+           align-items: flex-end; padding: var(--i-3) var(--i-6);
+           border-bottom: 1px solid var(--i-line-hi); background: var(--i-page); }
+  .g-body { padding: var(--i-6); display: flex; flex-direction: column; gap: var(--i-8); }
+  .g-spec { display: flex; flex-direction: column; gap: var(--i-3); }
+  .g-spec > h2 { margin: 0; font-family: var(--i-mono); font-size: var(--i-h2); color: var(--i-ink); }
+  .g-spec > p  { margin: 0; max-width: var(--i-measure); color: var(--i-dim);
+                 font-size: var(--i-small); }
+  .g-demo { display: flex; flex-wrap: wrap; gap: var(--i-3); align-items: flex-start; }
+  .g-demo > * { min-width: 0; }
+  .g-swatches { display: grid; gap: var(--i-2);
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+  .g-sw { display: flex; flex-direction: column; gap: var(--i-1); font-family: var(--i-mono);
+          font-size: var(--i-micro); color: var(--i-dim); }
+  .g-sw i { display: block; height: 2.5rem; border: 1px solid var(--i-line); border-radius: var(--i-radius-sm); }
+  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint); }
+</style>
+</head>
+<body>
+
+<div class="g-bar">
+  <label class="i-themepick"><span class="i-field-label">Theme</span>
+    <select class="i-input" id="theme"></select></label>
+  <label class="i-themepick"><span class="i-field-label">Surface override</span>
+    <select class="i-input" id="surface">
+      <option value="">(theme's own)</option>
+      <option value="tile">tile</option><option value="outline">outline</option>
+      <option value="rule">rule</option><option value="none">none</option>
+    </select></label>
+  <span class="g-note" id="what"></span>
+</div>
+
+<div class="g-body">
+
+  <section class="g-spec">
+    <h2>Colour roles</h2>
+    <p>Roles, not colours. Every theme fills all of these and none of them may change meaning — that
+       rule is why a screen never has to know which theme is running.</p>
+    <div class="g-swatches" id="swatches"></div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Type</h2>
+    <p>Two voices: mono is the machine (headings, labels, IDs, numbers, verdicts), prose is the human
+       (descriptions, help, chat). That split carries most of the identity.</p>
+    <h1 class="i-h i-h1">Heading one · the page</h1>
+    <h2 class="i-h i-h2">Heading two · a region</h2>
+    <p class="i-p">Prose. The human voice — descriptions, help text, anything written for a reader.</p>
+    <p class="i-p is-dim is-small">Dim and small: supporting detail that must not compete.</p>
+    <div class="i-eyebrow">Eyebrow · the system labelling a region</div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Buttons</h2>
+    <p>Emphasis rides on fill weight and rail, never on a new hue. Hues are the scarce resource.</p>
+    <div class="g-demo">
+      <button class="i-btn is-primary">Primary</button>
+      <button class="i-btn is-quiet">Quiet</button>
+      <button class="i-btn is-ghost">Ghost</button>
+      <button class="i-btn is-quiet" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Tags</h2>
+    <p><code>tone</code> is a meaning: signal (this wants you, or binds you) · machine (the system is
+       speaking) · crit · ok · mute. A tag asking for "amber" hasn't decided what it means.</p>
+    <div class="g-demo">
+      <span class="i-tag tone-signal">awaiting you</span>
+      <span class="i-tag tone-machine">running</span>
+      <span class="i-tag tone-crit">failed</span>
+      <span class="i-tag tone-ok">ok</span>
+      <span class="i-tag tone-mute">denied</span>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Stats</h2>
+    <p>A metric is a route into the view that owns it — a number you can't click is a dead end. The
+       figure sizes against its own column (<code>min(--x-figure, 18cqi)</code>), so a theme can raise
+       the display size without a long value colliding with its neighbour.</p>
+    <div class="i-stats">
+      <button class="i-stat is-link"><span class="i-stat-fit">
+        <span class="i-stat-v">7</span><span class="i-stat-l">agent runs</span></span></button>
+      <button class="i-stat is-link"><span class="i-stat-fit">
+        <span class="i-stat-v">$2.9433</span><span class="i-stat-l">spent</span></span></button>
+      <button class="i-stat is-link is-hot"><span class="i-stat-fit">
+        <span class="i-stat-v">2</span><span class="i-stat-l">awaiting you</span></span></button>
+      <div class="i-stat"><span class="i-stat-fit">
+        <span class="i-stat-v">1,137,125</span><span class="i-stat-l">tokens</span></span></div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Cards</h2>
+    <p>Title, optional badge, a line of blurb. The header wraps rather than squeezing the title —
+       the title is what gets scanned, the badge can move.</p>
+    <div class="i-cards">
+      <button class="i-card is-link"><span class="i-card-top"><span class="i-card-title">Ask the workspace</span></span>
+        <span class="i-card-blurb">Read-only agent, every step shown.</span></button>
+      <button class="i-card is-link is-on"><span class="i-card-top"><span class="i-card-title">Plan a fleet change</span>
+        <span class="i-tag tone-signal">changes things</span></span>
+        <span class="i-card-blurb">An agent scouts the fleet and files a proposal.</span></button>
+      <div class="i-card"><span class="i-card-top"><span class="i-card-title">quant-vps1</span>
+        <span class="i-tag tone-mute">host</span></span>
+        <span class="i-card-blurb">100.70.0.3</span></div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Rows</h2>
+    <p>The workhorse of every queue and history: title, meta, a supporting line.</p>
+    <div class="i-rows">
+      <button class="i-row is-link"><span class="i-row-top"><span class="i-row-title">deploy_template</span>
+        <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+        <span class="i-row-sub">836cd44cd560e171</span></button>
+      <button class="i-row is-link is-on"><span class="i-row-top"><span class="i-row-title">uncommitted changes</span>
+        <span class="i-row-meta">3 findings</span></span>
+        <span class="i-row-sub">27 Jul, 21:47 · flightdeck</span></button>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Table</h2>
+    <p>Header cells come from the same array as the column widths, so a column can never drift from
+       its heading. Scrolls inside itself rather than pushing the page sideways.</p>
+    <div class="i-table" style="--i-cols: 7rem 8rem 1fr 5rem 5rem" role="table">
+      <div class="i-tr is-head" role="row"><span>agent</span><span>when</span><span>model</span>
+        <span>cost</span><span>status</span></div>
+      <div class="i-tr" role="row"><span>review</span><span>27 Jul, 21:47</span>
+        <span>claude-opus-4-8</span><span>$0.5950</span><span><span class="i-tag tone-ok">ok</span></span></div>
+      <div class="i-tr" role="row"><span>builder</span><span>27 Jul, 13:04</span>
+        <span>claude-opus-4-8</span><span>$0.3281</span><span><span class="i-tag tone-crit">error</span></span></div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Trace</h2>
+    <p>The 2px rail is the system saying "a machine did this" — the same rail that marks the active
+       route in the sidebar shell. One visual idea, two uses.</p>
+    <div class="i-trace">
+      <div class="i-traceline is-muted">Reading the workspace…</div>
+      <div class="i-traceline"><b>Read</b> src/flightdeck/kernel/peer.py</div>
+      <div class="i-traceline"><b>gate</b> PASS</div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Findings</h2>
+    <p>Severity, location, claim, and a verdict from a verification pass. <em>Refuted</em> stays
+       visible at reduced opacity on purpose — it is evidence the review was checked, not noise.</p>
+    <div class="i-finding"><span class="i-tag tone-crit">high</span>
+      <span class="i-finding-where">web/server.py:122</span>
+      <span class="i-finding-body">The cross-site guard is a no-op on this route.
+        <span class="i-tag tone-crit">confirmed</span></span></div>
+    <div class="i-finding is-refuted"><span class="i-tag tone-signal">medium</span>
+      <span class="i-finding-where">engine/policy.py:41</span>
+      <span class="i-finding-body">Possible unbounded retry.
+        <span class="i-tag tone-mute">refuted</span>
+        <span class="i-finding-why">the budget is enforced one frame up</span></span></div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Callouts</h2>
+    <p>A terminal verdict. Tone carries the meaning — a failed run must never render in the ok tone.</p>
+    <div class="g-demo" style="flex-direction: column; align-items: stretch;">
+      <div class="i-callout tone-ok">7 checks passed.</div>
+      <div class="i-callout tone-crit">⚠ Couldn't start the run (HTTP 409).</div>
+      <div class="i-callout tone-signal">This one makes changes.</div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Panels, wells and fields</h2>
+    <p>A panel is a raised region — hairline over a near-transparent fill, never a solid card. A well
+       is recessed, for verbatim machine output. Both dissolve entirely under <code>surface: none</code>.</p>
+    <div class="i-panel">
+      <div class="i-split"><h2 class="i-h i-h2">deploy_template</h2>
+        <span class="i-tag tone-ok">approved</span></div>
+      <dl class="i-kv">
+        <div class="i-kv-pair"><dt>target</dt><dd>836cd44cd560e171</dd></div>
+        <div class="i-kv-pair"><dt>rollback</dt><dd>Revert to the previous template revision.</dd></div>
+      </dl>
+      <pre class="i-well">[preflight:deploy_template] template 'warren' + host ok — deploy will run</pre>
+    </div>
+    <label class="i-field"><span class="i-field-label">Message</span>
+      <input class="i-input" placeholder="Message the agent…"></label>
+    <div class="i-pills" role="tablist">
+      <button class="i-pill is-on" role="tab" aria-selected="true">Researcher</button>
+      <button class="i-pill" role="tab" aria-selected="false">Builder</button>
+      <button class="i-pill" role="tab" aria-selected="false">Designer</button>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Empty and error states</h2>
+    <p>Shipped so no screen invents its own — and so a failed fetch never looks the same as "none".
+       On a security screen those are opposite meanings.</p>
+    <div class="g-demo" style="flex-direction: column; align-items: stretch;">
+      <div class="i-panel"><div class="i-empty"><h2 class="i-h i-h2">No runs yet</h2>
+        <p class="i-p is-dim is-small">Talk to an agent in Chat — each gated run is metered here.</p></div></div>
+      <div class="i-loaderror"><h2 class="i-h i-h2">Couldn't reach the runs store</h2>
+        <p class="i-p is-dim is-small">It may be starting, or unavailable. This is not the same as it being empty.</p>
+        <button class="i-btn is-quiet">Retry</button></div>
+    </div>
+  </section>
+
+  <section class="g-spec">
+    <h2>Shell</h2>
+    <p>The one place structure genuinely branches, and the one part that needs the React layer —
+       six layouts (sidebar · topnav · rail · statusbar · topbar · titleblock) chosen by the active
+       theme. The nav vocabulary below is plain CSS and works anywhere.</p>
+    <div class="g-demo">
+      <div class="i-nav-stack" style="min-width: 12rem">
+        <button class="i-navitem is-on">Home</button>
+        <button class="i-navitem">Chat</button>
+        <button class="i-navitem">Runs</button>
+      </div>
+      <div class="i-nav-keys">
+        <button class="i-navkey is-on"><span class="i-navkey-n">1</span>home</button>
+        <button class="i-navkey"><span class="i-navkey-n">2</span>chat</button>
+        <button class="i-navkey"><span class="i-navkey-n">3</span>runs</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script type="module">
+  // The registry is imported, not restated — one source of truth for what a theme IS, shared with
+  // every React consumer. A gallery that hardcoded its own list would drift within a week.
+  import { THEMES, applyTheme, storedTheme } from "../src/themes.js";
+
+  const ROLES = ["page", "plane", "plane-2", "well", "ink", "dim", "faint",
+                 "line", "line-hi", "rail", "signal", "machine", "crit", "ok"];
+  const sel = document.getElementById("theme");
+  const surf = document.getElementById("surface");
+  const what = document.getElementById("what");
+
+  sel.innerHTML = THEMES.map((t) => `<option value="${t.id}">${t.name}</option>`).join("");
+  document.getElementById("swatches").innerHTML = ROLES.map((r) =>
+    `<span class="g-sw"><i style="background: var(--i-${r})"></i>--i-${r}</span>`).join("");
+
+  function render() {
+    const t = applyTheme(sel.value);
+    // the override is applied AFTER the theme, so it can demonstrate a component under a surface its
+    // own theme never uses — which is how you find out a new component only works in one of them
+    if (surf.value) document.documentElement.setAttribute("data-surface", surf.value);
+    what.textContent = `${t.blurb}  ·  surface: ${surf.value || t.surface} · shell: ${t.shell}`
+      + ` · grid: ${t.grid} · annotate: ${t.annotate} · hover: ${t.hover}`;
+  }
+  sel.value = storedTheme();
+  sel.addEventListener("change", render);
+  surf.addEventListener("change", render);
+  render();
+</script>
+</body>
+</html>

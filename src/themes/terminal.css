@@ -1,0 +1,87 @@
+/* ==============================================================================================
+   TERMINAL — dark only, GitHub-dark field.
+
+   THE IDEA: one family, one grid, and colour is status. Every voice in this theme is set in the
+   same monospace — the human one too — so hierarchy has to come from scale, tracking and density
+   instead of from a typeface change. Nothing draws a box (surface: none); a hairline field, a
+   command line above and a status bar below are the entire frame. Green is not decoration: it is
+   --i-ok, and it carries the live/attached feel — the prompt, the "0 errors", the selection bar.
+   Amber is --i-signal (flags, keys, money, anything that binds you), cyan is --i-machine.
+
+   Palette is GitHub dark, lifted straight from the direction sheet so the nine app screens land in
+   the same register as design/directions/b-terminal/*.html.
+   ============================================================================================== */
+
+[data-theme="terminal"] {
+  /* TYPE — the whole point. --i-prose deliberately resolves to the machine voice: in a terminal
+     there is no second family, so the split the system normally leans on is spent here on purpose. */
+  --i-mono: ui-monospace, "Cascadia Code", "Cascadia Mono", "JetBrains Mono", "SF Mono",
+            SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+  --i-prose: var(--i-mono);
+
+  /* SURFACES — the sheet's four depths, darkest-out: void frame, field, banded strip, raised chip.
+     --i-well takes the void because a well holds verbatim output, and that is where `cat` prints. */
+  --i-page:    #0d1117;   /* the text field: the stage everything lives on */
+  --i-plane:   #10161d;   /* banded rows, header and prompt strips */
+  --i-plane-2: #1b222b;   /* a raised chip / an active cell */
+  --i-well:    #010409;   /* outside the frame — and the ink of an inverted bar */
+
+  /* No atmosphere. A terminal is lit by nothing; the two corner washes would read as a smudge on a
+     flat character field, so this theme is the one that turns them off rather than tinting them. */
+  --i-wash-signal:  transparent;
+  --i-wash-machine: transparent;
+
+  /* Box-drawing weights: hairline, bright hairline, and a spine bright enough to read at 2px. */
+  --i-line:    #1f242c;
+  --i-line-hi: #30363d;
+  --i-rail:    #454c56;
+
+  --i-ink:   #e6edf3;
+  --i-dim:   #9aa4af;   /* 7.19:1 on --i-plane — measured, because labels live here */
+  --i-faint: #6e7681;   /* chrome and zeroed values only; never a label, never body */
+
+  /* Status is the ONLY thing with a hue, exactly as the sheet has it. */
+  --i-signal:  #d29922;   /* attention · money · keys · denied */
+  --i-machine: #39c5cf;   /* the system speaking */
+  --i-crit:    #f85149;   /* this failed */
+  --i-ok:      #3fb950;   /* live · attached · nothing wrong */
+  --i-signal-wash:  rgba(210, 153, 34, 0.14);
+  --i-machine-wash: rgba(57, 197, 207, 0.13);
+  --i-crit-wash:    rgba(248, 81, 73, 0.13);
+
+  /* STRUCTURE — dense, square, wide-tracked labels, and a figure big enough that scale alone
+     separates a readout from its caption (there is no second family left to do it). */
+  --x-figure: 2.8rem;
+  /* 0px, not 0: tokens.css derives --i-radius-pill through `min(var(--x-radius) * 100, 100px)`, and
+     a UNITLESS zero makes that min() a number-vs-length mismatch — an invalid length that only
+     looks correct because border-radius falls back to its initial 0. With a unit it computes. */
+  --x-radius: 0px;
+  --i-density: 0.82;
+  --x-rule-w: 1px;
+  --x-label-case: uppercase;
+  --x-label-track: 0.2em;
+  --x-grid-line: var(--i-line);
+  --x-grid-size: 1.25rem;   /* inert while grid is "none"; sized as a character cell, not a column */
+}
+
+/* ----------------------------------------------------------------------------------------------
+   The three things tokens and surface modes cannot say.
+   ---------------------------------------------------------------------------------------------- */
+
+/* 1. The frame. Both shell strips are banded away from the field, and the status bar sits on the
+      void — without this the TUI has no edges and the stage bleeds off the screen. */
+[data-theme="terminal"] .i-cmdline { background: var(--i-plane); }
+[data-theme="terminal"] .i-statusbar { background: var(--i-well); border-top-color: var(--i-line-hi); }
+
+/* 2. The selection bar. `hover: invert` gives a wash; a TUI gives htop — a solid bar with the field
+      colour punched back out of it, every child included. Green because a selected line is live. */
+[data-theme="terminal"] .i-stat.is-link:hover,
+[data-theme="terminal"] .i-card.is-link:hover,
+[data-theme="terminal"] .i-row.is-link:hover { background: var(--i-ok); color: var(--i-well); }
+[data-theme="terminal"] .i-stat.is-link:hover *,
+[data-theme="terminal"] .i-card.is-link:hover *,
+[data-theme="terminal"] .i-row.is-link:hover * { color: inherit; }
+
+/* 3. Banded ledger rows. With no box and no fill, a dense table loses its horizontal tracking; the
+      zebra is what a pager does instead of a border. */
+[data-theme="terminal"] .i-tr:nth-child(even) { background: var(--i-plane); }

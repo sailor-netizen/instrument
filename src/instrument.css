@@ -1,0 +1,40 @@
+/* ==============================================================================================
+   INSTRUMENT — the single CSS entry point.
+
+   One link and you have the whole system, themes included:
+
+       <link rel="stylesheet" href="…/instrument/src/instrument.css">
+       <html data-theme="terminal" data-surface="none" data-shell="statusbar">
+
+   NO FRAMEWORK IS REQUIRED to use this file. That is deliberate and load-bearing: the fleet runs
+   React in some places, server-rendered templates in others, and plain HTML in the direction sheets.
+   The visual identity lives entirely in CSS and the class vocabulary; React is a convenience layer
+   over it (`instrument` main export), never a requirement.
+
+   IMPORT ORDER IS THE SYSTEM'S LAYERING and it is not arbitrary:
+     tokens     L0 palette + L1 semantic roles; the house theme lives in :root
+     contract   L2 structure axes + the surface / hover / grid / annotate modes
+     themes/*   per-theme overrides keyed on [data-theme] — MUST come after contract
+     shell      the six navigation layouts
+     components the component layer, which consumes roles only
+
+   Bundler users may instead import the parts individually (see package.json `exports`) — Vite and
+   friends resolve `@import` fine, but importing the parts gives better tree-shaking of unused themes.
+   ============================================================================================== */
+
+@import "./tokens.css";
+@import "./contract.css";
+@import "./themes/swiss.css";
+@import "./themes/terminal.css";
+@import "./themes/editorial.css";
+@import "./themes/bento.css";
+@import "./themes/blueprint.css";
+@import "./shell.css";
+@import "./components.css";
+
+/* The one thing a host page must set for the scale to work. Everything in the system is rem, so this
+   single declaration is the whole fluid axis: zooming out widens the viewport, `vw` grows, and the
+   root grows to cancel the shrink. A host that wants a fixed scale overrides it. */
+html {
+  font-size: clamp(16px, 0.7vw + 9px, 34px);
+}

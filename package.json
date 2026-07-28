@@ -1,0 +1,39 @@
+{
+  "name": "instrument",
+  "version": "0.3.0",
+  "description": "A themeable design system where a theme owns structure, not just colour.",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "src",
+    "gallery",
+    "README.md",
+    "AUTHORING.md"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./css": "./src/instrument.css",
+    "./themes": "./src/themes.js",
+    "./tokens.css": "./src/tokens.css",
+    "./contract.css": "./src/contract.css",
+    "./components.css": "./src/components.css",
+    "./shell.css": "./src/shell.css",
+    "./themes/*.css": "./src/themes/*.css",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "gallery": "python -m http.server 4322 --bind 127.0.0.1 --directory gallery"
+  }
+}

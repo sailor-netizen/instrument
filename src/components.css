@@ -1,0 +1,210 @@
+/* ============================================================================================
+   COMPONENT LAYER — the primitives in ui.jsx. No literals: every value is an --i-* role.
+   ============================================================================================ */
+
+/* Every Instrument element is border-box, and the library states it rather than assuming the host page
+   has a reset. Without this, any component that sets an explicit width AND carries padding (Field's
+   input, Row) overflows its own parent by exactly padding + border — which is how the chat composer's
+   textarea ended up sliding underneath the Send button. */
+[class^="i-"], [class*=" i-"] { box-sizing: border-box; }
+
+/* Type ------------------------------------------------------------------------------------- */
+.i-h { font-family: var(--i-mono); font-weight: 700; letter-spacing: -0.01em; margin: 0;
+       color: var(--i-ink); line-height: 1.15; }
+.i-h1 { font-size: var(--x-title); font-family: var(--i-display-face, var(--i-mono)); }
+.i-h2 { font-size: var(--i-h2); }
+.i-h3 { font-size: var(--i-body); }
+.i-p  { font-family: var(--i-prose); font-size: var(--i-body); color: var(--i-ink);
+        line-height: 1.55; margin: 0; max-width: var(--i-measure); }
+.i-p.is-dim { color: var(--i-dim); }
+.i-p.is-small { font-size: var(--i-small); }
+.i-eyebrow { font-family: var(--i-mono); font-size: var(--i-micro);
+             letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
+             color: var(--i-signal); }
+
+/* Panel: translucent plane + hairline. No shadow — depth is the wash showing through. */
+.i-panel { background: var(--i-plane); border: 1px solid var(--i-line);
+           border-radius: var(--i-radius); padding: var(--i-4); }
+.i-panel.tier-2 { background: var(--i-plane-2); }
+/* The tone→stripe mapping hangs off .i-striped, not off .i-panel: Panel and Row both opt in with the
+   same class, and scoping it to one of them made the other's stripe silently render with no colour. */
+.i-striped.tone-signal  { --i-stripe: var(--i-signal); }
+.i-striped.tone-machine { --i-stripe: var(--i-machine); }
+.i-striped.tone-crit    { --i-stripe: var(--i-crit); }
+.i-striped.tone-ok      { --i-stripe: var(--i-ok); }
+.i-striped.tone-mute    { --i-stripe: var(--i-line-hi); }
+
+/* Button: emphasis by fill weight and rail, never by a new hue. */
+.i-btn { font-family: var(--i-chrome-face, var(--i-mono)); font-size: var(--i-small); font-weight: 600;
+         padding: var(--i-2) var(--i-4); border-radius: var(--i-radius-sm);
+         border: 1px solid var(--i-line); background: transparent; color: var(--i-ink);
+         cursor: pointer; transition: border-color var(--i-fast), background var(--i-fast),
+                                      transform var(--i-fast); }
+.i-btn:hover:not(:disabled) { border-color: var(--i-line-hi); transform: translateY(-1px); }
+.i-btn.is-primary { border-color: var(--i-signal); color: var(--i-signal);
+                    background: var(--i-signal-wash); }
+.i-btn.is-ghost { border-color: transparent; color: var(--i-dim); }
+.i-btn:disabled { color: var(--i-faint); border-color: var(--i-line); cursor: default; opacity: 0.6; }
+.i-btn:focus-visible, .i-pill:focus-visible, .i-input:focus-visible {
+  outline: 2px solid var(--i-signal); outline-offset: 2px; }
+
+/* Tag: a claim about state. */
+.i-tag { font-family: var(--i-chrome-face, var(--i-mono)); font-size: var(--i-micro); letter-spacing: 0.06em;
+         padding: 0.15em 0.6em; border-radius: var(--i-radius-pill);
+         border: 1px solid currentColor; white-space: nowrap; }
+.i-tag.tone-signal  { color: var(--i-signal);  background: var(--i-signal-wash); }
+.i-tag.tone-machine { color: var(--i-machine); background: var(--i-machine-wash); }
+.i-tag.tone-crit    { color: var(--i-crit);    background: var(--i-crit-wash); }
+.i-tag.tone-ok      { color: var(--i-ok); }
+.i-tag.tone-mute    { color: var(--i-dim); border-color: var(--i-line); }
+
+/* Field */
+.i-field { display: flex; flex-direction: column; gap: var(--i-1); width: 100%; }
+.i-field-label { font-family: var(--i-mono); font-size: var(--i-micro);
+                 letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
+                 color: var(--i-dim); }
+.i-input { font-family: var(--i-prose); font-size: var(--i-body); color: var(--i-ink);
+           background: var(--i-well); border: 1px solid var(--i-line);
+           border-radius: var(--i-radius-sm); padding: var(--i-3); width: 100%;
+           resize: vertical; transition: border-color var(--i-fast); }
+.i-input:hover { border-color: var(--i-line-hi); }
+.i-input::placeholder { color: var(--i-faint); }
+
+/* Pills */
+.i-pills { display: flex; gap: var(--i-2); flex-wrap: wrap; }
+.i-pill { font-family: var(--i-mono); font-size: var(--i-small); padding: var(--i-1) var(--i-3);
+          border-radius: var(--i-radius-pill); border: 1px solid var(--i-line);
+          background: transparent; color: var(--i-dim); cursor: pointer;
+          transition: color var(--i-fast), border-color var(--i-fast), background var(--i-fast); }
+.i-pill:hover { color: var(--i-ink); border-color: var(--i-line-hi); }
+.i-pill.is-on { color: var(--i-machine); border-color: var(--i-machine);
+                background: var(--i-machine-wash); }
+
+/* Empty state + well */
+/* margin-inline: auto so it centres inside whatever holds it. Without it the capped column pinned
+   itself to the left of a full-width Panel while its own text stayed centred — which reads as a
+   layout mistake rather than an empty state. */
+.i-empty { display: flex; flex-direction: column; align-items: center; gap: var(--i-2);
+           text-align: center; max-width: var(--i-measure-tight); margin-inline: auto; }
+.i-empty .i-p { text-align: center; }
+.i-well { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-dim);
+          background: var(--i-well); border: 1px solid var(--i-line);
+          border-radius: var(--i-radius-sm); padding: var(--i-3); margin: 0;
+          white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
+
+/* ============================================================================================
+   COMPOUNDS - extracted from real screens (see compounds.jsx). Still zero literals.
+   ============================================================================================ */
+
+/* Floors are set by CONTENT, not by how many items one screen happens to pass: a stat is a short
+   number plus a short label (9rem), a card carries a sentence (13rem). That is what keeps a six-stat
+   row from breaking 4+2 and a four-card row from breaking 3+1 at the widths this app actually runs at. */
+.i-stats { display: grid; gap: var(--i-3);
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); }
+/* Each stat is its own container, so the figure can size against the space it ACTUALLY has. Without
+   this, --x-figure and the grid floor are two numbers that must agree by hand and silently don't:
+   a theme raised its figure, "$2.9433" outgrew its column, and it collided with the next stat.
+   min() keeps the theme's chosen size as a ceiling and lets the column impose the real limit. */
+.i-stat { display: flex; flex-direction: column; gap: var(--i-2); align-items: flex-start;
+          text-align: left; font: inherit; color: inherit; background: var(--i-plane);
+          border: 1px solid var(--i-line); border-radius: var(--i-radius);
+          padding: var(--i-3) var(--i-4); }
+.i-stat.is-link { cursor: pointer; transition: border-color var(--i-fast), transform var(--i-fast); }
+.i-stat.is-link:hover { border-color: var(--i-line-hi); transform: translateY(-2px); }
+.i-stat-fit { container-type: inline-size; display: flex; flex-direction: column;
+              gap: var(--i-2); width: 100%; align-items: flex-start; }
+.i-stat-v { font-family: var(--i-display-face, var(--i-mono));
+            font-size: min(var(--x-figure), 18cqi);
+            font-weight: 700;
+            letter-spacing: -0.03em; line-height: 1; color: var(--i-ink); }
+.i-stat-l { font-family: var(--i-mono); font-size: var(--i-micro);
+            letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
+            color: var(--i-dim); }
+.i-stat.is-hot { border-color: var(--i-signal); background: var(--i-signal-wash); }
+.i-stat.is-hot .i-stat-v { color: var(--i-signal); }
+
+.i-cards { display: grid; gap: var(--i-3);
+           grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+.i-card { display: flex; flex-direction: column; gap: var(--i-2); align-items: flex-start;
+          text-align: left; font: inherit; color: inherit; background: var(--i-plane);
+          border: 1px solid var(--i-line); border-radius: var(--i-radius); padding: var(--i-4); }
+.i-card.is-link { cursor: pointer; transition: border-color var(--i-fast), transform var(--i-fast); }
+.i-card.is-link:hover { border-color: var(--i-line-hi); transform: translateY(-2px); }
+.i-card.is-on { border-color: var(--i-machine); background: var(--i-machine-wash); }
+/* Wraps, so a long title pushes the badge onto its own line rather than being squeezed into three
+   ragged lines beside it. The title is the thing being scanned; the badge can move. */
+.i-card-top { display: flex; align-items: center; justify-content: space-between; gap: var(--i-2);
+              width: 100%; flex-wrap: wrap; }
+.i-card-title { font-family: var(--i-chrome-face, var(--i-mono)); font-weight: 700; font-size: var(--i-body);
+                color: var(--i-ink); }
+.i-card-blurb { font-family: var(--i-prose); font-size: var(--i-small); color: var(--i-dim);
+                line-height: 1.45; }
+
+.i-rows { display: flex; flex-direction: column; gap: var(--i-2); }
+.i-row { display: flex; flex-direction: column; gap: var(--i-2); width: 100%; text-align: left;
+         font: inherit; color: inherit; background: var(--i-plane); border: 1px solid var(--i-line);
+         border-radius: var(--i-radius); padding: var(--i-3) var(--i-4); }
+.i-row.is-link { cursor: pointer; transition: border-color var(--i-fast), background var(--i-fast); }
+.i-row.is-link:hover { border-color: var(--i-line-hi); }
+.i-row.is-on { border-color: var(--i-machine); background: var(--i-machine-wash); }
+.i-row-top { display: flex; align-items: center; justify-content: space-between; gap: var(--i-3); }
+.i-row-title { font-family: var(--i-chrome-face, var(--i-mono)); font-weight: 700; font-size: var(--i-small);
+               color: var(--i-ink); }
+.i-row-meta, .i-row-sub { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-dim); }
+
+.i-section { display: flex; flex-direction: column; gap: var(--i-3); margin-top: var(--i-6); }
+.i-section:first-child { margin-top: 0; }
+.i-toolbar { display: flex; align-items: center; gap: var(--i-3); flex-wrap: wrap; }
+.i-toolbar-status { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-dim);
+                    font-style: italic; }
+
+.i-kv { display: grid; grid-template-columns: max-content 1fr; gap: var(--i-2) var(--i-4);
+        margin: 0; font-size: var(--i-small); }
+.i-kv-pair { display: contents; }
+.i-kv dt { font-family: var(--i-mono); font-size: var(--i-micro);
+           letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
+           color: var(--i-dim); }
+.i-kv dd { margin: 0; color: var(--i-ink); font-family: var(--i-prose); }
+
+.i-callout { font-family: var(--i-mono); font-size: var(--i-small); padding: var(--i-3) var(--i-4);
+             border: 1px solid currentColor; border-radius: var(--i-radius); }
+.i-callout.tone-ok      { color: var(--i-ok); }
+.i-callout.tone-crit    { color: var(--i-crit); background: var(--i-crit-wash); }
+.i-callout.tone-signal  { color: var(--i-signal); background: var(--i-signal-wash); }
+.i-callout.tone-machine { color: var(--i-machine); background: var(--i-machine-wash); }
+.i-callout.tone-mute    { color: var(--i-dim); border-color: var(--i-line); }
+
+/* the 2px rail is the system saying "a machine did this" */
+.i-trace { display: flex; flex-direction: column; gap: var(--i-1);
+           border-left: 2px solid var(--i-rail); padding-left: var(--i-3); }
+.i-traceline { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-dim); }
+.i-traceline b { color: var(--i-machine); font-weight: 600; }
+.i-traceline.is-muted { font-style: italic; }
+
+.i-table { display: flex; flex-direction: column; overflow-x: auto; }
+.i-tr { display: grid; grid-template-columns: var(--i-cols); gap: var(--i-3);
+        align-items: center; padding: var(--i-2) var(--i-3);
+        border-bottom: 1px solid var(--i-line); font-size: var(--i-row); }
+.i-tr.is-head { font-family: var(--i-chrome-face, var(--i-mono)); font-size: var(--i-micro);
+                letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
+                color: var(--i-dim); border-bottom-color: var(--i-rail); }
+
+.i-finding { display: grid; grid-template-columns: max-content minmax(8rem, 16rem) 1fr;
+             gap: var(--i-3); align-items: baseline; background: var(--i-plane);
+             border: 1px solid var(--i-line); border-radius: var(--i-radius);
+             padding: var(--i-3) var(--i-4); font-size: var(--i-small); }
+.i-finding.is-refuted { opacity: 0.55; }
+.i-finding-where { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-signal);
+                   word-break: break-all; }
+.i-finding-body { color: var(--i-ink); line-height: 1.5; }
+.i-finding-why { color: var(--i-dim); font-style: italic; }
+
+.i-loaderror { display: flex; flex-direction: column; align-items: flex-start; gap: var(--i-2);
+               background: var(--i-plane); border: 1px solid var(--i-line);
+               border-radius: var(--i-radius); padding: var(--i-4); max-width: var(--i-measure); }
+
+.i-view { display: flex; flex-direction: column; gap: var(--i-4); max-width: 100%; }
+.i-view-head { display: flex; flex-direction: column; gap: var(--i-1); }
+.i-view-sub { font-family: var(--i-prose); font-size: var(--i-small); color: var(--i-dim);
+              max-width: var(--i-measure); }
+.i-split { display: flex; align-items: center; justify-content: space-between; gap: var(--i-3); }

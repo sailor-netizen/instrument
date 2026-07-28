@@ -1,0 +1,115 @@
+/* ==============================================================================================
+   BENTO CONSOLE — filled tiles on midnight navy.  (data-theme="bento" · surface tile · shell topbar)
+
+   THE ONE IDEA: depth is made of LIGHT, not shadow. Every tile is a genuinely filled navy plane
+   that sits a measurable step above the field, and it separates from that field by a lit top edge
+   and a diagonal lift painted into its own background — never by a drop shadow, which is what turns
+   dark UI to mud. This is the one theme where --i-plane reads as a surface rather than a hint.
+
+   THE VOICES. Cyan is the machine speaking, and in this direction it is also the loudest thing on
+   screen: active nav, identifiers, traces, the edge a control lights up with. Magenta is failure,
+   held in reserve so that when a finding or a denied tool appears it is the only hot pink on the
+   page. Amber keeps --i-signal's meaning — this wants you, this binds you — separated from both at
+   micro sizes, and keeps that meaning stable when the user switches themes.
+
+   THE TYPE. No web fonts ship here, and the direction's own fallback chain names Bahnschrift, so
+   that is the lever taken: this theme's machine voice is a condensed industrial grotesque, not a
+   typewriter. Figures come out tight and tabular, tracked labels come out narrow and wide-spaced,
+   and it is unmistakably not the house theme. The one place that costs something — verbatim output,
+   where the character grid IS the content — gets a real monospace back, below.
+   ============================================================================================== */
+
+[data-theme="bento"] {
+  /* type ---------------------------------------------------------------------------------------
+     Bahnschrift (Win10+) is the DIN-derived grotesque the direction sheet itself falls back to;
+     Segoe UI Variable Display / SF via ui-sans-serif carry it elsewhere. --i-display-face is left
+     unset on purpose: it defaults to --i-mono, and here --i-mono already IS the display face. */
+  --i-mono: "Bahnschrift", "Segoe UI Variable Display", "DIN Alternate", "Avenir Next Condensed",
+            ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+             Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* L0 — the only literals this theme needs that are not themselves a role. Both are edge light. */
+  --_glint: rgba(158, 209, 255, 0.17);   /* the 1px lit top edge every raised tile carries */
+  --_lift:  rgba(62, 231, 255, 0.05);    /* the diagonal the machine's light lays across a plane */
+
+  /* L1 roles — flat, because this theme is dark-only (themes.js sets color-scheme: dark) ---------
+     The planes are translucent on purpose even though they read as opaque fills: at 9% and 13% of
+     a pale blue over near-black they land on #0f1523 / #141b2c, the direction's tile and chip, AND
+     they still take a tint from the corner washes, which is what stops a grid of tiles going flat. */
+  --i-page:    #04060d;
+  --i-plane:   rgba(126, 168, 255, 0.09);
+  --i-plane-2: rgba(126, 168, 255, 0.13);
+  --i-well:    rgba(0, 0, 0, 0.38);
+
+  /* Atmosphere: two off-canvas corner lights, stronger than the house theme's because the field
+     between tiles is a large part of what you look at here. Signal warms the top-left, the machine
+     floods the top-right in deep steel-cyan. */
+  --i-wash-signal:  rgba(245, 181, 68, 0.10);
+  --i-wash-machine: rgba(30, 120, 160, 0.22);
+
+  /* Hairlines. --i-line-hi is the cyan hover edge — the direction's signature move, and the reason
+     a lifted tile reads as a control rather than as a rendering glitch. */
+  --i-line:    rgba(142, 182, 255, 0.13);
+  --i-line-hi: rgba(62, 231, 255, 0.32);
+  --i-rail:    rgba(142, 182, 255, 0.24);
+
+  --i-ink:   #e9f1ff;
+  --i-dim:   #93a6c6;
+  --i-faint: #6f82a6;   /* lifted off the direction's #5d6f91: placeholders have to stay readable */
+
+  --i-signal:  #f5b544;   /* this wants you / binds you */
+  --i-machine: #3ee7ff;   /* the system is speaking */
+  --i-crit:    #ff45a8;   /* this failed */
+  --i-ok:      #57dd8f;   /* held 42deg off the cyan so "passed" is never mistaken for "machine" */
+  --i-signal-wash:  rgba(245, 181, 68, 0.12);
+  --i-machine-wash: rgba(62, 231, 255, 0.13);
+  --i-crit-wash:    rgba(255, 69, 168, 0.14);
+
+  /* L2 structure ------------------------------------------------------------------------------- */
+  --x-figure: 2.8rem;      /* the loud number. Wired to .i-stat-v below — nothing reads it yet. */
+  --x-radius: 16px;
+  --i-density: 1.1;        /* tiles want air; the direction pads to ~1.1em and gaps at ~1em */
+  --x-rule-w: 1px;         /* depth is fill and edge light, so the rules themselves stay hairlines */
+  --x-label-case: uppercase;
+  --x-label-track: 0.22em;
+  --x-grid-line: var(--i-line);
+  --x-grid-size: 6rem;
+
+  /* --x-radius is declared by the contract but only .i-topbar-tile reads it; every panel, card,
+     stat, row and bubble reads --i-radius. Binding them makes generous corners a system-wide fact
+     instead of a property of one shell element. */
+  --i-radius: var(--x-radius);
+  --i-radius-sm: 10px;
+}
+
+/* Edge light, painted into the plane's own background rather than a pseudo-element: .i-striped
+   already owns ::before, and taking it would silently delete every identity stripe in the product.
+   Rows are left out deliberately — the direction gives its recessed strip tier no glint either, and
+   a list of twenty glinting rows reads as stripes, not as depth. */
+[data-theme="bento"] .i-panel,
+[data-theme="bento"] .i-card,
+[data-theme="bento"] .i-stat {
+  background-image:
+    linear-gradient(to bottom, var(--_glint) 0 1px, transparent 1px),
+    linear-gradient(158deg, var(--_lift), transparent 64%);
+}
+
+/* The figure IS the theme. --x-figure is the contract's own "single biggest lever" and no component
+   reads it; .i-stat-v is hard-wired to --i-h1. Wired here, with the direction's tight tracking. */
+[data-theme="bento"] .i-stat-v { font-size: var(--x-figure); line-height: 0.86; letter-spacing: -0.045em; }
+[data-theme="bento"] .i-h { letter-spacing: -0.035em; }
+
+/* Wide-tracked micro labels are the direction's other signature. --x-label-track reaches only three
+   shell elements, none of which exist in the topbar shell, so it is wired to the labels themselves.
+   Table headers are left alone: they sit in fixed grid columns that extra tracking would overrun. */
+[data-theme="bento"] .i-stat-l,
+[data-theme="bento"] .i-eyebrow,
+[data-theme="bento"] .i-field-label,
+[data-theme="bento"] .i-kv dt { letter-spacing: var(--x-label-track); }
+
+/* --i-mono is a grotesque here, which is right for a figure and wrong for a diff. The well is the
+   one surface whose content is a character grid, so it gets a real monospace back. */
+[data-theme="bento"] .i-well {
+  font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, Menlo, monospace;
+}

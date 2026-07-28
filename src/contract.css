@@ -1,0 +1,194 @@
+/* ==============================================================================================
+   INSTRUMENT — THE THEME CONTRACT.  v0.3
+   ==============================================================================================
+
+   A theme in this system is NOT a palette. That was the mistake worth naming up front: five
+   colour swaps over one skeleton produce five versions of the same product, and the skeleton is
+   usually what someone means when they say they don't like how it looks.
+
+   So a theme here owns three layers, and a theme file may override all three:
+
+     L0  PALETTE     private literals (`--_`). The only place a hex is legal.
+     L1  ROLES       semantic tokens (`--i-`). What components actually consume.
+     L2  STRUCTURE   how components DRAW and where the shell PUTS things. Scalars live as
+                     `--x-` custom properties; modes live as rules keyed on [data-theme].
+
+   ONE ATTRIBUTE.  Everything hangs off `data-theme` on <html>. A theme file therefore contains
+   its own token overrides AND its own structural rules, which makes each theme self-contained and
+   makes desync impossible — there is no second switch to forget.
+
+   ----------------------------------------------------------------------------------------------
+   WHAT A THEME MAY SET  (the whole contract — a theme that needs something not on this list is
+   telling you the contract is missing an axis; add the axis here rather than a one-off rule)
+   ----------------------------------------------------------------------------------------------
+
+   TYPE
+     --i-mono          the machine voice
+     --i-prose         the human voice
+     --i-display-face  optional third face for figures/headlines (defaults to --i-mono)
+     --x-label-case    none | uppercase          how micro-labels are set
+     --x-label-track   letter-spacing for labels
+     --x-figure        display-numeral size. The single biggest lever on "how does this feel".
+     --x-title         page-title size, sibling to --x-figure. Themes disagree about titles as much
+                       as about figures; pinning .i-h1 made every theme's page open the same way.
+     --i-display-face  the figure/heading face (defaults to --i-mono)
+     --i-chrome-face   the control-and-label face — card titles, row titles, buttons, tags, table
+                       heads (defaults to --i-mono). Split out because a theme whose display voice
+                       is not the machine voice was otherwise forced to restate it per selector.
+
+   SURFACE — how Panel / Card / Row / Stat draw themselves. Set by structural rules, not a prop:
+     tile      filled plane + hairline + radius        (the default, and Bento's)
+     outline   no fill, hard 1px outline, no radius    (Blueprint)
+     rule      no box at all; a top rule + whitespace  (Swiss, Editorial)
+     none      no box, no rule; spacing alone divides  (Terminal)
+
+   SHELL — where navigation lives. Real DOM, so it is a component variant (see shell.jsx):
+     sidebar | topnav | rail | statusbar | titleblock
+
+   SCALARS
+     --x-radius        corner radius for tiles (0 disables rounding system-wide)
+     --i-density       multiplies the whole spacing ramp
+     --x-rule-w        weight of the primary separator
+     --x-grid          none | columns | fine     background grid painted on the stage
+     --x-annotate      0 | 1                     item numbers, dimension lines, leader callouts
+     --x-hover         lift | mark | invert      what a control does on hover
+
+   ----------------------------------------------------------------------------------------------
+   RULES A THEME MUST NOT BREAK
+   ----------------------------------------------------------------------------------------------
+   1. Never change what a ROLE MEANS. --i-crit is "this failed" in every theme. A theme picks the
+      hue; it does not get to repurpose the role. This is what keeps nine views correct across five
+      themes without touching a single component.
+   2. Never target a view. `[data-theme="x"] .fd-runs` is a bug — it means the theme is patching an
+      app screen instead of expressing itself through the system. Target `.i-*` only.
+   3. Contrast is not negotiable. Body text clears 4.5:1 against its own surface in every theme,
+      light and dark. The gate checks this; a theme that fails it is not finished.
+   4. Exactly one `color-scheme` declaration exists in the codebase, here. A theme that wants to be
+      light-only writes `color-scheme: light` in its own block — it does not add a second global.
+   ============================================================================================== */
+
+:root {
+  /* L2 defaults. Every theme inherits these and overrides what it cares about. */
+  --x-figure: 2.6rem;
+  --x-title: var(--i-h1);
+  --x-label-case: uppercase;
+  --x-label-track: 0.12em;
+  --x-radius: 10px;
+  --x-rule-w: 1px;
+  --x-grid: none;
+  --x-annotate: 0;
+  --x-hover: lift;
+
+  /* Selection pair for hover:invert. It was hardwired to a signal wash, which is not an inversion —
+     the one theme that asked for a real htop selection bar had to write it itself. A mode the
+     contract names has to be a mode the contract actually delivers. */
+  --x-select-bg: var(--i-signal-wash);
+  --x-select-fg: inherit;
+
+  /* Painted by the shell when --x-grid asks for it. Kept here so a theme sets colour, not geometry. */
+  --x-grid-line: var(--i-line);
+  --x-grid-size: 5rem;
+}
+
+/* ----------------------------------------------------------------------------------------------
+   SURFACE MODES.  Written once, against the component layer, so no component knows which theme is
+   active and no theme has to restate them. A theme opts in with one declaration:
+       [data-theme="terminal"] { --x-surface: none; }
+   ---------------------------------------------------------------------------------------------- */
+
+/* outline — no fill, hard edge, square. The drawing-office register. */
+[data-surface="outline"] .i-panel,
+[data-surface="outline"] .i-card,
+[data-surface="outline"] .i-row,
+[data-surface="outline"] .i-stat {
+  background: none;
+  border: var(--x-rule-w) solid var(--i-line-hi);
+  border-radius: 0;
+}
+
+/* rule — the box dissolves into a top rule and whitespace. Swiss and Editorial both live here. */
+[data-surface="rule"] .i-panel,
+[data-surface="rule"] .i-card,
+[data-surface="rule"] .i-row,
+[data-surface="rule"] .i-stat {
+  background: none;
+  border: 0;
+  border-top: var(--x-rule-w) solid var(--i-line);
+  border-radius: 0;
+  padding-inline: 0;
+}
+[data-surface="rule"] .i-rows,
+[data-surface="rule"] .i-cards,
+[data-surface="rule"] .i-stats { gap: 0; }
+[data-surface="rule"] .i-row + .i-row { border-top-color: var(--i-line); }
+
+/* none — nothing draws a container. Density and alignment do all the work. */
+[data-surface="none"] .i-panel,
+[data-surface="none"] .i-card,
+[data-surface="none"] .i-row,
+[data-surface="none"] .i-stat {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: var(--i-1) 0;
+}
+[data-surface="none"] .i-rows,
+[data-surface="none"] .i-cards { gap: 0; }
+
+/* ----------------------------------------------------------------------------------------------
+   HOVER MODES.  A control must always announce itself; themes disagree about how.
+   ---------------------------------------------------------------------------------------------- */
+[data-hover="mark"] .i-stat.is-link:hover,
+[data-hover="mark"] .i-card.is-link:hover,
+[data-hover="mark"] .i-row.is-link:hover { transform: none; border-color: var(--i-ink); }
+[data-hover="mark"] .i-stat.is-link:hover .i-stat-v { color: var(--i-signal); }
+
+[data-hover="invert"] .i-stat.is-link:hover,
+[data-hover="invert"] .i-card.is-link:hover,
+[data-hover="invert"] .i-row.is-link:hover {
+  transform: none;
+  background: var(--x-select-bg);
+  color: var(--x-select-fg);
+}
+/* punch the selection colour back out of every child, or an inverted bar keeps its old text colours
+   and becomes unreadable — the exact failure a "selection" that only sets a background produces */
+[data-hover="invert"] .i-stat.is-link:hover *,
+[data-hover="invert"] .i-card.is-link:hover *,
+[data-hover="invert"] .i-row.is-link:hover * { color: inherit; }
+
+/* ----------------------------------------------------------------------------------------------
+   GRID.  Painted on the stage, behind everything, when a theme asks for it.
+   ---------------------------------------------------------------------------------------------- */
+[data-grid="columns"] .i-stage {
+  background-image: repeating-linear-gradient(to right,
+    var(--x-grid-line) 0 1px, transparent 1px var(--x-grid-size));
+}
+[data-grid="fine"] .i-stage {
+  background-image:
+    repeating-linear-gradient(to right,  var(--x-grid-line) 0 1px, transparent 1px var(--x-grid-size)),
+    repeating-linear-gradient(to bottom, var(--x-grid-line) 0 1px, transparent 1px var(--x-grid-size));
+}
+
+/* ----------------------------------------------------------------------------------------------
+   ANNOTATION.  Off by default. Blueprint turns it on and the same markup grows item numbers.
+   Implemented as counters so no component has to know its own index.
+   ---------------------------------------------------------------------------------------------- */
+[data-annotate="1"] .i-rows,
+[data-annotate="1"] .i-stats,
+[data-annotate="1"] .i-cards { counter-reset: i-item; }
+[data-annotate="1"] .i-row::after,
+[data-annotate="1"] .i-stat::after,
+[data-annotate="1"] .i-card::after {
+  counter-increment: i-item;
+  content: counter(i-item, decimal-leading-zero);
+  position: absolute;
+  top: var(--i-2);
+  right: var(--i-3);
+  font-family: var(--i-mono);
+  font-size: var(--i-micro);
+  letter-spacing: 0.1em;
+  color: var(--i-faint);
+}
+[data-annotate="1"] .i-row,
+[data-annotate="1"] .i-stat,
+[data-annotate="1"] .i-card { position: relative; }

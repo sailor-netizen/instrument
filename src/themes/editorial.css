@@ -1,0 +1,148 @@
+/* ==============================================================================================
+   EDITORIAL OPS — a theme for Instrument.  Light only, warm cream stock.
+
+   THE ONE IDEA: a page, not a panel. Nothing is boxed — hierarchy is carried by a rule, a change
+   of face, and the whitespace between them. The human voice is SET in a serif; the machine's is
+   TYPED in mono. That one contrast does more work here than every colour in the file.
+
+   Translated from design/directions/c-editorial/{cockpit,runs}.html. Its palette is inherited
+   almost literally (warm cream, charcoal ink, dusty crimson, muted ochre); its type is not — the
+   sheet loaded Fraunces and Work Sans, and this ships inside an app with no font loading, so the
+   direction survives on the one distinction system stacks reliably give you: serif vs mono.
+
+   TWO INKS BECAME FOUR. The sheet is a two-colour press: crimson for alarm, ochre for everything
+   secondary, with `ok` set in the same ochre. Instrument's roles will not collapse that way —
+   --i-signal ("wants you") and --i-ok ("succeeded") are different claims and must not be the same
+   swatch. So two further inks were mixed in the same muted, printed register rather than borrowed
+   from a screen palette: a slate for the machine voice, an olive for outcomes.
+
+   Every value below is measured, not eyeballed. Ink on page 15.03:1 · dim on plane 5.57:1.
+   ============================================================================================== */
+
+[data-theme="editorial"] {
+  /* Rule 4 of the contract: a light-only theme declares its own scheme, it does not add a global.
+     Stated here as well as by the registry so the stock stays cream before the JS has run. */
+  color-scheme: light;
+
+  /* The one literal that is not a role: laid-paper tooth on the metadata rail. */
+  --_grain: rgba(33, 28, 21, 0.03);
+
+  /* --- type ----------------------------------------------------------------------------------
+     Mono is unchanged in kind — it is still the machine. Prose becomes a real serif, and the
+     display tier is set from the same family: a magazine draws its headline from its text face,
+     and there is no third slot to spend. Order favours faces with LINING figures (Iowan on macOS,
+     Palatino Linotype on Windows) because Georgia — the universal fallback — defaults to old-style
+     numerals that would drop 3, 4, 7 and 9 below the baseline in a column of costs. */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --i-prose: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+             "Times New Roman", Times, serif;
+  --i-display-face: var(--i-prose);
+
+  /* --- stock ---------------------------------------------------------------------------------
+     Planes barely exist under `rule` surface, so these are tints of the same sheet rather than
+     lifted cards: paper, a tint block, the recessed warm stock the sheet uses for hover, and a
+     deeper well for verbatim output. */
+  --i-page:    #f7f1e4;
+  --i-plane:   #f3ecdd;
+  --i-plane-2: #ece0c8;
+  --i-well:    #e9dfc6;
+
+  /* Paper tones; it does not glow. Both corner washes are held near nothing — enough to make the
+     stock read as uneven rather than as flat digital cream. */
+  --i-wash-signal:  rgba(122, 94, 29, 0.05);
+  --i-wash-machine: rgba(53, 86, 107, 0.03);
+
+  /* --- rules ---------------------------------------------------------------------------------
+     Three weights, three jobs, straight from the sheet: a hairline that separates, a leader that
+     bounds, and the thick masthead rule — which here is simply the ink itself, so the agent trace
+     and the ledger head both read as a change bar struck in the margin of a proof. */
+  --i-line:    #d3c5a8;
+  --i-line-hi: #96835d;
+  --i-rail:    #211c15;
+
+  --i-ink:   #211c15;
+  --i-dim:   #665c4d;
+  --i-faint: #877a64;
+
+  /* --- inks ----------------------------------------------------------------------------------
+     Ochre and crimson are the sheet's own hue (41.9° and 7.5°), pulled darker in value because
+     these are TEXT colours first — the sheet could afford a light ochre on a 0.66rem label; a
+     0.7rem eyebrow that has to clear 4.5:1 cannot. Slate and olive are the two the sheet never
+     needed, mixed to sit in the same muted register instead of arriving from a screen palette. */
+  --i-signal:  #7a5e1d;   /* muted ochre — this wants you, or binds you                      5.41:1 */
+  --i-machine: #35566b;   /* slate — the system is speaking                                  6.92:1 */
+  --i-crit:    #9c3324;   /* dusty crimson — this failed                                     6.41:1 */
+  --i-ok:      #4c6b32;   /* printer's olive — this succeeded                                5.40:1 */
+  --i-signal-wash:  rgba(122, 94, 29, 0.10);
+  --i-machine-wash: rgba(53, 86, 107, 0.09);
+  --i-crit-wash:    rgba(156, 51, 36, 0.07);   /* the sheet's own --accent-wash, unchanged */
+
+  /* --- structure ----------------------------------------------------------------------------- */
+  --x-figure: 3rem;          /* the masthead run of display figures — the direction's loudest note */
+  --x-radius: 0;             /* a magazine has no rounded corners, anywhere */
+  --i-density: 1.25;         /* with no boxes left, whitespace is the only thing dividing anything */
+  --x-rule-w: 1px;           /* the hairline; the 2px masthead rule is placed deliberately, below */
+  --x-label-case: uppercase;
+  --x-label-track: 0.18em;   /* the sheet's tracking on its section labels and column heads */
+
+  /* The registry sets grid:none for this theme, so these are inert — declared so that a laid grid,
+     if it were ever switched on, would be struck in the paper's own hairline at its own measure. */
+  --x-grid-line: var(--i-line);
+  --x-grid-size: 5rem;
+
+  /* CONTRACT GAP, honoured rather than worked around: contract.css says --x-radius "0 disables
+     rounding system-wide", but components.css still reads --i-radius* directly, so --x-radius
+     currently reaches only .i-topbar-tile. Binding them here keeps tags, buttons, inputs and wells
+     square today and needs deleting the moment the component layer migrates. */
+  --i-radius:      var(--x-radius);
+  --i-radius-sm:   var(--x-radius);
+  --i-radius-pill: var(--x-radius);
+}
+
+/* ----------------------------------------------------------------------------------------------
+   STRUCTURE — only what the surface, shell and hover modes cannot say. Five ideas, nothing more.
+   ---------------------------------------------------------------------------------------------- */
+
+/* 1 · The page is set, not typed. Names, headlines and figures take the serif; everything the
+   system emits verbatim — ids, paths, labels, traces, wells — stays mono. That split IS the theme.
+   Pointed at --i-display-face rather than --i-prose so it becomes redundant, never wrong, if the
+   component layer ever wires the heading tier to that role itself. */
+[data-theme="editorial"] .i-h,
+[data-theme="editorial"] .i-brand,
+[data-theme="editorial"] .i-card-title,
+[data-theme="editorial"] .i-row-title {
+  font-family: var(--i-display-face);
+  font-weight: 500;            /* Palatino and Georgia ship 400/700; 500 resolves to the book cut */
+  letter-spacing: -0.015em;
+}
+[data-theme="editorial"] .i-brand { font-size: var(--i-h2); }   /* the rail's masthead */
+
+/* Figures are set at book weight — a 700 serif at 3rem reads tabloid, not magazine — and pinned to
+   lining tabular numerals wherever the resolved face offers them. */
+[data-theme="editorial"] .i-stat-v {
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* 2 · The masthead rule. `rule` surface gives every element the same hairline; the run of figures
+   and the ledger head take the thick editorial rule instead. This is the move the sheet is built on. */
+[data-theme="editorial"] .i-stat { border-top: 2px solid var(--i-ink); }
+[data-theme="editorial"] .i-tr.is-head { border-bottom-width: 2px; }
+
+/* 3 · `mark` darkens a border to ink — invisible against a rule that is already ink. So the hover
+   is carried by the recessed warm stock, which is the sheet's own answer for a live figure or row. */
+[data-theme="editorial"] .i-stat.is-link:hover,
+[data-theme="editorial"] .i-card.is-link:hover,
+[data-theme="editorial"] .i-row.is-link:hover { background: var(--i-plane-2); }
+
+/* 4 · Laid paper on the metadata rail, bounded by a leader rather than a hairline. */
+[data-theme="editorial"] .i-rail-col {
+  background-color: var(--i-plane);
+  background-image: repeating-linear-gradient(0deg, var(--_grain) 0 1px, transparent 1px 5px);
+  border-right-color: var(--i-line-hi);
+}
+
+/* 5 · An input's entire affordance is its box, so it takes the boundary that clears 3:1 (3.27:1)
+   while the decorative hairline stays deliberately delicate at 1.51:1. The contract has no role
+   for "a control edge" as distinct from "a separator"; this is the one place that costs something. */
+[data-theme="editorial"] .i-input { border-color: var(--i-line-hi); }

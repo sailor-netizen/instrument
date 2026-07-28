@@ -1,0 +1,116 @@
+/* ==============================================================================================
+   BLUEPRINT — a drafting sheet.  Light only.
+
+   THE ONE IDEA: the interface is a SCHEMATIC of the system it controls — everything is drawn,
+   nothing is filled. Objects are outlines on paper with the grid running straight through them,
+   quantities are dimensioned figures, and every item carries a number.
+
+   That idea decides the whole palette. There is exactly ONE accent on a drawing sheet, and it is
+   the callout cyan the draughtsman annotates with — so cyan is --i-machine, "the system is
+   speaking", and it also paints the grid. Alarm red is --i-crit and it is RESERVED: the sheet's own
+   key reads "fault colour reserved — 0 on sheet", and if you see red something failed.
+
+   That leaves --i-signal ("this wants you or binds you") with no hue to spend, which is correct
+   rather than a compromise: a drawing signals with LINE WEIGHT, not colour. So --i-signal is the
+   hard object line (#252c32) — the same graphite that draws the registration ticks below. A stat
+   that wants you switches from the soft object line to the hard one and picks up a graphite wash;
+   the role's meaning is intact, the channel is weight instead of hue. --i-ok is graphite too,
+   because the sheet's key calls a passing item "nominal" and draws it in plain lead.
+
+   Two line weights, as the direction insists: 1px --x-rule-w for objects, a half-weight
+   --x-grid-line under them. Three inks are spent WITHIN the 1px weight (fine ruling, object line,
+   hard object line) — that is the sheet's own hierarchy, not a third weight.
+
+   Measured, not eyeballed: --i-ink on --i-page = 15.72:1, --i-dim on --i-plane = 7.33:1.
+   ============================================================================================== */
+
+[data-theme="blueprint"] {
+  color-scheme: light;
+
+  /* IBM Plex is the drawing-office face; ui-monospace and the system grotesque carry it when Plex
+     is not installed, since this app loads no web fonts. Mono does most of the talking here —
+     every annotation, label, figure and identifier on a sheet is set in the machine voice. */
+  --i-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas,
+            "DejaVu Sans Mono", monospace;
+  --i-prose: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto,
+             "Helvetica Neue", Arial, sans-serif;
+
+  /* Sheet stock. Flat values, not light-dark(): this theme declares a single colour-scheme.
+     The title block sits on cleaner stock than the drawing — that is --i-plane-2's job here. */
+  --i-page:    #fbfaf6;   /* the paper the drawing is on */
+  --i-plane:   #fdfdfa;   /* title-block / parts-list stock, a shade brighter */
+  --i-plane-2: #ffffff;
+  --i-well:    #eceff0;   /* a shaded region: verbatim machine output, hatched in cool grey */
+
+  /* A drawing sheet is evenly lit — it has no atmosphere and casts no glow. Both corner washes
+     are switched off deliberately; the cyan grid is the only thing tinting the field. */
+  --i-wash-signal:  transparent;
+  --i-wash-machine: transparent;
+
+  /* Three inks at ONE weight. --i-line-hi is what [data-surface="outline"] draws every panel,
+     card, row and stat with, so it is the object line; --i-rail is the hard line reserved for the
+     two rules that carry structure (a table head, a trace spine). */
+  --i-line:    #b0b8be;   /* fine ruling — controls, ledger rows, dividers */
+  --i-line-hi: #8a949b;   /* the object line — every outlined object, and hover */
+  --i-rail:    #252c32;   /* the hard object line */
+
+  --i-ink:   #1b2024;
+  --i-dim:   #4e565d;
+  --i-faint: #69737c;     /* annotation grey, pulled down from the sheet's #868e95 (3.18:1) so the
+                             item numbers, placeholders and sheet index clear 4.5:1 as real text */
+
+  --i-signal:  #252c32;   /* binds you: the hard line, not a hue — see the header */
+  --i-machine: #0a6f92;   /* callout cyan: the system annotating its own drawing */
+  --i-crit:    #c2182b;   /* alarm red, reserved — visible only on a fault */
+  --i-ok:      #3b444b;   /* "nominal", drawn in plain lead exactly as the sheet's key does */
+  --i-signal-wash:  rgba(37, 44, 50, 0.06);
+  --i-machine-wash: rgba(43, 156, 196, 0.13);
+  --i-crit-wash:    rgba(194, 24, 43, 0.09);
+
+  /* L2 — structure */
+  --x-figure: 3rem;        /* dimensioned quantities are the largest thing on the sheet */
+  --x-radius: 0;
+  --i-density: 1;          /* the spacing ramp lands on clean rem, commensurate with the grid */
+  --x-rule-w: 1px;
+  --x-label-case: uppercase;
+  --x-label-track: 0.18em;
+
+  /* The grid is painted at a fixed 1px by the contract, so the direction's 0.5px hairline is
+     expressed as half its ink: this alpha renders the same mass a 0.5px line of the sheet's
+     #cbe2ec would. --x-grid-size is the major tier; the 8px minor tier has nowhere to live. */
+  --x-grid-line: rgba(43, 156, 196, 0.12);
+  --x-grid-size: 4rem;
+
+  /* Corners. --x-radius above is the contract's knob but the component layer reads --i-radius*,
+     so squaring the sheet means setting these too — a pill-shaped tag would break the drawing. */
+  --i-radius: 0;
+  --i-radius-sm: 0;
+  --i-radius-pill: 0;
+}
+
+/* ----------------------------------------------------------------------------------------------
+   Structural rules — only what tokens and the surface modes cannot say.
+   ---------------------------------------------------------------------------------------------- */
+
+/* Registration ticks. The direction's signature: an object is held to the sheet by two hard marks
+   at its corners while its own outline stays soft. This is the one mark that makes the outline
+   surface read as a DRAWING rather than a wireframe, and there is no token for it.
+   ::before only — [data-annotate="1"] owns ::after for the item number — and .i-striped is left
+   alone because it uses ::before for the tone stripe, which carries meaning. */
+[data-theme="blueprint"] .i-panel { position: relative; }
+[data-theme="blueprint"] .i-panel:not(.i-striped)::before,
+[data-theme="blueprint"] .i-card::before,
+[data-theme="blueprint"] .i-stat::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-left: var(--x-rule-w) solid var(--i-signal);
+  border-top: var(--x-rule-w) solid var(--i-signal);
+  pointer-events: none;
+}
+
+/* The title block is printed on the cleaner stock, as it is on a real sheet. */
+[data-theme="blueprint"] .i-titleblock { background: var(--i-plane-2); }

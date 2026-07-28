@@ -1,0 +1,102 @@
+/* ==============================================================================================
+   SWISS SIGNAL — paper, a visible column grid, enormous figures, one red.
+
+   THE ONE IDEA: emphasis is BLACK, not colour. Everything the product wants to stress — the active
+   route, the focus ring, the hover mark, the "ok" verdict, the primary button — is set in ink on
+   bone paper, which leaves exactly one hue in the whole system. That hue is red and it means
+   "this failed", so red appears twice on a busy screen and never once on a calm one. --i-signal is
+   therefore near-black on purpose: a theme that spends colour on attention has none left for alarm.
+   ============================================================================================== */
+
+[data-theme="swiss"] {
+  color-scheme: light;
+
+  /* TYPE. The grotesque is the voice of the sheet — headlines, destinations and every figure. Mono
+     survives only where the machine literally emits characters (paths, ids, logs, wells), which is
+     the one place a second face carries meaning rather than decoration. No web fonts: Arial and
+     Helvetica are the two grotesques that are actually installed everywhere, and they are the right
+     two for this direction anyway. */
+  --i-prose: "Helvetica Neue", Helvetica, "Arial Nova", Arial, "Liberation Sans", "Segoe UI",
+             system-ui, -apple-system, sans-serif;
+  --i-display-face: "Helvetica Neue", Helvetica, "Arial Nova", Arial, "Liberation Sans", "Segoe UI",
+                    system-ui, -apple-system, sans-serif;
+  --i-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas,
+            "Liberation Mono", monospace;
+
+  /* SURFACES. Paper is warm bone; a plane is the whiter stock laid on top of it. Under
+     surface=rule almost nothing draws a plane at all, so these carry the few places that still do:
+     the chat bubble, a finding, a load error, a tier-2 band. */
+  --i-page:    #fbfaf7;
+  --i-plane:   #ffffff;
+  --i-plane-2: #f4f2ec;
+  --i-well:    #efece3;
+
+  /* No atmosphere. The page is flat stock — the grid is the only thing behind the content, and a
+     radial wash under it would turn structure into weather. */
+  --i-wash-signal:  transparent;
+  --i-wash-machine: transparent;
+
+  /* RULES are the entire chrome language. A hairline is a boundary; the strong rule is ink, and it
+     is what "active", "hovered" and "this column heading" all resolve to. */
+  --i-line:    #d4d0c6;
+  --i-line-hi: #12110f;
+  --i-rail:    #12110f;
+
+  --i-ink:   #12110f;
+  --i-dim:   #56534c;
+  --i-faint: #7a776e;
+
+  /* Signal is ink: on paper, the strongest possible mark IS the attention. Machine sits one step
+     back — still dark, still authoritative, but never mistaken for something asking you to act.
+     Ok is ink too, because "it worked" is not news. Crit is the only hue in the theme. */
+  --i-signal:  #12110f;
+  --i-machine: #45423b;
+  --i-crit:    #da291c;
+  --i-ok:      #12110f;
+  --i-signal-wash:  rgba(18, 17, 15, 0.055);
+  --i-machine-wash: rgba(69, 66, 59, 0.06);
+  --i-crit-wash:    rgba(218, 41, 28, 0.07);
+
+  /* STRUCTURE. The figure is the direction, so it is the biggest number in the file; the column
+     grid is tuned to land ~12 lines across a laptop stage and is drawn at the faintest tone that
+     still reads as measurement rather than dirt. Nothing rounds. */
+  --x-figure: 3.5rem;
+  --x-radius: 0;
+  --i-density: 1.15;
+  --x-rule-w: 1px;
+  --x-label-case: uppercase;
+  --x-label-track: 0.16em;
+  --x-grid-line: #e8e5dc;
+  --x-grid-size: 6.5rem;
+}
+
+/* ----------------------------------------------------------------------------------------------
+   The four things the surface / hover / grid modes cannot say.
+   ---------------------------------------------------------------------------------------------- */
+
+/* 1. The display voice is the grotesque. Only machine emissions stay monospaced. */
+[data-theme="swiss"] .i-h,
+[data-theme="swiss"] .i-brand,
+[data-theme="swiss"] .i-navitem { font-family: var(--i-display-face); font-weight: 700; }
+[data-theme="swiss"] .i-h { letter-spacing: -0.03em; }
+[data-theme="swiss"] .i-brand { text-transform: uppercase; letter-spacing: 0.24em; }
+
+/* 2. Two-tier masthead: identity over a hairline, destinations over the strong rule. */
+[data-theme="swiss"] .i-masthead-top { border-bottom: var(--x-rule-w) solid var(--i-line); }
+
+/* 3. The figure stands ON a rule with its label beneath it — the signature of the direction, and
+      the inverse of surface=rule, which puts the rule above the whole block. The label's rule is
+      what goes black when a metric is hot or hovered, so "mark" still marks. Wider columns because
+      a 3.5rem numeral needs room a 2.6rem one does not. */
+[data-theme="swiss"] .i-stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+[data-theme="swiss"] .i-stat { border-top: 0; gap: 0; }
+[data-theme="swiss"] .i-stat-v { line-height: 0.86; letter-spacing: -0.045em; }
+[data-theme="swiss"] .i-stat-l { width: 100%; margin-top: var(--i-4); padding-top: var(--i-2);
+                                 border-top: var(--x-rule-w) solid var(--i-line); }
+[data-theme="swiss"] .i-stat.is-hot .i-stat-l,
+[data-theme="swiss"] .i-stat.is-link:hover .i-stat-l { border-top-color: var(--i-ink);
+                                                       color: var(--i-ink); }
+
+/* 4. The one filled control on the sheet: an ink block with paper text (18.1:1). */
+[data-theme="swiss"] .i-btn.is-primary { background: var(--i-ink); color: var(--i-page);
+                                         border-color: var(--i-ink); }
