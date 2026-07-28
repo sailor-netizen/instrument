@@ -88,7 +88,12 @@
   margin: 0 0 0 auto;                       /* pin to the inline-end edge */
   background: var(--i-page); color: var(--i-ink);
   border-inline-start: var(--x-rule-w) solid var(--i-line-hi);
-  display: flex; flex-direction: column;
+  /* display MUST stay none while closed. A <dialog> gets `display: none` from the UA stylesheet, and
+     putting `display: flex` on the base class silently overrode it — every drawer in the app rendered
+     permanently, open or not. It goes on [open] instead, and `display ... allow-discrete` below is
+     what still lets the exit animate. */
+  display: none;
+  flex-direction: column;
   translate: 100% 0;
   /* allow-discrete is what makes the EXIT animate: without it display:none applies instantly and the
      card vanishes rather than leaving. */
@@ -97,7 +102,7 @@
 }
 .i-drawer.is-left { margin: 0 auto 0 0; translate: -100% 0;
                     border-inline: 0; border-inline-end: var(--x-rule-w) solid var(--i-line-hi); }
-.i-drawer[open] { translate: 0 0; }
+.i-drawer[open] { display: flex; translate: 0 0; }
 @starting-style { .i-drawer[open] { translate: 100% 0; } }
 @starting-style { .i-drawer.is-left[open] { translate: -100% 0; } }
 
