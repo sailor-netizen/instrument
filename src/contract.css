@@ -80,6 +80,15 @@
 :root {
   /* L2 defaults. Every theme inherits these and overrides what it cares about. */
   --x-figure: 2.6rem;
+  /* How much of its own column a figure may fill. The component sizes a figure as
+     min(--x-figure, --x-figure-fit), so this is the half that usually WINS: measured across the six
+     themes at a 1280px stage, the container allowance binds in five of them and the theme's declared
+     ceiling never applies at all. That made --x-figure look inert and sent three theme authors into
+     writing a paragraph about it instead of turning a knob. It was hardcoded as a bare `18cqi` in
+     components.css and Bento had already forked the whole font-size rule twice to get 24cqi for its
+     hero tile and 12cqi for its small ones — two themes restating one idea, which is the symptom
+     AUTHORING.md names for "the contract is short a dimension". */
+  --x-figure-fit: 18cqi;
   --x-title: var(--i-h1);
   --x-label-case: uppercase;
   --x-label-track: 0.12em;
@@ -88,6 +97,17 @@
   --x-grid: none;
   --x-annotate: 0;
   --x-hover: lift;
+
+  /* ------------------------------------------------------------------------------------------
+     Everything ABOVE and BELOW this line that is read with var() is a live default a theme may
+     override in its own CSS.
+
+     The MODE defaults — surface · shell · grid · annotate · hover · sectionRule · band · leader ·
+     emphasis · hero — are NOT among them, and are declared here only to document the legal values.
+     A mode is driven by a data-* attribute that applyTheme() writes from the registry, so setting
+     `--x-hero: 1` in a theme's CSS looks exactly like setting a scalar and does nothing at all.
+     Modes go in src/themes.js. `npm run check` enforces this, because nothing else would.
+     ------------------------------------------------------------------------------------------ */
 
   /* Selection pair for hover:invert. It was hardwired to a signal wash, which is not an inversion —
      the one theme that asked for a real htop selection bar had to write it itself. A mode the

@@ -65,7 +65,7 @@
   <nav>
     <a href="index.html">Components</a><a href="foundations.html">Foundations</a>
     <a href="themes.html">Themes</a><a href="patterns.html">Patterns</a>
-    <a href="compare.html" aria-current="page">Compare</a>
+    <a href="compare.html" aria-current="page">Compare</a><a href="sheets.html">Sheets</a>
   </nav>
   <div class="row" style="margin-top:.6rem">
     <div>
@@ -153,11 +153,17 @@
     [...e.currentTarget.children].forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     render();
   });
-  addEventListener("resize", render);
-
   // A missing screens/ directory should say so rather than showing six blank rectangles.
   fetch(`screens/${screen}.html`, { method: "HEAD" })
-    .then((r) => { if (!r.ok) throw 0; render(); })
+    .then((r) => {
+      if (!r.ok) throw 0;
+      render();
+      // Observer, not a resize listener: a wall that loads in a BACKGROUND tab has no width yet, so
+      // every pane computes scale(0) — and bringing the tab forward fires no resize event, leaving
+      // the wall collapsed and indistinguishable from six panes that failed to load. Found on
+      // sheets.html, which shares this code; fixed in both rather than in the one that showed it.
+      new ResizeObserver(render).observe(wall);
+    })
     .catch(() => { wall.hidden = true; document.getElementById("empty").hidden = false; });
 </script>
 </body>

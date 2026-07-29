@@ -100,6 +100,7 @@
   --x-figure:     3.2rem;
   --x-stat-floor: 12.5rem;
   --x-card-floor: 15rem;
+  --_figure-small: calc(3.2rem * 0.45);   /* the recessed strips' ceiling — see the 3n rule below */
   --_figure-hero: 7.4rem;   /* the hero's own ceiling. Bigger than the sheet's 106px because the
                                hero cell here is wider than the sheet's; its own column clamps it. */
 
@@ -153,8 +154,15 @@
 }
 /* …but a metric that wants you keeps its amber edge. Attention outranks composition. */
 [data-theme="bento"] .i-stats > :first-child:not(.is-hot) { border-color: var(--i-line-hi); }
+/* Both of this theme's figure sizes are now VALUES, not a restated font-size rule: the component
+   keeps ownership of the formula (min of ceiling and container allowance) and the theme says which
+   ceiling and which allowance. Before --x-figure-fit existed this block had to copy the whole
+   declaration, including the 24cqi that only made sense against a hardcoded 18cqi elsewhere. */
+[data-theme="bento"] .i-stats > :first-child {
+  --x-figure: var(--_figure-hero);
+  --x-figure-fit: 24cqi;   /* a 2x2 tile has the width to spend, so let the numeral use more of it */
+}
 [data-theme="bento"] .i-stats > :first-child .i-stat-v {
-  font-size: min(var(--_figure-hero), 24cqi);
   line-height: 0.8;
   letter-spacing: -0.055em;
 }
@@ -179,8 +187,12 @@
   border-radius: var(--i-radius-sm);
   padding: var(--i-2) var(--i-3);
 }
-[data-theme="bento"] .i-stats > :nth-child(3n):not(.is-hot) .i-stat-v {
-  font-size: min(var(--x-figure) * 0.45, 12cqi);
+/* The recessed strips. --x-figure cannot be defined in terms of itself (a custom property that
+   references its own name is invalid at computed-value time, not a relative adjustment), so the
+   shrunken ceiling is a private token computed once at theme root. */
+[data-theme="bento"] .i-stats > :nth-child(3n):not(.is-hot) {
+  --x-figure: var(--_figure-small);
+  --x-figure-fit: 12cqi;
 }
 
 /* Wide-tracked micro labels are the direction's other signature. --x-label-track reaches only three

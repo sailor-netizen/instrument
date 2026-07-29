@@ -196,7 +196,7 @@ Symptoms you have this problem:
 - Two themes independently wrote the same override.
 - A component would need to know the theme name.
 
-Every axis currently in `contract.css` got there this way — fifteen of them now, and not one was
+Every axis currently in `contract.css` got there this way — twenty-one of them now, and not one was
 designed up front. `CHANGELOG.md` records which theme asked for each, which is what stops the list
 growing on speculation. Worked examples:
 
@@ -224,7 +224,17 @@ growing on speculation. Worked examples:
 **Watch for coupling.** `--x-figure` and the stats grid floor were two numbers that had to agree by
 hand, and didn't — a theme raised the figure and `$2.9433` overflowed into the next stat. The fix
 wasn't a third token to tune; it was making the figure size *against its own container*
-(`min(var(--x-figure), 18cqi)`) so the coupling can't desync. Prefer deriving over adding a knob.
+(`min(var(--x-figure), var(--x-figure-fit))`) so the coupling can't desync. Prefer deriving over
+adding a knob.
+
+**And watch for the constant inside the derivation.** That container allowance was written as a bare
+`18cqi` in `components.css` for two releases, on the reasoning above: it is part of the formula, not a
+setting. It was still a value with an opinion in it, and Bento needed a different opinion twice — a
+hero tile has width to spend, a recessed strip does not — so it forked the whole `font-size` rule
+rather than change one number. Measuring settled it: the allowance binds in five of six themes, which
+makes it the number that actually decides how big a figure is. A derivation is the right shape; a
+magic number *inside* one is still a knob, just an unreachable one. If a second theme has to copy a
+rule to change a constant, promote the constant.
 
 ---
 

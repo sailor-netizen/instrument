@@ -122,7 +122,7 @@
 .i-stat-fit { container-type: inline-size; display: flex; flex-direction: column;
               gap: var(--i-2); width: 100%; align-items: flex-start; }
 .i-stat-v { font-family: var(--i-display-face, var(--i-mono));
-            font-size: min(var(--x-figure), 18cqi);
+            font-size: min(var(--x-figure), var(--x-figure-fit));
             font-weight: 700;
             letter-spacing: -0.03em; line-height: 1; color: var(--i-ink); }
 .i-stat-l { font-family: var(--i-mono); font-size: var(--i-micro);

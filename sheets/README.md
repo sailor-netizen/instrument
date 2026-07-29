@@ -33,7 +33,7 @@ you point at one.
 
 Step 3 is the interesting one. A sheet can do anything; a theme can only do what the contract allows.
 Translating one into the other is a measurement, and the parts that don't survive are not failures —
-they are the contract telling you which dimension it is missing. Every one of the fifteen axes in
+they are the contract telling you which dimension it is missing. Every one of the twenty-one axes in
 `contract.css` was found this way. None was designed up front.
 
 ## Writing one
@@ -51,15 +51,42 @@ Copy `_template.html`. Then:
 4. **Say what it is in one sentence** at the top of the file, as a comment. "A drafting sheet: fine
    grid, hard outlines, everything numbered" is a direction. "Clean and modern" is not.
 
+If step 4 is the one you find hard, that is the useful signal — see
+**[DIRECTIONS.md](DIRECTIONS.md)**, which breaks a direction into ten axes each of the five existing
+sheets genuinely disagrees about, with a blank brief to fill in. A line you cannot fill is a part of
+the design nobody has decided yet.
+
+### One trap, inherited from the originals
+
+All five sheets here load their fonts from Google Fonts. They still render offline through their
+fallback stacks — but *not as the artefact that was judged*, which matters if you are comparing them
+on a plane, behind a strict CSP, or screenshotting them for an assistant to look at. The links were
+left in deliberately: stripping them would change what was chosen. Just know that an offline
+screenshot of these five is evidence about their **skeletons**, not their type.
+
+The themes they became have no such dependency — a theme ships into apps that load no fonts at all,
+so `editorial.css` is really *serif vs mono*, not *Fraunces vs Work Sans*.
+
 ## Comparing them
 
 ```bash
-npm run gallery      # → http://127.0.0.1:4322/gallery/compare.html
+npm run gallery
 ```
 
-`compare.html` shows one screen across every *installed theme* at once. For sheets that are not themes
-yet, open them side by side in browser tabs, or drop them in `gallery/screens/` temporarily so the
-wall picks them up.
+Two walls, because there are two things worth comparing:
+
+| Page | Shows | Use it when |
+|---|---|---|
+| [`gallery/sheets.html`](../gallery/sheets.html) | every **sheet** in this directory, side by side, each with its direction sentence and the theme it became | picking a direction — step 2 |
+| [`gallery/compare.html`](../gallery/compare.html) | one **screen** across every installed theme at once | checking a translation survived — step 3 |
+
+Both scale a full-width render down rather than reflowing it, because a responsive reflow destroys
+the composition, and composition is the whole of what a sheet has to show. Both offer 1440 / 1100 /
+720 so you can see a direction fail at a narrow width, which is where directions usually fail.
+
+A new sheet appears on the wall once you add it to the list in `gallery/sheets.html`; `npm run check`
+fails if the list and this directory disagree, so a sheet cannot go quietly missing from the
+comparison it was written for.
 
 ## Working with an assistant
 
@@ -71,7 +98,9 @@ description. Sheets fix that from both ends: it can *write* five genuinely diffe
 cheaply, and you can *look* at all five before anything is built.
 
 Give it the content and the constraint, one direction per agent, then compare. That is how the five
-in this repo were made — five agents, one sheet each, the same two screens, and a human picked.
+in this repo were made — five agents, one sheet each, the same content, and a human picked. (Each
+agent drew two screens; the cockpit is the one kept here, because comparison needs one control
+variable and five files, not ten.)
 
 The screens under `gallery/screens/` serve the same purpose in reverse: they render the real component
 vocabulary in whatever theme the URL asks for, so an assistant can screenshot its own work in six

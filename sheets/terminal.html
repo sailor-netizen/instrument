@@ -1,0 +1,456 @@
+<!-- DIRECTION: A TUI — one monospace family for every voice, nothing boxed, a command line above and
+     a status bar below as the entire frame, and colour spent only on status.
+
+     Became src/themes/terminal.css. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cockpit — Flightdeck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ══ FLIGHTDECK / TERMINAL ══ one family, one grid, colour is status ══════════ */
+:root{
+  color-scheme: dark;
+
+  /* surfaces */
+  --tty-void:        #010409;   /* outside the frame, status bar */
+  --tty-field:       #0d1117;   /* the text field itself */
+  --tty-field-alt:   #10161d;   /* banded rows, header + prompt strips */
+  --tty-surface:     #1b222b;   /* raised chip / active nav */
+  --tty-hover:       #141b23;   /* hover wash on a pane cell */
+
+  /* rules (box drawing) */
+  --tty-rule:        #1f242c;
+  --tty-rule-bright: #30363d;
+
+  /* text */
+  --tty-fg:          #e6edf3;   /* primary */
+  --tty-fg-mid:      #9aa4af;   /* secondary */
+  --tty-fg-dim:      #6e7681;   /* chrome, labels */
+  --tty-fg-faint:    #454c56;   /* structure glyphs, zeroed values */
+
+  /* status — the only colours with meaning */
+  --tty-ok:          #3fb950;   /* live · ok · nothing wrong */
+  --tty-warn:        #d29922;   /* attention · money · denied · keys */
+  --tty-err:         #f85149;   /* error */
+
+  /* inversion (TUI selection bar) */
+  --tty-select-bg:   #3fb950;
+  --tty-select-fg:   #010409;
+
+  --tty-cursor:      #3fb950;
+  --tty-scroll:      #262c35;
+
+  --mono:'JetBrains Mono','Cascadia Code','Cascadia Mono',ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono','Courier New',monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--tty-void);
+  color:var(--tty-fg);
+  font-family:var(--mono);
+  font-size:13px;
+  line-height:20px;
+  font-variant-ligatures:none;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--tty-select-bg);color:var(--tty-select-fg)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--tty-field)}
+::-webkit-scrollbar-thumb{background:var(--tty-scroll)}
+::-webkit-scrollbar-thumb:hover{background:var(--tty-rule-bright)}
+
+/* ── frame ─────────────────────────────────────────────────────────────────── */
+.tty{
+  height:100dvh;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto auto;
+  grid-template-columns:minmax(0,1fr);   /* never let max-content widen the frame */
+  background:var(--tty-field);
+}
+
+/* ── the command that produced this screen ─────────────────────────────────── */
+.cmd{
+  display:flex;align-items:center;gap:1ch;
+  height:30px;padding:0 2ch;
+  background:var(--tty-field-alt);
+  border-bottom:1px solid var(--tty-rule);
+  white-space:nowrap;overflow:hidden;
+  font-size:12px;
+}
+.chev{color:var(--tty-ok);font-weight:700}
+.bin{color:var(--tty-fg);font-weight:500}
+.arg{color:var(--tty-fg-mid)}
+.flag{color:var(--tty-warn)}
+.grow{flex:1 1 auto;min-width:1ch}
+.live{
+  color:var(--tty-ok);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+}
+.blip{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── scrolling field ───────────────────────────────────────────────────────── */
+.field{overflow:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.field > *{flex:0 0 auto}
+
+/* empty buffer lines below the last row — the void is deliberate, not leftover */
+.field > .tail{
+  flex:1 1 auto;min-height:0;overflow:hidden;
+  padding:8px 2ch 0;
+  color:var(--tty-fg-faint);
+  font-size:12.5px;line-height:19px;
+  user-select:none;
+}
+
+/* ── masthead: scale contrast lives here ───────────────────────────────────── */
+.head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:2ch 4ch;flex-wrap:wrap;
+  padding:20px 2ch 16px;
+}
+h1{
+  margin:0;
+  font-size:28px;line-height:30px;font-weight:700;
+  letter-spacing:.26em;text-transform:uppercase;
+}
+.sub{margin:6px 0 0;color:var(--tty-fg-mid);font-size:12.5px}
+.fx{color:var(--tty-fg-faint)}
+.head-r{text-align:right;font-size:11px;line-height:17px;color:var(--tty-fg-dim);white-space:nowrap}
+.head-r .fx{display:inline-block;min-width:4ch;text-align:left}
+.ok{color:var(--tty-ok)}
+.warn{color:var(--tty-warn)}
+.err{color:var(--tty-err)}
+.null{color:var(--tty-fg-faint)}
+.dim{color:var(--tty-fg-dim)}
+
+/* ── section rule: ├─ label ─────────────────────────┤ ──────────────────────── */
+.rule{
+  display:flex;align-items:center;gap:1ch;
+  padding:0 2ch;margin:14px 0 0;
+  color:var(--tty-fg-faint);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  line-height:18px;
+}
+.rule b{color:var(--tty-fg-dim);font-weight:500;letter-spacing:.22em}
+.rule .fill{flex:1 1 auto;border-top:1px solid var(--tty-rule);height:0}
+.rule .meta{color:var(--tty-fg-faint);letter-spacing:.14em}
+
+/* ── metric band: full bleed, hairline grid, no cards ──────────────────────── */
+.band{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  gap:1px;background:var(--tty-rule);
+  border-top:1px solid var(--tty-rule);
+  border-bottom:1px solid var(--tty-rule);
+  margin-top:8px;
+}
+.cell{
+  position:relative;display:block;min-width:0;
+  background:var(--tty-field);
+  padding:15px 2ch 13px;
+}
+.cell::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--tty-ok);transform:scaleY(0);transform-origin:top;
+  transition:transform .12s ease-out;
+}
+.cell:hover,.cell:focus-visible{background:var(--tty-hover);outline:none}
+.cell:hover::before,.cell:focus-visible::before{transform:scaleY(1)}
+.val{
+  display:block;
+  font-size:clamp(26px,2.6vw,40px);
+  line-height:1.06;
+  font-weight:700;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.val .sym{font-size:.6em;font-weight:500;color:var(--tty-fg-dim);letter-spacing:0}
+.lab{
+  display:block;margin-top:8px;
+  font-size:10px;line-height:14px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--tty-fg-dim);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.route{
+  display:block;margin-top:7px;
+  font-size:10.5px;line-height:14px;color:var(--tty-fg-faint);white-space:nowrap;
+}
+.route .k{color:var(--tty-warn);font-weight:700}
+.cell:hover .route,.cell:focus-visible .route{color:var(--tty-ok)}
+.cell:hover .route .k,.cell:focus-visible .route .k{color:var(--tty-ok)}
+
+/* ── action lines: leader dots, invert on hover ────────────────────────────── */
+.acts{padding:8px 2ch 4px}
+.act{
+  display:flex;align-items:baseline;gap:1.5ch;
+  padding:5px 1ch;margin:0 -1ch;
+}
+.act .mk{color:var(--tty-fg-faint);width:1ch;flex:0 0 auto}
+.act .mk::before{content:"\25B8"}
+.act .t{font-weight:500;white-space:nowrap}
+.act .lead{
+  flex:1 1 auto;min-width:2ch;height:0;
+  border-bottom:1px dotted var(--tty-rule-bright);
+  transform:translateY(-4px);
+}
+.act .d{color:var(--tty-fg-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act .key{color:var(--tty-warn);font-size:11px;flex:0 0 auto}
+.act:hover,.act:focus-visible{background:var(--tty-select-bg);color:var(--tty-select-fg);outline:none}
+.act:hover .mk::before,.act:focus-visible .mk::before{content:"\25B6"}
+.act:hover .mk,.act:hover .d,.act:hover .key,
+.act:focus-visible .mk,.act:focus-visible .d,.act:focus-visible .key{color:var(--tty-select-fg)}
+.act:hover .lead,.act:focus-visible .lead{border-bottom-color:var(--tty-select-fg)}
+
+/* ── last review: a tree, not a card ───────────────────────────────────────── */
+.rev{display:block;padding:8px 2ch 10px;margin:0;position:relative}
+.rev::before{
+  content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;
+  background:var(--tty-warn);transform:scaleY(0);transform-origin:top;
+  transition:transform .12s ease-out;
+}
+.rev:hover,.rev:focus-visible{background:var(--tty-hover);outline:none}
+.rev:hover::before,.rev:focus-visible::before{transform:scaleY(1)}
+.rev-top{display:flex;align-items:baseline;gap:1.5ch}
+.rev-top .t{font-weight:500}
+.rev-top .fill{flex:1 1 auto;border-top:1px dotted var(--tty-rule);height:0;transform:translateY(-4px)}
+.rev-top .when{color:var(--tty-fg-dim);font-size:12px;white-space:nowrap}
+.tree{color:var(--tty-fg-faint);white-space:pre}
+.rev .line{font-size:12.5px}
+
+/* ── the waiting prompt (this is a process, not a report) ──────────────────── */
+.prompt{
+  display:flex;align-items:center;gap:1ch;
+  height:34px;padding:0 2ch;
+  background:var(--tty-field-alt);
+  border-top:1px solid var(--tty-rule);
+  white-space:nowrap;overflow:hidden;
+}
+.cursor{
+  display:inline-block;width:1ch;height:15px;
+  background:var(--tty-cursor);
+  transform:translateY(2px);
+  animation:blink 1.06s step-end infinite;
+}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.ghost{
+  color:var(--tty-fg-faint);font-size:11.5px;
+  flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.pmeta{flex:0 0 auto;color:var(--tty-fg-dim);font-size:11px;padding-left:2ch}
+.pmeta .end{color:var(--tty-fg-mid);letter-spacing:.14em}
+
+/* ── fixed status bar ──────────────────────────────────────────────────────── */
+.status{
+  display:flex;align-items:stretch;
+  height:26px;
+  background:var(--tty-void);
+  border-top:1px solid var(--tty-rule-bright);
+  font-size:11px;line-height:26px;white-space:nowrap;
+}
+.ws{
+  flex:0 0 auto;
+  background:var(--tty-select-bg);color:var(--tty-select-fg);
+  font-weight:700;letter-spacing:.08em;
+  padding:0 1.5ch;
+}
+.ws:hover{background:var(--tty-warn)}
+.nav{flex:1 1 auto;display:flex;min-width:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.navi{
+  flex:0 0 auto;padding:0 1.3ch;color:var(--tty-fg-dim);
+  border-right:1px solid var(--tty-rule);
+}
+.navi .k{color:var(--tty-warn);font-weight:700}
+.navi:hover{background:var(--tty-surface);color:var(--tty-fg)}
+.navi.on{background:var(--tty-surface);color:var(--tty-ok);box-shadow:inset 0 2px 0 var(--tty-ok)}
+.navi.on .k{color:var(--tty-ok)}
+.counts{flex:0 0 auto;display:flex;gap:1.6ch;padding:0 1.5ch;color:var(--tty-fg-dim);border-left:1px solid var(--tty-rule)}
+
+/* ── responsive: the grid reflows, the character grid never breaks ─────────── */
+@media (max-width:1180px){
+  .band{grid-template-columns:repeat(3,1fr)}
+  .act .d{font-size:12px}
+}
+@media (max-width:900px){
+  .head{padding:16px 2ch 12px}
+  h1{font-size:24px;letter-spacing:.2em}
+  .head-r{display:none}
+}
+@media (max-width:1180px){ .counts .c-opt{display:none} }   /* nav keeps priority over counts */
+@media (max-width:820px){ .counts{display:none} }
+@media (max-width:700px){
+  .band{grid-template-columns:repeat(2,1fr)}
+  .act{flex-wrap:wrap;gap:0 1.5ch}
+  .act .lead{display:none}
+  .act .d{flex:1 1 100%;padding-left:2.5ch;white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){
+  .cursor,.blip{animation:none}
+  .cell::before,.rev::before{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="tty">
+
+  <!-- the command line that produced this screen -->
+  <div class="cmd">
+    <span class="chev">&#10095;</span><span class="bin">flightdeck</span>
+    <span class="arg">cockpit</span>
+    <span class="flag">--workspace</span><span class="arg">flightdeck</span>
+    <span class="flag">--watch</span>
+    <span class="grow"></span>
+    <span class="live"><span class="blip">&#9632;</span> live</span>
+  </div>
+
+  <main class="field">
+
+    <div class="head">
+      <div class="head-l">
+        <h1>Cockpit</h1>
+        <p class="sub"><span class="fx">//</span> Working in Flightdeck — everything below runs against it.</p>
+      </div>
+      <div class="head-r">
+        <div><span class="fx">cwd</span> ~/Downloads/Claude_Code/flightdeck</div>
+        <div><span class="fx">ws</span> flightdeck <span class="ok">&#9632;</span> attached</div>
+      </div>
+    </div>
+
+    <div class="rule">
+      <span>&#9500;</span><b>status</b><span class="fill"></span>
+      <span class="meta">press the number to jump</span><span>&#9508;</span>
+    </div>
+
+    <!-- six metrics — full bleed, hairline grid, every one routes -->
+    <div class="band">
+      <a class="cell" href="runs.html">
+        <span class="val">7</span>
+        <span class="lab">agent runs</span>
+        <span class="route">&rarr; <span class="k">5</span> runs</span>
+      </a>
+      <a class="cell" href="runs.html">
+        <span class="val warn"><span class="sym">$</span>2.9433</span>
+        <span class="lab">spent</span>
+        <span class="route">&rarr; <span class="k">5</span> runs</span>
+      </a>
+      <a class="cell" href="#approvals">
+        <span class="val null">0</span>
+        <span class="lab">awaiting you</span>
+        <span class="route">&rarr; <span class="k">7</span> approvals</span>
+      </a>
+      <a class="cell" href="#fleet">
+        <span class="val ok">3</span>
+        <span class="lab">fleet hosts</span>
+        <span class="route">&rarr; <span class="k">8</span> fleet</span>
+      </a>
+      <a class="cell" href="#creds">
+        <span class="val">5</span>
+        <span class="lab">credentials</span>
+        <span class="route">&rarr; <span class="k">9</span> creds</span>
+      </a>
+      <a class="cell" href="runs.html">
+        <span class="val ok">0</span>
+        <span class="lab">run errors</span>
+        <span class="route">&rarr; <span class="k">5</span> runs</span>
+      </a>
+    </div>
+
+    <div class="rule">
+      <span>&#9500;</span><b>Start something</b><span class="fill"></span>
+      <span class="meta">4 actions</span><span>&#9508;</span>
+    </div>
+
+    <div class="acts">
+      <a class="act" href="#chat">
+        <span class="mk"></span>
+        <span class="t">Ask the workspace</span>
+        <span class="lead"></span>
+        <span class="d">Read-only agent, every step shown.</span>
+        <span class="key">[a]</span>
+      </a>
+      <a class="act" href="#dev">
+        <span class="mk"></span>
+        <span class="t">Run the gates</span>
+        <span class="lead"></span>
+        <span class="d">Build, lint and test the active project.</span>
+        <span class="key">[g]</span>
+      </a>
+      <a class="act" href="#workflows">
+        <span class="mk"></span>
+        <span class="t">Run a workflow</span>
+        <span class="lead"></span>
+        <span class="d">Checks · review · fleet plan · design loop.</span>
+        <span class="key">[w]</span>
+      </a>
+      <a class="act" href="#reviews">
+        <span class="mk"></span>
+        <span class="t">Review changes</span>
+        <span class="lead"></span>
+        <span class="d">A gated agent reads your diff.</span>
+        <span class="key">[r]</span>
+      </a>
+    </div>
+
+    <div class="rule">
+      <span>&#9500;</span><b>Last review</b><span class="fill"></span>
+      <span class="meta">1 entry</span><span>&#9508;</span>
+    </div>
+
+    <a class="rev" href="#reviews">
+      <div class="rev-top">
+        <span class="t">uncommitted changes</span>
+        <span class="fill"></span>
+        <span class="when">27 Jul, 21:47</span>
+      </div>
+      <div class="line"><span class="tree">&#9500;&#9472; </span><span class="warn">1 finding</span></div>
+      <div class="line"><span class="tree">&#9492;&#9472; </span><span class="ok">1 confirmed</span> <span class="fx">·</span> <span class="null">0 refuted</span> <span class="fx">·</span> <span class="null">0 unverified</span></div>
+    </a>
+
+    <div class="tail" aria-hidden="true">
+      <div>~</div><div>~</div><div>~</div><div>~</div><div>~</div><div>~</div>
+      <div>~</div><div>~</div><div>~</div><div>~</div><div>~</div><div>~</div>
+      <div>~</div><div>~</div><div>~</div><div>~</div><div>~</div><div>~</div>
+      <div>~</div><div>~</div><div>~</div><div>~</div><div>~</div><div>~</div>
+      <div>~</div><div>~</div><div>~</div><div>~</div><div>~</div><div>~</div>
+    </div>
+
+  </main>
+
+  <!-- the process is still running -->
+  <div class="prompt">
+    <span class="chev">&#10095;</span><span class="cursor"></span>
+    <span class="ghost">&nbsp;&nbsp;1&ndash;9 jump &nbsp;·&nbsp; a g w r start &nbsp;·&nbsp; : command &nbsp;·&nbsp; / search</span>
+    <span class="pmeta"><span class="end">(TOP)</span> 6 metrics &nbsp;·&nbsp; 4 actions &nbsp;·&nbsp; 1 review</span>
+  </div>
+
+  <footer class="status">
+    <a class="ws" href="#workspace">flightdeck &#9662;</a>
+    <nav class="nav">
+      <a class="navi on" href="cockpit.html"><span class="k">1</span> home</a>
+      <a class="navi" href="#chat"><span class="k">2</span> chat</a>
+      <a class="navi" href="#dev"><span class="k">3</span> dev workflow</a>
+      <a class="navi" href="#workflows"><span class="k">4</span> workflows</a>
+      <a class="navi" href="runs.html"><span class="k">5</span> runs</a>
+      <a class="navi" href="#reviews"><span class="k">6</span> reviews</a>
+      <a class="navi" href="#approvals"><span class="k">7</span> approvals</a>
+      <a class="navi" href="#fleet"><span class="k">8</span> fleet</a>
+      <a class="navi" href="#creds"><span class="k">9</span> creds</a>
+    </nav>
+    <div class="counts">
+      <span class="c-opt"><span class="dim">runs</span> 7</span>
+      <span class="c-opt"><span class="dim">spent</span> <span class="warn">$2.9433</span></span>
+      <span class="c-opt"><span class="dim">await</span> <span class="null">0</span></span>
+      <span><span class="dim">err</span> <span class="ok">0</span></span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

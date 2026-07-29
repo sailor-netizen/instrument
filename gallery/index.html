@@ -29,12 +29,32 @@
   .g-sw { display: flex; flex-direction: column; gap: var(--i-1); font-family: var(--i-mono);
           font-size: var(--i-micro); color: var(--i-dim); }
   .g-sw i { display: block; height: 2.5rem; border: 1px solid var(--i-line); border-radius: var(--i-radius-sm); }
-  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint); }
+  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint);
+            flex: 1 1 auto; min-width: 0; }
+  /* Shares the first flex line with the pickers, bottom-aligned against their inputs by the bar's
+     own align-items:flex-end. Giving it flex-basis:100% to force its own row was worse — it made a
+     sticky bar three lines tall. The theme note keeps the second line; it shrinks rather than being
+     pushed there, so the bar's height no longer depends on how long the current blurb is. */
+  .g-nav { display: flex; gap: 1rem; margin-right: auto; }
+  .g-nav a { font-size: var(--i-micro); color: var(--i-dim); text-decoration: none; }
+  .g-nav a:hover { color: var(--i-ink); }
+  .g-nav a[aria-current] { color: var(--i-ink); font-weight: 650; }
 </style>
 </head>
 <body>
 
 <div class="g-bar">
+  <!-- The landing page shipped with no nav at all, so every other gallery page was reachable only by
+       editing the URL — and compare.html, the page the whole comparison method rests on, was linked
+       from nowhere. `npm run check` now asserts every page reaches every other one. -->
+  <nav class="g-nav">
+    <a href="index.html" aria-current="page">Components</a>
+    <a href="foundations.html">Foundations</a>
+    <a href="themes.html">Themes</a>
+    <a href="patterns.html">Patterns</a>
+    <a href="compare.html">Compare</a>
+    <a href="sheets.html">Sheets</a>
+  </nav>
   <label class="i-themepick"><span class="i-field-label">Theme</span>
     <select class="i-input" id="theme"></select></label>
   <label class="i-themepick"><span class="i-field-label">Surface override</span>

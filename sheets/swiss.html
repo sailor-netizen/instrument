@@ -1,0 +1,542 @@
+<!-- DIRECTION: Swiss Signal — a painted twelve-column grid on bone paper, hairline rules, figures
+     set enormous and hung on the column lines, and exactly one hue in the system: a red that only
+     ever means this failed.
+
+     Became src/themes/swiss.css. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cockpit — Flightdeck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   SWISS SIGNAL — tokens. Every colour in the system lives here.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  /* surface */
+  --paper:              #FBFAF7;
+
+  /* ink */
+  --ink:                #12110F;
+  --ink-secondary:      #56534C;
+  --ink-tertiary:       #8D8A81;
+
+  /* rules — the whole chrome language is hairlines */
+  --rule-grid:          #E8E5DC;   /* the visible 12-column lines */
+  --rule-hair:          #D4D0C6;   /* structural hairlines */
+  --rule-strong:        #12110F;   /* active / emphatic rule */
+  --rule-clear:         transparent;
+
+  /* signal — exception only. Twice per screen, never decorative. */
+  --signal:             #DA291C;
+
+  /* interaction */
+  --focus-ring:         #12110F;
+  --selection-bg:       #12110F;
+  --selection-ink:      #FBFAF7;
+
+  /* metrics (non-colour) */
+  --measure: 1560px;
+  --pad: clamp(20px, 3.2vw, 56px);
+  --gutter: clamp(12px, 1.6vw, 24px);
+  --sans: 'Archivo', 'Helvetica Neue', Helvetica, 'Arial Nova', Arial, 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.45;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+::selection{ background:var(--selection-bg); color:var(--selection-ink); }
+a{ color:inherit; }
+a:focus-visible, button:focus-visible{
+  outline:2px solid var(--focus-ring);
+  outline-offset:4px;
+}
+.skip{
+  position:absolute; left:-9999px; top:0;
+  background:var(--ink); color:var(--paper);
+  padding:10px 16px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; z-index:9;
+}
+.skip:focus{ left:0; }
+
+/* ── the grid apparatus ─────────────────────────────────────── */
+.band{ position:relative; }
+.band__inner{
+  position:relative;
+  max-width:var(--measure);
+  margin-inline:auto;
+  padding-inline:var(--pad);
+}
+.rules{
+  position:absolute; top:0; bottom:0;
+  left:var(--pad); right:var(--pad);
+  display:grid;
+  grid-template-columns:repeat(12, minmax(0,1fr));
+  column-gap:var(--gutter);
+  pointer-events:none;
+  z-index:0;
+}
+.rules i{ display:block; border-left:1px solid var(--rule-grid); }
+.rules i:last-child{ border-right:1px solid var(--rule-grid); }
+.g{
+  position:relative; z-index:1;
+  display:grid;
+  grid-template-columns:repeat(12, minmax(0,1fr));
+  column-gap:var(--gutter);
+}
+
+/* ── masthead: a thin rule across the top, no sidebar anywhere ── */
+.masthead{ border-bottom:1px solid var(--rule-strong); }
+.masthead__inner{ max-width:var(--measure); margin-inline:auto; padding-inline:var(--pad); }
+.mast-top{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:24px; padding:20px 0 14px;
+  border-bottom:1px solid var(--rule-hair);
+}
+.brand{ display:flex; align-items:center; gap:13px; text-decoration:none; }
+.brand__mark{ width:11px; height:11px; background:var(--ink); display:block; flex:none; }
+.brand__name{
+  font-size:15px; font-weight:800; letter-spacing:.26em; text-transform:uppercase;
+  font-stretch:112%; line-height:1;
+}
+.workspace{
+  appearance:none; background:none; border:0;
+  border-bottom:2px solid var(--rule-strong);
+  padding:0 0 5px; margin:0;
+  display:flex; align-items:baseline; gap:12px;
+  font:inherit; color:var(--ink); cursor:pointer;
+  transition:border-color .18s ease;
+}
+.workspace__k{
+  font-size:10px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-tertiary); font-stretch:112%; transition:color .18s ease;
+}
+.workspace__v{ font-size:16px; font-weight:700; letter-spacing:-.015em; }
+.workspace__c{ font-size:10px; color:var(--ink-secondary); }
+.workspace:hover .workspace__k{ color:var(--ink); }
+
+.nav{
+  display:flex; flex-wrap:wrap;
+  justify-content:space-between;
+  gap:0 22px;
+  padding-top:13px;
+}
+.nav a{
+  text-decoration:none;
+  color:var(--ink-tertiary);
+  font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  font-stretch:112%; line-height:1;
+  padding-bottom:11px;
+  border-bottom:2px solid var(--rule-clear);
+  transition:color .16s ease, border-color .16s ease;
+}
+.nav a:hover{ color:var(--ink); border-bottom-color:var(--rule-hair); }
+.nav a[aria-current]{ color:var(--ink); border-bottom-color:var(--rule-strong); }
+
+/* ── page title ─────────────────────────────────────────────── */
+.g--title{ padding:46px 0 56px; }
+.title{
+  grid-column:1 / span 5; margin:0;
+  font-size:clamp(34px, 4.2vw, 58px); line-height:.92; font-weight:800;
+  letter-spacing:-.038em; font-stretch:92%;
+}
+.title__sub{
+  grid-column:7 / span 5; align-self:end; margin:0; padding-bottom:9px;
+  font-size:clamp(14px, 1.15vw, 17px); line-height:1.42;
+  color:var(--ink-secondary); max-width:46ch;
+}
+
+/* ── section heads ──────────────────────────────────────────── */
+.sechead{
+  grid-column:1 / -1;
+  display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); column-gap:var(--gutter);
+  align-items:baseline; padding-bottom:30px;
+}
+.sechead__no{
+  grid-column:1 / span 1;
+  font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--ink-tertiary);
+  font-variant-numeric:tabular-nums;
+}
+.sechead__name{
+  grid-column:2 / span 6; margin:0;
+  font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+  font-stretch:112%;
+}
+
+/* ── metrics: deliberately uneven. 5 / 5 / 2 then 3 / 3 / 3 ──── */
+.g--metrics{
+  border-top:1px solid var(--rule-hair);
+  padding:30px 0 88px;
+  row-gap:clamp(44px, 4.6vw, 78px);
+}
+.metric{
+  display:flex; flex-direction:column; justify-content:flex-end;
+  text-decoration:none; color:inherit; position:relative; min-width:0;
+}
+.metric::before{
+  content:""; position:absolute; left:-10px; top:0; bottom:0; width:2px;
+  background:var(--rule-clear); transition:background-color .18s ease;
+}
+.metric:hover::before, .metric:focus-visible::before{ background:var(--rule-strong); }
+.metric__v{
+  display:block; font-weight:700; line-height:.78;
+  letter-spacing:-.045em; font-stretch:88%;
+  transition:transform .2s ease;
+}
+.metric:hover .metric__v{ transform:translateY(-5px); }
+/* nowrap keeps every label rule on one shared line across the band —
+   a wrapped foot would break the horizontal rule the numbers sit on */
+.metric__foot{
+  margin-top:16px; padding-top:11px;
+  border-top:1px solid var(--rule-hair);
+  display:flex; flex-wrap:nowrap; align-items:baseline; justify-content:space-between;
+  gap:10px;
+  transition:border-color .18s ease;
+}
+.metric:hover .metric__foot{ border-top-color:var(--rule-strong); }
+.metric__k{
+  font-size:11px; font-weight:700; letter-spacing:.17em; text-transform:uppercase;
+  color:var(--ink-secondary); font-stretch:112%; white-space:nowrap;
+  transition:color .16s ease;
+}
+.metric:hover .metric__k{ color:var(--ink); }
+.metric__to{
+  font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink); font-stretch:112%; white-space:nowrap;
+  opacity:0; transform:translateX(-6px);
+  transition:opacity .18s ease, transform .18s ease;
+}
+.metric:hover .metric__to, .metric:focus-visible .metric__to{ opacity:1; transform:none; }
+.metric:focus-visible{ outline-offset:8px; }
+
+/* the section number holds row 1 so the uneven metric rows follow it;
+   the row-gap already supplies the space, so drop the head's own padding */
+.g--metrics .sechead{ grid-row:1; padding-bottom:0; }
+.m-1{ grid-column:1 / span 5;  grid-row:2; }
+.m-2{ grid-column:6 / span 4;  grid-row:2; }
+.m-3{ grid-column:10 / span 3; grid-row:2; }
+.m-4{ grid-column:1 / span 3;  grid-row:3; }
+.m-5{ grid-column:5 / span 3;  grid-row:3; }
+.m-6{ grid-column:10 / span 3; grid-row:3; }
+.m-1 .metric__v{ font-size:clamp(94px, 12.4vw, 196px); }
+.m-2 .metric__v{ font-size:clamp(50px, 6.1vw, 92px); }
+.m-3 .metric__v,
+.m-4 .metric__v,
+.m-5 .metric__v,
+.m-6 .metric__v{ font-size:clamp(40px, 4.2vw, 62px); }
+
+/* ── actions: hairline-ruled rows, unequal weight ───────────── */
+.g--actions{ border-top:1px solid var(--rule-hair); padding:36px 0 96px; }
+.act{
+  grid-column:1 / -1;
+  display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); column-gap:var(--gutter);
+  align-items:baseline;
+  border-top:1px solid var(--rule-hair);
+  padding:24px 0;
+  text-decoration:none; color:inherit; position:relative;
+  transition:border-color .18s ease;
+}
+.act:last-of-type{ border-bottom:1px solid var(--rule-hair); }
+.act::before{
+  content:""; position:absolute; left:-10px; top:-1px; bottom:0; width:2px;
+  background:var(--rule-clear); transition:background-color .18s ease;
+}
+.act:hover{ border-top-color:var(--rule-strong); }
+.act:hover::before, .act:focus-visible::before{ background:var(--rule-strong); }
+.act__no{
+  grid-column:1 / span 1;
+  font-size:11px; font-weight:700; letter-spacing:.16em; color:var(--ink-tertiary);
+  font-variant-numeric:tabular-nums; transition:color .16s ease;
+}
+.act:hover .act__no{ color:var(--ink); }
+.act__t{
+  grid-column:2 / span 5;
+  font-size:clamp(21px, 2.1vw, 30px); font-weight:700; line-height:1.04;
+  letter-spacing:-.028em; font-stretch:92%;
+  transition:transform .2s ease;
+}
+.act:hover .act__t{ transform:translateX(10px); }
+.act__d{
+  grid-column:7 / span 5;
+  font-size:14.5px; line-height:1.42; color:var(--ink-secondary);
+}
+.act__go{
+  grid-column:12 / span 1; justify-self:end;
+  font-size:17px; color:var(--ink-tertiary);
+  transition:transform .2s ease, color .16s ease;
+}
+.act:hover .act__go{ transform:translateX(9px); color:var(--ink); }
+.act--lead{ padding:34px 0 32px; }
+.act--lead .act__t{ font-size:clamp(28px, 3.3vw, 46px); }
+
+/* ── last review: the rule above it is red because it holds an
+      unresolved finding. Signal use 1 of 2. ─────────────────── */
+.g--review{ border-top:2px solid var(--signal); padding:36px 0 120px; }
+.rv{
+  grid-column:1 / -1;
+  display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); column-gap:var(--gutter);
+  align-items:baseline; row-gap:22px;
+  border-top:1px solid var(--rule-hair);
+  border-bottom:1px solid var(--rule-hair);
+  padding:32px 0 36px;
+  text-decoration:none; color:inherit; position:relative;
+  transition:border-color .18s ease;
+}
+.rv::before{
+  content:""; position:absolute; left:-10px; top:-1px; bottom:-1px; width:2px;
+  background:var(--rule-clear); transition:background-color .18s ease;
+}
+.rv:hover{ border-top-color:var(--rule-strong); border-bottom-color:var(--rule-strong); }
+.rv:hover::before, .rv:focus-visible::before{ background:var(--rule-strong); }
+.rv__target{
+  grid-column:1 / span 4;
+  font-size:clamp(24px, 2.5vw, 36px); font-weight:700; line-height:1.02;
+  letter-spacing:-.03em; font-stretch:92%;
+}
+.rv__find{ grid-column:5 / span 2; display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+/* signal use 2 of 2 */
+.rv__find b{
+  font-size:clamp(34px, 3.6vw, 54px); font-weight:700; line-height:.8;
+  letter-spacing:-.04em; color:var(--signal); font-stretch:88%;
+}
+.rv__find span{
+  font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-secondary); font-stretch:112%;
+}
+.rv__when{
+  grid-column:7 / span 2;
+  font-size:13px; letter-spacing:.03em; color:var(--ink-secondary);
+  font-variant-numeric:tabular-nums;
+}
+.rv__triad{ grid-column:9 / span 4; display:flex; justify-content:space-between; gap:14px; }
+.tri b{
+  display:block; font-size:clamp(22px, 2.2vw, 30px); font-weight:700; line-height:.9;
+  letter-spacing:-.03em;
+}
+.tri span{
+  display:block; margin-top:9px;
+  font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-tertiary); font-stretch:112%;
+}
+
+/* ── narrow ─────────────────────────────────────────────────── */
+@media (max-width:1080px){
+  .nav a{ font-size:10.5px; letter-spacing:.14em; }
+  .brand__name{ letter-spacing:.2em; }
+}
+@media (max-width:1000px){
+  /* the destination tag stops fitting beside the label — the ink bar,
+     the rule and the lift still carry the hover */
+  .metric__to{ display:none; }
+}
+@media (max-width:780px){
+  .rules{ grid-template-columns:repeat(6, minmax(0,1fr)); }
+  .rules i:nth-child(n+7){ display:none; }
+  .g, .sechead, .act, .rv{ grid-template-columns:repeat(6, minmax(0,1fr)); }
+  .title{ grid-column:1 / -1; }
+  .title__sub{ grid-column:1 / -1; padding-bottom:0; margin-top:20px; }
+  .m-1{ grid-column:1 / -1;      grid-row:auto; }
+  .m-2{ grid-column:1 / span 4;  grid-row:auto; }
+  .m-3{ grid-column:5 / span 2;  grid-row:auto; }
+  .m-4{ grid-column:1 / span 2;  grid-row:auto; }
+  .m-5{ grid-column:3 / span 2;  grid-row:auto; }
+  .m-6{ grid-column:5 / span 2;  grid-row:auto; }
+  .sechead__name{ grid-column:2 / span 5; }
+  .act__t{ grid-column:2 / span 5; }
+  .act__d{ grid-column:2 / span 5; margin-top:12px; }
+  .act__go{ display:none; }
+  .rv__target{ grid-column:1 / -1; }
+  .rv__find{ grid-column:1 / span 2; }
+  .rv__when{ grid-column:3 / span 4; }
+  .rv__triad{ grid-column:1 / -1; }
+  .nav{ justify-content:flex-start; gap:0 18px; }
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <div class="mast-top">
+      <a class="brand" href="cockpit.html">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__name">Flightdeck</span>
+      </a>
+      <button class="workspace" type="button">
+        <span class="workspace__k">Workspace</span>
+        <span class="workspace__v">Flightdeck</span>
+        <span class="workspace__c" aria-hidden="true">▼</span>
+      </button>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="cockpit.html" aria-current="page">Home</a>
+      <a href="#chat">Chat</a>
+      <a href="#dev-workflow">Dev Workflow</a>
+      <a href="#workflows">Workflows</a>
+      <a href="runs.html">Runs</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#approvals">Approvals</a>
+      <a href="#fleet">Fleet</a>
+      <a href="#creds">Creds</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- title -->
+  <section class="band">
+    <div class="band__inner">
+      <div class="rules" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="g g--title">
+        <h1 class="title">Cockpit</h1>
+        <p class="title__sub">Working in Flightdeck — everything below runs against it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- metrics -->
+  <section class="band">
+    <div class="band__inner">
+      <div class="rules" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="g g--metrics">
+        <div class="sechead"><span class="sechead__no">01</span></div>
+
+        <a class="metric m-1" href="runs.html">
+          <span class="metric__v">7</span>
+          <span class="metric__foot">
+            <span class="metric__k">Agent runs</span>
+            <span class="metric__to">Runs →</span>
+          </span>
+        </a>
+
+        <a class="metric m-2" href="runs.html">
+          <span class="metric__v">$2.9433</span>
+          <span class="metric__foot">
+            <span class="metric__k">Spent</span>
+            <span class="metric__to">Runs →</span>
+          </span>
+        </a>
+
+        <a class="metric m-3" href="#approvals">
+          <span class="metric__v">0</span>
+          <span class="metric__foot">
+            <span class="metric__k">Awaiting you</span>
+            <span class="metric__to">Approvals →</span>
+          </span>
+        </a>
+
+        <a class="metric m-4" href="#fleet">
+          <span class="metric__v">3</span>
+          <span class="metric__foot">
+            <span class="metric__k">Fleet hosts</span>
+            <span class="metric__to">Fleet →</span>
+          </span>
+        </a>
+
+        <a class="metric m-5" href="#creds">
+          <span class="metric__v">5</span>
+          <span class="metric__foot">
+            <span class="metric__k">Credentials</span>
+            <span class="metric__to">Creds →</span>
+          </span>
+        </a>
+
+        <a class="metric m-6" href="runs.html">
+          <span class="metric__v">0</span>
+          <span class="metric__foot">
+            <span class="metric__k">Run errors</span>
+            <span class="metric__to">Runs →</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- start something -->
+  <section class="band">
+    <div class="band__inner">
+      <div class="rules" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="g g--actions">
+        <div class="sechead">
+          <span class="sechead__no">02</span>
+          <h2 class="sechead__name">Start something</h2>
+        </div>
+
+        <a class="act act--lead" href="#chat">
+          <span class="act__no">01</span>
+          <span class="act__t">Ask the workspace</span>
+          <span class="act__d">Read-only agent, every step shown.</span>
+          <span class="act__go" aria-hidden="true">→</span>
+        </a>
+
+        <a class="act" href="#dev-workflow">
+          <span class="act__no">02</span>
+          <span class="act__t">Run the gates</span>
+          <span class="act__d">Build, lint and test the active project.</span>
+          <span class="act__go" aria-hidden="true">→</span>
+        </a>
+
+        <a class="act" href="#workflows">
+          <span class="act__no">03</span>
+          <span class="act__t">Run a workflow</span>
+          <span class="act__d">Checks · review · fleet plan · design loop.</span>
+          <span class="act__go" aria-hidden="true">→</span>
+        </a>
+
+        <a class="act" href="#reviews">
+          <span class="act__no">04</span>
+          <span class="act__t">Review changes</span>
+          <span class="act__d">A gated agent reads your diff.</span>
+          <span class="act__go" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- last review -->
+  <section class="band">
+    <div class="band__inner">
+      <div class="rules" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="g g--review">
+        <div class="sechead">
+          <span class="sechead__no">03</span>
+          <h2 class="sechead__name">Last review</h2>
+        </div>
+
+        <a class="rv" href="#reviews">
+          <span class="rv__target">uncommitted changes</span>
+          <span class="rv__find"><b>1</b><span>finding</span></span>
+          <span class="rv__when">27 Jul, 21:47</span>
+          <span class="rv__triad">
+            <span class="tri"><b>1</b><span>confirmed</span></span>
+            <span class="tri"><b>0</b><span>refuted</span></span>
+            <span class="tri"><b>0</b><span>unverified</span></span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

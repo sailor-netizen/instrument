@@ -154,7 +154,131 @@ if (existsSync(GALLERY)) {
   }
 }
 
-/* 9. No box-shadow. Depth here is translucency + a hairline + the page wash showing through, which
+/* 9. The axis vocabulary is closed at both ends.
+
+      a) A theme may only set --x-* axes the contract DECLARES. Setting one it does not is a typo that
+         does nothing, silently, forever — CSS has no such thing as an unknown-property error, so the
+         theme author sees their line in the file and assumes it works.
+      b) Every axis the contract declares is CONSUMED somewhere. An axis nothing reads is a knob
+         wired to nothing: it survives review because it looks used, and the first person to turn it
+         is the one who finds out.
+
+      Together these are what stop the contract drifting from the themes in either direction. */
+{
+  const contract = read(join(SRC, "contract.css"));
+  const declared = new Set(
+    [...contract.matchAll(/^\s{2}(--x-[a-z0-9-]+)\s*:/gm)].map((m) => m[1]));
+
+  // A MODE is one whose consumption is an attribute selector. Setting it in a theme's CSS is a trap:
+  // it looks exactly like setting a scalar, and it does nothing, because applyTheme() writes the
+  // attribute from themes.js. Catching it here is the only place anyone finds out.
+  const isMode = (axis) => contract.includes(`[data-${axis.replace("--x-", "")}`);
+
+  for (const f of themeFiles) {
+    for (const m of read(join(THEMES_DIR, f)).matchAll(/(--x-[a-z0-9-]+)\s*:/g)) {
+      if (!declared.has(m[1])) {
+        fail("theme-sets-a-real-axis",
+             `themes/${f} sets ${m[1]}, which contract.css never declares — it does nothing`);
+      } else if (isMode(m[1])) {
+        fail("modes-live-in-the-registry",
+             `themes/${f} sets ${m[1]} in CSS, but that is a MODE — it does nothing here. `
+             + `Set it in src/themes.js instead.`);
+      }
+    }
+  }
+
+  // consumers: anything that READS an axis, anywhere in the system
+  const consumers = readdirSync(SRC).filter((f) => f.endsWith(".css"))
+    .map((f) => read(join(SRC, f)))
+    .concat(themeFiles.map((f) => read(join(THEMES_DIR, f))))
+    .join("\n");
+  const normalised = consumers.replace(/var\(\s+/g, "var(");
+  for (const axis of declared) {
+    // a declaration is not a use; look for var(--x-thing) or an attribute selector driving it
+    // Two kinds of axis, two kinds of consumption. A SCALAR is read with var(); a MODE is read by an
+    // attribute selector, because a discrete choice needs rule blocks rather than a value. Checking
+    // only for var() reported all seven modes as dead, which is how this distinction got noticed.
+    // Plain string search on a whitespace-normalised copy rather than a regex per axis: an axis name
+    // is user data in a pattern, and escaping it correctly is a bug waiting to happen.
+    const attr = `[data-${axis.replace("--x-", "")}`;
+    if (!normalised.includes(`var(${axis}`) && !normalised.includes(attr)) {
+      fail("every-axis-is-consumed", `contract declares ${axis} but nothing reads it`);
+    }
+  }
+}
+
+/* 11. The gallery is navigable — every top-level page links to every other one. Not pedantry: the
+       gallery had drifted to four different navs and a landing page with none at all, which left
+       `compare.html` — the page the entire comparison method rests on — reachable only by typing its
+       URL. A page nobody can get to is a page nobody looks at, and the whole argument for the wall is
+       that you have to look. Screens are exempt; they are specimens rendered inside a frame, and
+       chrome on one would show up in every pane of the wall. */
+if (existsSync(GALLERY)) {
+  const pages = readdirSync(GALLERY).filter((f) => f.endsWith(".html"));
+  for (const f of pages) {
+    const html = read(join(GALLERY, f));
+    const missing = pages.filter((o) => o !== f && !html.includes(`href="${o}"`));
+    if (missing.length) {
+      fail("gallery-is-navigable", `gallery/${f} has no link to ${missing.join(", ")}`);
+    }
+  }
+}
+
+/* 12. The sheet wall shows every sheet. sheets.html hand-lists them because sheets are static files
+       with no registry to import — so the list can silently fall behind the directory, and a wall
+       that quietly omits your sixth direction looks entirely correct while hiding the option you
+       wrote it to consider. Same reasoning as rule 5, different pair of halves. */
+{
+  const wall = join(GALLERY, "sheets.html");
+  const dir = join(ROOT, "sheets");
+  if (existsSync(wall) && existsSync(dir)) {
+    const html = read(wall);
+    const files = readdirSync(dir).filter((f) => f.endsWith(".html") && !f.startsWith("_"));
+    for (const f of files) {
+      if (!html.includes(f)) fail("wall-shows-every-sheet", `sheets/${f} is missing from sheets.html`);
+    }
+    for (const m of html.matchAll(/\.\.\/sheets\/([a-z0-9-]+\.html)/g)) {
+      if (!files.includes(m[1])) {
+        fail("wall-shows-every-sheet", `sheets.html lists sheets/${m[1]}, which does not exist`);
+      }
+    }
+  }
+}
+
+/* 13. The docs' axis count is the real axis count. Two files said "fifteen axes" when the contract
+       declared twenty-one — written true, drifted silently over six additions, and quoted back with
+       total confidence by anyone reading them. A number in prose is a claim like any other, and this
+       repo's whole position is that an unchecked claim stops being true. Cheap to verify, so it is. */
+{
+  const WORDS = { ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
+                  sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20,
+                  "twenty-one": 21, "twenty-two": 22, "twenty-three": 23, "twenty-four": 24,
+                  "twenty-five": 25, "twenty-six": 26, "twenty-seven": 27, "twenty-eight": 28 };
+  const actual = [...read(join(SRC, "contract.css")).matchAll(/^ {2}--x-[a-z0-9-]+\s*:/gm)].length;
+  const docs = ["AUTHORING.md", "README.md", join("sheets", "README.md")]
+    .filter((f) => existsSync(join(ROOT, f)));
+
+  // Only claims about the CONTRACT's axes. The first version of this rule counted the word "axes"
+  // anywhere and immediately flagged sheets/README.md's "ten axes" — which is true, and is about
+  // DIRECTIONS.md's ten ways to DESCRIBE a direction, a different vocabulary that happens to share
+  // the noun. The rule was wrong, not the sentence. Requiring `contract.css` in the same sentence is
+  // what makes the two countable things distinguishable.
+  for (const f of docs) {
+    for (const sentence of read(join(ROOT, f)).split(/(?<=\.)\s+|\n\n/)) {
+      if (!sentence.includes("contract.css")) continue;
+      for (const m of sentence.matchAll(/\b([a-z]+(?:-[a-z]+)?)\s+(?:of\s+them\s+now|axes)\b/gi)) {
+        const word = m[1].toLowerCase();
+        const claimed = WORDS[word];
+        if (claimed !== undefined && claimed !== actual) {
+          fail("docs-count-the-real-axes",
+               `${f} says "${word}" axes in contract.css; it declares ${actual}`);
+        }
+      }
+    }
+  }
+}
+
+/* 10. No box-shadow. Depth here is translucency + a hairline + the page wash showing through, which
       is why it stays crisp in dark mode instead of turning to mud. Stated in the README, so checked. */
 for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   if (/box-shadow\s*:\s*(?!none)/.test(read(join(SRC, f)))) {
@@ -163,7 +287,7 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
 }
 
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 9;
+const RULES = 13;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);

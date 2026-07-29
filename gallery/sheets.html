@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — direction sheets</title>
+
+<!-- Step 2 of the loop in sheets/README.md, which until now was the instruction "open them side by
+     side in browser tabs". A method whose comparison step is a manual chore is a method that gets
+     skipped, and the whole argument for sheets is that comparison is the part you cannot do in your
+     head. So: the same wall as compare.html, pointed at the sheets rather than the themes.
+
+     Like compare.html this deliberately does NOT load instrument.css. These panes are pre-library by
+     definition — a sheet is free to ignore the system, that freedom is the point — and chrome built
+     from the system would be a seventh opinion arguing with the five on display. -->
+<style>
+  :root {
+    --w-bg: #f4f4f2; --w-panel: #fff; --w-ink: #16181c; --w-dim: #6b7280;
+    --w-line: #d9d9d4; --w-on: #16181c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --w-bg: #121316; --w-panel: #1a1c20; --w-ink: #e9eaec; --w-dim: #9aa1ab;
+            --w-line: #2c2f35; --w-on: #e9eaec; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--w-bg); color: var(--w-ink);
+         font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: inherit; }
+
+  header { position: sticky; top: 0; z-index: 5; background: var(--w-bg);
+           border-bottom: 1px solid var(--w-line); padding: .9rem 1.25rem; }
+  .row { display: flex; gap: 1.5rem; align-items: flex-end; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: .95rem; font-weight: 650; }
+  .lede { margin: .3rem 0 0; color: var(--w-dim); font-size: .82rem; max-width: 56rem; }
+  .lede a { color: var(--w-ink); }
+  nav a { margin-right: 1rem; font-size: .8rem; color: var(--w-dim); text-decoration: none; }
+  nav a[aria-current] { color: var(--w-ink); font-weight: 650; }
+  .lbl { display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+         color: var(--w-dim); margin-bottom: .2rem; }
+  .seg { display: flex; border: 1px solid var(--w-line); border-radius: 6px; overflow: hidden; }
+  .seg button { font: inherit; font-size: .82rem; padding: .35rem .8rem; border: 0;
+                background: transparent; color: var(--w-dim); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--w-on); color: var(--w-panel); }
+
+  .wall { display: grid; gap: 1.4rem; padding: 1.1rem 1.25rem 3rem;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
+  .pane { display: flex; flex-direction: column; gap: .5rem; }
+  .frame { position: relative; overflow: hidden; border: 1px solid var(--w-line);
+           border-radius: 6px; background: var(--w-panel); }
+  .frame iframe { position: absolute; inset: 0; border: 0; transform-origin: top left; }
+  .cap b { font-weight: 650; }
+  .cap { font-size: .78rem; }
+  /* The direction sentence is the caption, not decoration. It is the thing being judged alongside
+     the pixels: if the sheet does not look like the sentence, one of the two is wrong. */
+  .cap p { margin: .25rem 0 0; color: var(--w-dim); font-size: .76rem; }
+  .meta { display: flex; justify-content: space-between; gap: .5rem; align-items: baseline;
+          margin-top: .3rem; font-size: .72rem; color: var(--w-dim); }
+  .meta a { text-decoration: none; }
+  .meta a:hover { color: var(--w-ink); }
+  .became { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Components</a><a href="foundations.html">Foundations</a>
+    <a href="themes.html">Themes</a><a href="patterns.html">Patterns</a>
+    <a href="compare.html">Compare</a><a href="sheets.html" aria-current="page">Sheets</a>
+  </nav>
+  <div class="row" style="margin-top:.6rem">
+    <div>
+      <h1>Direction sheets — where each theme started</h1>
+      <p class="lede">
+        Five hand-written pages, same content in every one, each committed hard to a single idea and
+        free to ignore this library entirely. That freedom is the point: a sheet can change the
+        composition, which a token swap can never do. Every theme in the system began as one of
+        these. Read <a href="../sheets/DIRECTIONS.md">DIRECTIONS.md</a> for the vocabulary that makes
+        a direction specifiable before anyone builds it.
+      </p>
+    </div>
+    <div style="margin-left:auto">
+      <span class="lbl">Width</span>
+      <div class="seg" id="width">
+        <button data-v="1440" aria-pressed="true">1440</button>
+        <button data-v="1100" aria-pressed="false">1100</button>
+        <button data-v="720" aria-pressed="false">720</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wall" id="wall"></div>
+
+<script type="module">
+  // Sheets are static files with no registry, so this list is written by hand — and `npm run check`
+  // asserts it matches sheets/*.html exactly, because a wall that silently omits the sixth sheet
+  // looks completely correct while hiding the option you added it to consider.
+  const SHEETS = [
+    { file: "swiss.html",     name: "Swiss Signal",
+      became: "swiss",
+      line: "A painted twelve-column grid on bone paper, hairline rules, figures set enormous and hung on the column lines, and exactly one hue: a red that only ever means this failed." },
+    { file: "terminal.html",  name: "Terminal",
+      became: "terminal",
+      line: "A TUI — one monospace family for every voice, nothing boxed, a command line above and a status bar below as the entire frame, colour spent only on status." },
+    { file: "editorial.html", name: "Editorial Ops",
+      became: "editorial",
+      line: "A magazine page, not a panel — warm cream stock, a masthead rule, the human voice in a serif and the machine's in mono, hierarchy from scale and whitespace with nothing boxed at all." },
+    { file: "bento.html",     name: "Bento Console",
+      became: "bento",
+      line: "Unequal tiles on midnight navy where composition is the hierarchy — a lit 2×2 hero, ordinary planes, recessed strips, no two cells the same size, and depth made of light rather than shadow." },
+    { file: "blueprint.html", name: "Blueprint",
+      became: "blueprint",
+      line: "A drafting sheet — fine grid, hard outlines, everything numbered; nothing filled, quantities dimensioned, callout cyan the only annotation ink and red reserved for a fault." },
+  ];
+  const LOGICAL_H = 900;
+
+  const wall = document.getElementById("wall");
+  let logicalW = 1440;
+
+  wall.innerHTML = SHEETS.map((s) => `
+    <div class="pane">
+      <div class="frame">
+        <iframe loading="lazy" title="${s.name}" src="../sheets/${s.file}"></iframe>
+      </div>
+      <div class="cap">
+        <b>${s.name}</b>
+        <p>${s.line}</p>
+        <div class="meta">
+          <span class="became">→ became <code>src/themes/${s.became}.css</code></span>
+          <a href="../sheets/${s.file}" target="_blank" rel="noopener">open ↗</a>
+        </div>
+      </div>
+    </div>`).join("");
+
+  // Scale a full render down rather than letting each pane reflow. A responsive reflow would destroy
+  // the composition being compared, and composition is the only thing a sheet exists to show.
+  function render() {
+    for (const pane of wall.querySelectorAll(".pane")) {
+      const box = pane.querySelector(".frame");
+      const frame = pane.querySelector("iframe");
+      const k = box.clientWidth / logicalW;
+      frame.style.width = logicalW + "px";
+      frame.style.height = LOGICAL_H + "px";
+      frame.style.transform = `scale(${k})`;
+      box.style.height = LOGICAL_H * k + "px";
+    }
+  }
+
+  document.getElementById("width").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    logicalW = Number(b.dataset.v);
+    [...e.currentTarget.children].forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  });
+
+  // A ResizeObserver rather than a resize listener plus a one-shot call at startup. That pairing has
+  // a hole: if the page loads in a BACKGROUND tab the wall has no width yet, every pane computes
+  // scale(0), and bringing the tab forward fires no resize event — so the wall stays collapsed and
+  // looks like five sheets that failed to load. Observed exactly that here, with all five iframes
+  // fully loaded behind it. The observer fires whenever the element actually has a size, whatever
+  // the reason, which covers first layout, tab activation, font swap and window resize alike.
+  new ResizeObserver(render).observe(wall);
+</script>
+</body>
+</html>

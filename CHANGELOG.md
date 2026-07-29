@@ -4,6 +4,44 @@ Structure axes are the interesting entries. Each one exists because a theme coul
 something and was brute-forcing around it — that is the only good reason to add one, and recording
 *which* theme asked is what stops the list growing on speculation.
 
+## 0.5.0
+
+One axis, and it is the first one found by **measuring** rather than by a theme author hitting a wall.
+
+| Axis | Kind | Asked for by | Solves |
+|---|---|---|---|
+| `--x-figure-fit` | scalar | Bento (twice), measurement | how much of its own column a figure may fill. It was a bare `18cqi` inside `components.css`, so the only way to change it was to fork the whole `font-size` rule — which Bento had already done twice, at 24cqi for its hero tile and 12cqi for its recessed strips. |
+
+Why it was worth finding: the component sizes a figure as `min(--x-figure, --x-figure-fit)`, and at a
+1280px stage the **fit wins in five of the six themes** — Swiss renders 74.6px against an 86.4px
+ceiling, Blueprint 31.1 against 54.4, Editorial 37.1 against 48, Bento 36.2 against 51.2. Only
+Terminal, which deliberately lowered its figure, has its ceiling bind. So `--x-figure` looked inert
+for most themes and three separate theme files answered by writing a paragraph about the coupling
+instead of turning a knob, because the knob did not exist.
+
+Bento's two forks are now value declarations rather than restated rules — the component keeps the
+formula, the theme says which ceiling and which allowance. Verified behaviour-preserving: computed
+figure sizes across all six themes and all six cockpit stats are byte-identical before and after,
+including Bento's three distinct sizes (131 / 45.9 / 25.9px).
+
+Also in this release, none of them axes:
+
+- **`sheets/`** — the five original direction sheets, the method that produced them, and
+  `DIRECTIONS.md`: ten things a direction has to answer, each one something the five real themes
+  genuinely disagree about, with a blank brief to fill in.
+- **`gallery/sheets.html`** — step 2 of the loop as a page instead of an instruction to open browser
+  tabs. Every sheet side by side, each captioned with its direction sentence and the theme it became.
+- **The gallery is navigable.** It had drifted to four different navs and a landing page with none,
+  leaving `compare.html` reachable only by typing its URL. Checked now.
+- **`npm run gallery` is a Node server that sends `no-store`.** `python -m http.server` sends no
+  `Cache-Control`, so a browser may reuse a stylesheet without revalidating; editing `contract.css`
+  produced a page built from the new `components.css` and the old contract, every figure collapsed to
+  18px, and it looked exactly like a bug in the change. A gallery you cannot trust to show you the
+  current code is worse than no gallery.
+- **Three new check rules** — modes cannot be set in theme CSS (they do nothing there), every gallery
+  page links to every other, and a count of axes stated in prose has to be the real count. The last
+  one was written after finding two docs claiming "fifteen" when the contract declared twenty-one.
+
 ## 0.4.0
 
 Eight axes, all requested by theme authors who hit the wall rather than invented up front.
