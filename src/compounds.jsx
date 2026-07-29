@@ -14,7 +14,7 @@ import { H, P, Tag } from "./primitives.jsx";
 
 /** The page shell: title, one line of orientation, then content. Every view had hand-rolled this same
  *  header + canvas pair (10 copies), which is exactly how headers drift apart. */
-export function View({ title, sub, actions, children, className = "" }) {
+export function View({ title, sub, status, actions, children, className = "" }) {
   return (
     <div className={`i-view ${className}`}>
       <header className="i-view-head">
@@ -23,8 +23,16 @@ export function View({ title, sub, actions, children, className = "" }) {
           {sub ? <div className="i-view-sub">{sub}</div> : null}
         </div>
         {/* actions sit ON the title row rather than under it. A dev tool that spends 150px of every
-            screen on a heading and a sentence has spent it on the least useful thing there. */}
-        {actions ? <div className="i-view-actions">{actions}</div> : null}
+            screen on a heading and a sentence has spent it on the least useful thing there.
+            `status` is a slot rather than something callers compose, because two of them had started
+            hand-writing `<span className="i-toolbar-status">` — reaching into another component's
+            internals, which quietly makes that class app-facing API that no rename may touch. */}
+        {status || actions ? (
+          <div className="i-view-actions">
+            {status ? <span className="i-status">{status}</span> : null}
+            {actions}
+          </div>
+        ) : null}
       </header>
       {children}
     </div>

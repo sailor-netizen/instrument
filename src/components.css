@@ -161,8 +161,10 @@
 .i-section { display: flex; flex-direction: column; gap: var(--i-3); margin-top: var(--i-6); }
 .i-section:first-child { margin-top: 0; }
 .i-toolbar { display: flex; align-items: center; gap: var(--i-3); flex-wrap: wrap; }
-.i-toolbar-status { font-family: var(--i-mono); font-size: var(--i-row); color: var(--i-dim);
-                    font-style: italic; }
+/* One live-status style, shared by Toolbar and View. It was Toolbar's private class and two screens
+   reached for it from outside; a name two components share should be a name, not a secret. */
+.i-status, .i-toolbar-status { font-family: var(--i-mono); font-size: var(--i-row);
+                               color: var(--i-dim); font-style: italic; }
 
 .i-kv { display: grid; grid-template-columns: max-content 1fr; gap: var(--i-2) var(--i-4);
         margin: 0; font-size: var(--i-small); }
