@@ -14,7 +14,12 @@ import { H, P, Tag } from "./primitives.jsx";
 
 /** The page shell: title, one line of orientation, then content. Every view had hand-rolled this same
  *  header + canvas pair (10 copies), which is exactly how headers drift apart. */
-export function View({ title, sub, status, actions, children, className = "" }) {
+/** `aside` is a secondary column beside the main content, for the material that explains the primary
+ *  thing without competing with it — a per-agent cost breakdown next to a run table, a verdict tally
+ *  next to a review history. It exists because three screens had the same shape of leftover: an API
+ *  returning a breakdown the screen had nowhere to put, next to a stage two-thirds empty below the
+ *  fold. Passing no `aside` renders exactly what it rendered before, so no existing view changes. */
+export function View({ title, sub, status, actions, aside, children, className = "" }) {
   return (
     <div className={`i-view ${className}`}>
       <header className="i-view-head">
@@ -34,7 +39,12 @@ export function View({ title, sub, status, actions, children, className = "" }) 
           </div>
         ) : null}
       </header>
-      {children}
+      {aside ? (
+        <div className="i-view-body">
+          <div className="i-view-main">{children}</div>
+          <aside className="i-view-aside">{aside}</aside>
+        </div>
+      ) : children}
     </div>
   );
 }
@@ -207,8 +217,25 @@ export function Table({ cols, head, children, className = "" }) {
   );
 }
 
-export function TRow({ children, className = "", ...rest }) {
-  return <div className={`i-tr ${className}`} role="row" {...rest}>{children}</div>;
+/** A table row. Given `onClick` it becomes properly operable from the keyboard — focusable, with
+ *  Enter and Space bound — because a `div` with a click handler is a control that only exists for
+ *  mouse users, which this file's own rules call a keyboard trap. It cannot be a `<button>`: a button
+ *  may not contain the row's cells, and a grid row must keep `role="row"` to stay in the table's
+ *  accessibility tree. Focusable-plus-keydown is the accessible form of a clickable grid row. */
+export function TRow({ children, className = "", onClick, ...rest }) {
+  const keys = onClick
+    ? (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();  // Space would otherwise scroll the page out from under the row
+        onClick(e);
+      }
+    : undefined;
+  return (
+    <div className={`i-tr${onClick ? " is-link" : ""} ${className}`} role="row"
+      tabIndex={onClick ? 0 : undefined} onClick={onClick} onKeyDown={keys} {...rest}>
+      {children}
+    </div>
+  );
 }
 
 /** A finding: severity + location + claim, with an optional verdict from a verification pass. */

@@ -196,7 +196,7 @@ Symptoms you have this problem:
 - Two themes independently wrote the same override.
 - A component would need to know the theme name.
 
-Every axis currently in `contract.css` got there this way — twenty-one of them now, and not one was
+Every axis currently in `contract.css` got there this way — twenty-two of them now, and not one was
 designed up front. `CHANGELOG.md` records which theme asked for each, which is what stops the list
 growing on speculation. Worked examples:
 

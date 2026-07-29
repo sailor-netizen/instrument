@@ -43,7 +43,7 @@ function ThemePicker({ theme, onTheme }) {
 
 export function Shell({
   variant = "sidebar", brand = "Instrument", nav = [], active, onNavigate,
-  workspace = null, theme, onTheme, children,
+  workspace = null, theme, onTheme, notes = null, children,
 }) {
   const controls = (
     <>
@@ -144,12 +144,13 @@ export function Shell({
         <div className="i-shell is-titleblock">
           {stage}
           <aside className="i-sheet-col">
-            <section className="i-sheet-notes">
-              <div className="i-eyebrow">Notes</div>
-              <p className="i-p is-small is-dim">
-                Every quantity on a sheet is a link; its target sheet is given in the item foot.
-              </p>
-            </section>
+            {/* A SLOT, and empty by default. This block used to contain a hardcoded sentence — "Every
+                quantity on a sheet is a link; its target sheet is given in the item foot" — which was
+                true of the drafting sheet this shell was translated from and true of nothing since.
+                It shipped into a real product as permanent placeholder copy at the top of the right
+                column, which is how a library ends up writing a customer's UI text. A shell composes;
+                it does not author. Passing nothing renders nothing, rather than renders filler. */}
+            {notes ? <section className="i-sheet-notes">{notes}</section> : null}
             <div className="i-titleblock">
               <div className="i-titleblock-head">
                 <b>{brand}</b>

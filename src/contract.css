@@ -89,6 +89,11 @@
      hero tile and 12cqi for its small ones — two themes restating one idea, which is the symptom
      AUTHORING.md names for "the contract is short a dimension". */
   --x-figure-fit: 18cqi;
+  /* Width of a View's aside column. A scalar rather than a fixed number because the themes disagree
+     about it for a reason they already disagree about elsewhere: Editorial runs --i-density 1.35 and
+     needs the room, Terminal runs 0.74 and a wide column there is dead space. Same family as
+     --x-stat-floor and --x-card-floor, which exist for exactly this. */
+  --x-aside: 16rem;
   --x-title: var(--i-h1);
   --x-label-case: uppercase;
   --x-label-track: 0.12em;

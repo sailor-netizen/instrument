@@ -33,7 +33,7 @@ you point at one.
 
 Step 3 is the interesting one. A sheet can do anything; a theme can only do what the contract allows.
 Translating one into the other is a measurement, and the parts that don't survive are not failures —
-they are the contract telling you which dimension it is missing. Every one of the twenty-one axes in
+they are the contract telling you which dimension it is missing. Every one of the twenty-two axes in
 `contract.css` was found this way. None was designed up front.
 
 ## Writing one

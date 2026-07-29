@@ -190,12 +190,24 @@
 .i-traceline.is-muted { font-style: italic; }
 
 .i-table { display: flex; flex-direction: column; overflow-x: auto; }
+/* min-width:0 is load-bearing, not defensive. .i-table is a COLUMN flex container, so every row is a
+   flex item with the default `min-width: auto` — meaning the row refuses to be narrower than its own
+   min-content and inflates past the table, taking the fr tracks with it. The effect is that
+   proportional columns silently divide the wrong width: a six-track fr row measured 725px inside a
+   675px table and pushed its last column behind the horizontal scrollbar. minmax(0,1fr) on the tracks
+   does NOT fix it — the tracks were never the constraint, the row was. */
 .i-tr { display: grid; grid-template-columns: var(--i-cols); gap: var(--i-3);
-        align-items: center; padding: var(--i-2) var(--i-3);
+        align-items: center; padding: var(--i-2) var(--i-3); min-width: 0;
         border-bottom: 1px solid var(--i-line); font-size: var(--i-row); }
 .i-tr.is-head { font-family: var(--i-chrome-face, var(--i-mono)); font-size: var(--i-micro);
                 letter-spacing: var(--x-label-track); text-transform: var(--x-label-case);
                 color: var(--i-dim); border-bottom-color: var(--i-rail); }
+/* A clickable row has to LOOK clickable, or the interaction is a secret. Background rather than the
+   lift Row uses: a table row that rises on hover breaks the shared baseline that makes columns
+   readable, which is the entire reason the data is in a table. */
+.i-tr.is-link { cursor: pointer; transition: background var(--i-fast); }
+.i-tr.is-link:hover { background: var(--i-plane-2); }
+.i-tr.is-link:focus-visible { outline: 2px solid var(--i-signal); outline-offset: -2px; }
 
 .i-finding { display: grid; grid-template-columns: max-content minmax(8rem, 16rem) 1fr;
              gap: var(--i-3); align-items: baseline;
@@ -216,6 +228,23 @@
 .i-view-actions { display: flex; align-items: center; gap: var(--i-2); flex-wrap: wrap; }
 .i-view-sub { font-family: var(--i-prose); font-size: var(--i-small); color: var(--i-dim);
               max-width: var(--i-measure); }
+/* The aside column. Sticky, because its job is to stay readable while you scroll the thing it
+   annotates — a breakdown that scrolls away the moment you look at row 40 is a breakdown you have to
+   remember instead of read. minmax(0, …) on BOTH tracks rather than `auto`: a grid track sized to
+   content refuses to shrink below its longest unbreakable word, and one long agent name in the aside
+   was enough to push the run table into a horizontal scrollbar. */
+.i-view-body { display: grid; gap: var(--i-4); align-items: start;
+               grid-template-columns: minmax(0, 1fr) minmax(0, var(--x-aside)); }
+.i-view-main { display: flex; flex-direction: column; gap: var(--i-4); min-width: 0; }
+.i-view-aside { display: flex; flex-direction: column; gap: var(--i-3); min-width: 0;
+                position: sticky; top: var(--i-4); }
+/* One column below the shell's own collapse point, and NOT sticky there: a sticky block in a stacked
+   layout pins itself over the content it was meant to sit beside. */
+@media (max-width: 60rem) {
+  .i-view-body { grid-template-columns: minmax(0, 1fr); }
+  .i-view-aside { position: static; }
+}
+
 .i-split { display: flex; align-items: center; justify-content: space-between; gap: var(--i-3); }
 
 /* Context strip — the reference is a dev tool's status bar: scope, live facts, one implied action,

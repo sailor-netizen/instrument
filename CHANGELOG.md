@@ -6,11 +6,35 @@ something and was brute-forcing around it — that is the only good reason to ad
 
 ## 0.5.0
 
-One axis, and it is the first one found by **measuring** rather than by a theme author hitting a wall.
+Two axes, both found by **measuring** rather than by a theme author hitting a wall.
 
 | Axis | Kind | Asked for by | Solves |
 |---|---|---|---|
 | `--x-figure-fit` | scalar | Bento (twice), measurement | how much of its own column a figure may fill. It was a bare `18cqi` inside `components.css`, so the only way to change it was to fork the whole `font-size` rule — which Bento had already done twice, at 24cqi for its hero tile and 12cqi for its recessed strips. |
+| `--x-aside` | scalar | Flightdeck's Runs / Reviews / Approvals | width of `View`'s new aside column. Same family as `--x-stat-floor` and `--x-card-floor`: the themes disagree about it for a reason they already disagree about elsewhere, since Editorial runs `--i-density` 1.35 and Terminal 0.74. |
+
+**`View` takes an `aside`.** A secondary column for the material that explains the primary thing
+without competing with it. Three Flightdeck screens had the same leftover — an API returning a
+breakdown the screen had nowhere to put, beside a stage two-thirds empty below the fold — which is
+the threshold `AUTHORING.md` sets for admitting a pattern. Passing no `aside` renders exactly what it
+rendered before.
+
+**`Shell` takes `notes`; the titleblock no longer writes your copy.** That shell shipped with a
+hardcoded sentence — *"Every quantity on a sheet is a link; its target sheet is given in the item
+foot"* — true of the drafting sheet it was translated from and of nothing since. It sat at the top of
+the right-hand column of a real product as permanent placeholder text. It is a slot now, empty by
+default: a shell composes, it does not author.
+
+**Two layout bugs, both of which made columns silently wrong rather than visibly broken:**
+
+- `.i-tr` had no `min-width: 0`. `.i-table` is a column flex container, so every row was a flex item
+  with `min-width: auto` and refused to be narrower than its own min-content — inflating past the
+  table and taking the `fr` tracks with it. A six-track row measured 725px inside a 675px table and
+  pushed its last column behind a horizontal scrollbar. `minmax(0,1fr)` on the tracks does *not* fix
+  this; the tracks were never the constraint.
+- `TRow` with `onClick` was a `div` with a click handler — a control that exists only for mouse
+  users, which this repo's own AUTHORING calls a keyboard trap. It is focusable now, with Enter and
+  Space bound, keeping `role="row"` (a `<button>` may not contain the row's cells).
 
 Why it was worth finding: the component sizes a figure as `min(--x-figure, --x-figure-fit)`, and at a
 1280px stage the **fit wins in five of the six themes** — Swiss renders 74.6px against an 86.4px
