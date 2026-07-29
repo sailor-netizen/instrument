@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint" data-surface="outline" data-shell="titleblock"
+      data-grid="fine" data-annotate="1" data-hover="mark" data-section-rule="none"
+      data-band="rows" data-leader="0" data-emphasis="fill" data-hero="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — Runs</title>
+
+<!-- ONE link is the whole system, exactly as on the gallery pages. The attributes above are the house
+     default theme's own row from the registry, so the page renders as *a* theme before the module has
+     run; applyTheme() rewrites all eleven of them in one pass a moment later, from ?theme=. -->
+<link rel="stylesheet" href="../../src/instrument.css">
+
+<style>
+  /* The only rule on this page. The library styles i-* elements; it deliberately does not own the
+     host document, so a screen has to say which role paints the page it sits on. */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+</style>
+</head>
+<body>
+
+<!-- THE DENSE LEDGER. Seven metered agent runs, one working day. This is the tabular extreme of the
+     system: banding, leaders, type scale and label case all show up harder here than anywhere else,
+     because forty-nine cells of machine voice leave nowhere for a theme to hide. -->
+
+<div class="i-shell is-sidebar">
+
+  <aside class="i-side">
+    <div class="i-brand">Flightdeck</div>
+    <div class="i-eyebrow i-side-head">Cockpit</div>
+    <nav class="i-nav-stack" aria-label="Main">
+      <button type="button" class="i-navitem">Home</button>
+      <button type="button" class="i-navitem">Chat</button>
+      <button type="button" class="i-navitem is-on" aria-current="page">Runs</button>
+      <button type="button" class="i-navitem">Proposals</button>
+      <button type="button" class="i-navitem">Reviews</button>
+      <button type="button" class="i-navitem">Fleet</button>
+      <button type="button" class="i-navitem">Credentials</button>
+    </nav>
+  </aside>
+
+  <main class="i-stage">
+
+    <div class="i-ctxbar">
+      <span class="i-ctx-scope">flightdeck</span>
+      <span class="i-ctx-fact"><span class="i-ctx-k">window</span>
+        <span class="i-ctx-v">29 Jul</span></span>
+      <span class="i-ctx-fact tone-machine"><span class="i-ctx-k">store</span>
+        <span class="i-ctx-v">runs.sqlite</span></span>
+      <span class="i-ctx-fact"><span class="i-ctx-k">budget</span>
+        <span class="i-ctx-v">$2.9433 of $12.00</span></span>
+      <span class="i-ctx-fact tone-ok"><span class="i-ctx-k">gates</span>
+        <span class="i-ctx-v">7 of 7 passed</span></span>
+      <span class="i-ctx-act"><button type="button" class="i-btn is-quiet">Open the store</button></span>
+    </div>
+
+    <div class="i-view">
+      <header class="i-view-head">
+        <div class="i-view-titles">
+          <h1 class="i-h i-h1">Runs</h1>
+          <div class="i-view-sub">Every gated agent run, metered. Seven finished today across two
+            models; four tool calls were denied by the workspace allowlist and none of them stopped a
+            run.</div>
+        </div>
+        <div class="i-view-actions">
+          <button type="button" class="i-btn is-quiet">Export CSV</button>
+          <button type="button" class="i-btn is-primary">Start a run</button>
+        </div>
+      </header>
+
+      <section class="i-section">
+        <div class="i-eyebrow">Today</div>
+        <div class="i-stats">
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">runs</span></span></div>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">$2.9433</span><span class="i-stat-l">total cost</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">1,137,125</span><span class="i-stat-l">tokens</span></span></button>
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">0</span><span class="i-stat-l">errors</span></span></div>
+        </div>
+      </section>
+
+      <section class="i-section">
+        <div class="i-eyebrow">Run ledger</div>
+
+        <div class="i-toolbar">
+          <div class="i-pills" role="group" aria-label="Filter by agent">
+            <button type="button" class="i-pill is-on" aria-pressed="true">all agents</button>
+            <button type="button" class="i-pill" aria-pressed="false">review</button>
+            <button type="button" class="i-pill" aria-pressed="false">builder</button>
+            <button type="button" class="i-pill" aria-pressed="false">researcher</button>
+          </div>
+          <span class="i-toolbar-status">Read from runs.sqlite at 21:52. Newest first.</span>
+        </div>
+
+        <!-- Column widths are one custom property, read by the head row and every body row alike, so a
+             heading cannot drift away from the column it names. The model column is the only 1fr: it
+             is the one value whose length varies, and it is where the table gives back its slack. -->
+        <div class="i-table" style="--i-cols: 7rem 8rem minmax(7.5rem, 1fr) 5rem 5.5rem 7.5rem 4.5rem"
+             role="table" aria-label="Agent runs">
+          <div class="i-tr is-head" role="row">
+            <span role="columnheader">agent</span>
+            <span role="columnheader">when</span>
+            <span role="columnheader">model</span>
+            <span role="columnheader">cost</span>
+            <span role="columnheader">tokens</span>
+            <span role="columnheader">tools</span>
+            <span role="columnheader">status</span></div>
+
+          <div class="i-tr" role="row"><span>review-verify</span><span>29 Jul, 21:48</span>
+            <span>claude-opus-4-8</span><span>$0.5950</span><span>187,402</span><span>96</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>review</span><span>29 Jul, 20:12</span>
+            <span>claude-opus-4-8</span><span>$0.4127</span><span>141,908</span>
+            <span>71 <span class="i-tag tone-mute">2 denied</span></span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>builder</span><span>29 Jul, 17:35</span>
+            <span>claude-opus-4-8</span><span>$1.3072</span><span>402,617</span><span>188</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>researcher</span><span>29 Jul, 14:09</span>
+            <span>claude-opus-4-8</span><span>$0.2318</span><span>79,244</span><span>54</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>review</span><span>29 Jul, 11:26</span>
+            <span>claude-opus-4-8</span><span>$0.1864</span><span>64,509</span><span>43</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>review</span><span>29 Jul, 09:14</span>
+            <span>claude-opus-4-8</span><span>$0.1918</span><span>66,338</span>
+            <span>45 <span class="i-tag tone-mute">2 denied</span></span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+
+          <div class="i-tr" role="row"><span>researcher</span><span>28 Jul, 23:41</span>
+            <span>claude-haiku-4-5</span><span>$0.0184</span><span>195,107</span><span>38</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+        </div>
+
+        <div class="i-callout tone-ok">All seven runs exited clean. The four denied tool calls were
+          writes outside the workspace root; both runs carried on and passed their gates.</div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  // The registry is imported, not restated — one source of truth for what a theme IS. The URL
+  // parameter is the whole point of this file: a comparison page frames it six times at six themes,
+  // so the CONTENT is the control variable and the only thing that differs is the design.
+  import { applyTheme, storedTheme } from "../../src/themes.js";
+  const t = new URLSearchParams(location.search).get("theme");
+  applyTheme(t || storedTheme());
+</script>
+</body>
+</html>

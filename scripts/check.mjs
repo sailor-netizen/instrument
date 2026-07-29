@@ -97,10 +97,20 @@ for (const f of themeFiles) {
 }
 
 /* 6. The gallery obeys the rules it documents. A gallery that hardcodes a colour while telling you
-      not to is the least credible file in the repo. */
+      not to is the least credible file in the repo.
+
+      Scoped to pages that actually LOAD the system, which is principled rather than an exemption
+      list: a page claiming to follow the rules is one that imports them. `compare.html` deliberately
+      does not — it is the wall the exhibits hang on, holding six panes at six themes, and chrome that
+      restyled itself as you switched would be competing with the thing being judged. A page that
+      opts out of the stylesheet has opted out of the vocabulary, and gets no tokens to use. */
 if (existsSync(GALLERY)) {
   for (const f of readdirSync(GALLERY).filter((f) => f.endsWith(".html"))) {
-    const hits = [...read(join(GALLERY, f)).matchAll(LITERAL)];
+    const html = read(join(GALLERY, f));
+    // a real <link>, not the substring: compare.html's own comment EXPLAINS that it does not load
+    // instrument.css, and a naive includes() read that explanation as the thing it denies
+    if (!/<link[^>]+instrument\.css/.test(html)) continue;
+    const hits = [...html.matchAll(LITERAL)];
     if (hits.length) fail("gallery-uses-tokens", `gallery/${f}: ${hits.length} (${hits[0][0]})`);
   }
 }
@@ -110,18 +120,41 @@ if (existsSync(GALLERY)) {
       the whole gallery rendered UNSTYLED — the loudest possible bug, invisible to every other check
       because the HTML itself was fine. */
 if (existsSync(GALLERY)) {
-  for (const f of readdirSync(GALLERY).filter((f) => f.endsWith(".html"))) {
+  const pages = readdirSync(GALLERY, { recursive: true })
+    .map(String).filter((f) => f.endsWith(".html"));
+  for (const f of pages) {
     const html = read(join(GALLERY, f));
+    const base = join(GALLERY, dirname(f));
     const refs = [...html.matchAll(/(?:href|src|from)\s*=?\s*["']([^"'#?]+\.(?:css|js|mjs))["']/g)]
       .map((m) => m[1])
       .filter((u) => !/^(https?:)?\/\//.test(u));
     for (const ref of new Set(refs)) {
-      if (!existsSync(join(GALLERY, ref))) fail("gallery-assets-resolve", `gallery/${f} -> ${ref}`);
+      if (!existsSync(join(base, ref))) fail("gallery-assets-resolve", `gallery/${f} -> ${ref}`);
     }
   }
 }
 
-/* 8. No box-shadow. Depth here is translucency + a hairline + the page wash showing through, which
+/* 8. Screens compose the library rather than restyling it. A screen page exists to prove the
+      vocabulary builds real UI; a <style> block full of rules in one is that proof failing quietly.
+      A handful of layout lines is fine — a stylesheet is not. */
+{
+  const dir = join(GALLERY, "screens");
+  if (existsSync(dir)) {
+    for (const f of readdirSync(dir).filter((f) => f.endsWith(".html"))) {
+      const html = read(join(dir, f));
+      const css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
+      const decls = (css.match(/[a-z-]+\s*:[^;{}]+;/g) || []).length;
+      if (decls > 20) fail("screens-compose-not-restyle", `gallery/screens/${f}: ${decls} declarations`);
+      if ([...css.matchAll(LITERAL)].length) fail("gallery-uses-tokens", `gallery/screens/${f}`);
+      if (!html.includes("themes.js")) {
+        fail("screens-are-theme-parameterised",
+             `gallery/screens/${f} never imports themes.js — it cannot honour ?theme=`);
+      }
+    }
+  }
+}
+
+/* 9. No box-shadow. Depth here is translucency + a hairline + the page wash showing through, which
       is why it stays crisp in dark mode instead of turning to mud. Stated in the README, so checked. */
 for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   if (/box-shadow\s*:\s*(?!none)/.test(read(join(SRC, f)))) {
@@ -130,7 +163,7 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
 }
 
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 8;
+const RULES = 9;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);

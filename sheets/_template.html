@@ -1,0 +1,54 @@
+<!-- DIRECTION: <one sentence — what this is, committed to. "A drafting sheet: fine grid, hard
+     outlines, everything numbered" is a direction. "Clean and modern" is not.>
+
+     A direction sheet is hand-written and free to ignore Instrument entirely. That is deliberate: a
+     sheet explores COMPOSITION, and composition is exactly what a token swap cannot reach. Change
+     where navigation lives, whether there are boxes at all, how dense it is, what the type is doing.
+
+     Keep the CONTENT identical to every other sheet. It is the control variable — change it and you
+     are comparing screens, not designs.  See README.md for the loop. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction — <name></title>
+<style>
+  /* Everything lives here. No imports, no library, no build step — a sheet you cannot open by
+     double-clicking is a sheet nobody will look at.
+
+     Declare your palette once at the top even though nothing enforces it: when this direction wins,
+     these are the values that become src/themes/<id>.css, and having them already named saves the
+     translation step from being an archaeology exercise. */
+  :root {
+    --page:   #ffffff;
+    --ink:    #111111;
+    --dim:    #666666;
+    --line:   #dddddd;
+    --signal: #cc4400;   /* this wants you, or binds you */
+    --crit:   #cc0000;   /* this failed */
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 16px/1.5 ui-sans-serif, system-ui, sans-serif; }
+</style>
+</head>
+<body>
+
+<!-- THE CONTENT, fixed across every sheet. Re-word nothing; re-arrange freely.
+
+     Cockpit
+       sub:     Working in Flightdeck — everything below runs against it.
+       metrics: 7 agent runs · $2.9433 spent · 0 awaiting you ·
+                3 fleet hosts · 5 credentials · 0 run errors
+       actions: Ask the workspace   — Read-only agent, every step shown.
+                Run the gates       — Build, lint and test the active project.
+                Run a workflow      — Checks · review · fleet plan · design loop.
+                Review changes      — A gated agent reads your diff.
+       last review: uncommitted changes · 1 finding · 27 Jul, 21:47
+
+     Navigation (nine destinations — WHERE these live is part of your direction, not a given):
+       Home · Chat · Dev Workflow · Workflows · Runs · Reviews · Approvals · Fleet · Creds -->
+
+</body>
+</html>

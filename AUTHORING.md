@@ -90,6 +90,19 @@ Conventions the whole library follows, so the next component doesn't have to be 
 
 Two files: `src/themes/<id>.css` and one object in `src/themes.js`.
 
+### First, though: don't start here
+
+A theme written straight into the contract inherits the contract's assumptions, which is how six
+themes end up being one theme in six palettes. Start with a **direction sheet** — a hand-written page,
+free to ignore this library entirely, exploring the composition rather than the colours. Compare
+several. Then translate the winner.
+
+That translation is a measurement: what survives is what the contract can express, and what doesn't
+is the contract telling you which axis it is missing. Every axis in `contract.css` was found this way.
+
+See **[sheets/README.md](sheets/README.md)** for the loop and a template, and
+`gallery/compare.html` for the same screen across every installed theme at once.
+
 ### 1. The registry entry
 
 ```js

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flightdeck — Cockpit</title>
+
+<!-- ONE link is the whole system, exactly as on the gallery pages. This file is a SCREEN, not a
+     specimen: it renders one real product view and applies whatever theme ?theme= asks for, so
+     compare.html can iframe the same file six times and the design is the only variable left.
+
+     No <html> attributes are pre-set here, unlike patterns.html. That page renders as Blueprint
+     before its script runs because Blueprint is what it is; a screen that hardcoded one theme's
+     attributes would flash that theme in five of the six panes on the wall. -->
+<link rel="stylesheet" href="../../src/instrument.css">
+
+<!-- In <head> rather than at the end of <body> for the same reason: deferred either way, but the
+     earlier it starts the smaller the unthemed window is when six copies paint at once. -->
+<script type="module">
+  import { applyTheme, storedTheme } from "../../src/themes.js";
+  const t = new URLSearchParams(location.search).get("theme");
+  applyTheme(t || storedTheme());
+</script>
+
+<style>
+  /* The only CSS in this file, and it is host-page reset rather than design. The library states
+     box-sizing for its own elements but cannot reset a host's body, and .i-shell is 100vh — an 8px
+     default margin would hang a scrollbar off every theme. Roles, never literals, here too. */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+</style>
+</head>
+<body>
+
+<div class="i-shell is-sidebar">
+
+  <aside class="i-side">
+    <div class="i-brand">Flightdeck</div>
+    <div class="i-eyebrow i-side-head">Workspace</div>
+    <nav class="i-nav-stack" aria-label="Main">
+      <button type="button" class="i-navitem is-on" aria-current="page">Cockpit</button>
+      <button type="button" class="i-navitem">Chat</button>
+      <button type="button" class="i-navitem">Runs</button>
+      <button type="button" class="i-navitem">Reviews</button>
+      <button type="button" class="i-navitem">Fleet</button>
+      <button type="button" class="i-navitem">Credentials</button>
+    </nav>
+  </aside>
+
+  <main class="i-stage">
+    <div class="i-view">
+
+      <header class="i-view-head">
+        <div class="i-view-titles">
+          <h1 class="i-h i-h1">Cockpit</h1>
+          <div class="i-view-sub">Seven runs today, nothing waiting on you, and the last review
+            cleared its gate.</div>
+        </div>
+        <div class="i-view-actions">
+          <button type="button" class="i-btn is-quiet">Run ledger</button>
+          <button type="button" class="i-btn is-primary">Resume last session</button>
+        </div>
+      </header>
+
+      <!-- Six metrics, every one of them a route into the view that owns it — a number you cannot
+           click is a dead end. "awaiting you" carries is-hot only while it is non-zero; today it is
+           zero, so it stays an ordinary tile. A permanent hot state is not a state. -->
+      <section class="i-section">
+        <div class="i-eyebrow">Today</div>
+        <div class="i-stats">
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">agent runs</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">$2.9433</span><span class="i-stat-l">spent</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">0</span><span class="i-stat-l">awaiting you</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">3</span><span class="i-stat-l">fleet hosts</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">5</span><span class="i-stat-l">credentials</span></span></button>
+          <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+            <span class="i-stat-v">0</span><span class="i-stat-l">run errors</span></span></button>
+        </div>
+      </section>
+
+      <!-- The launcher proper. The badge is the only thing separating a read-only agent from one
+           that will change the fleet, so it is a tone and not a colour: machine says the system is
+           merely speaking, signal says this one binds you. -->
+      <section class="i-section">
+        <div class="i-eyebrow">Start something</div>
+        <div class="i-cards">
+          <button type="button" class="i-card is-link"><span class="i-card-top">
+            <span class="i-card-title">Ask the workspace</span>
+            <span class="i-tag tone-machine">read only</span></span>
+            <span class="i-card-blurb">A scoped agent answers from the repo and shows every file it
+              opened.</span></button>
+          <button type="button" class="i-card is-link"><span class="i-card-top">
+            <span class="i-card-title">Review the working tree</span>
+            <span class="i-tag tone-machine">read only</span></span>
+            <span class="i-card-blurb">11 uncommitted files. Findings come back with a verdict
+              each.</span></button>
+          <button type="button" class="i-card is-link"><span class="i-card-top">
+            <span class="i-card-title">Plan a fleet change</span>
+            <span class="i-tag tone-signal">changes things</span></span>
+            <span class="i-card-blurb">An agent scouts the three hosts and files a proposal you
+              approve or deny.</span></button>
+          <button type="button" class="i-card is-link"><span class="i-card-top">
+            <span class="i-card-title">Rotate a credential</span>
+            <span class="i-tag tone-signal">changes things</span></span>
+            <span class="i-card-blurb">Mint a replacement in the broker, then retire the standing
+              grant.</span></button>
+        </div>
+      </section>
+
+      <section class="i-section">
+        <div class="i-eyebrow">Last review</div>
+        <div class="i-rows">
+          <button type="button" class="i-row is-link">
+            <span class="i-row-top"><span class="i-row-title">review &middot; uncommitted changes</span>
+              <span class="i-row-meta"><span class="i-tag tone-ok">gate passed</span></span></span>
+            <span class="i-row-sub">flightdeck &middot; 11 files, +412 &minus;96 &middot; 3 findings,
+              0 confirmed &middot; 29 Jul, 09:14 &middot; $0.5950</span></button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

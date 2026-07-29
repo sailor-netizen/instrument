@@ -57,6 +57,8 @@ vocabulary rather than in React:
 | `foundations.html` | the primitives: the three token layers, every colour role with what it *means*, the type ramp at real size, spacing and what density does to it, the three border weights, the motion budget, and why there is no `box-shadow`. |
 | `themes.html` | all six side by side — a registry-generated table of every structure axis, and a live colour-role matrix so a role that changed meaning between themes would be visible instantly. |
 | `patterns.html` | composed examples: a whole screen under each surface mode, forms, an agent run, empty/error/loading, and a density comparison. |
+| `compare.html` | **the same screen in every theme at once.** Comparison needs simultaneity — switching a picker one theme at a time tells you what each looks like, never which one is better. |
+| `screens/*.html` | standalone real screens that apply whatever theme `?theme=` asks for. What the wall iframes, and what an assistant can screenshot to see its own work in six themes. |
 
 Every page reads the *real* `themes.js` registry rather than restating it, so the documentation cannot
 drift from the code.
@@ -142,7 +144,9 @@ front — a library designed in advance guesses at what screens need; one extrac
 | `src/primitives.jsx` | leaves — type, panel, button, tag, field, pills, well |
 | `src/compounds.jsx` | patterns from real screens — stats, cards, rows, tables, traces, findings |
 | `src/instrument.css` | one import for the whole system, no bundler required |
-| `gallery/*.html` | four framework-free pages: components · foundations · themes · patterns |
+| `gallery/*.html` | framework-free pages: components · foundations · themes · patterns · compare |
+| `gallery/screens/` | real screens, theme-parameterised — the panes the compare wall shows |
+| `sheets/` | direction sheets: where a look starts, before it is a theme |
 | `scripts/check.mjs` | the library's own gate — 8 invariants, zero dependencies |
 
 ## Consumers
@@ -151,6 +155,18 @@ front — a library designed in advance guesses at what screens need; one extrac
 
 Adding one: depend on the package, import the CSS, set `data-theme`. If you find yourself editing the
 library to make your app work, that is a missing axis — see [AUTHORING.md](AUTHORING.md).
+
+## Proposing a new look
+
+Don't start by writing a theme — a theme written straight into the contract inherits the contract's
+assumptions, which is how six themes become one theme in six palettes.
+
+Start with a **direction sheet**: a hand-written page, free to ignore this library entirely, exploring
+the *composition* rather than the colours. Compare several. Translate the winner.
+
+That translation is a measurement. A sheet can do anything; a theme can only do what the contract
+allows, and the parts that don't survive aren't failures — they are the contract naming the dimension
+it is missing. See **[sheets/README.md](sheets/README.md)** for the loop and a template.
 
 ## Where it came from
 

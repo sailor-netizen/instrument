@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — compare</title>
+
+<!-- This page deliberately does NOT load instrument.css. It is a workbench, not a specimen: it holds
+     panes that each load the system at a different theme, and a chrome of its own would be a seventh
+     opinion competing with the six being judged. -->
+<style>
+  :root {
+    --w-bg: #f4f4f2; --w-panel: #fff; --w-ink: #16181c; --w-dim: #6b7280;
+    --w-line: #d9d9d4; --w-on: #16181c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --w-bg: #121316; --w-panel: #1a1c20; --w-ink: #e9eaec; --w-dim: #9aa1ab;
+            --w-line: #2c2f35; --w-on: #e9eaec; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--w-bg); color: var(--w-ink);
+         font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: inherit; }
+
+  header { position: sticky; top: 0; z-index: 5; background: var(--w-bg);
+           border-bottom: 1px solid var(--w-line); padding: .9rem 1.25rem; }
+  .row { display: flex; gap: 1.5rem; align-items: flex-end; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: .95rem; font-weight: 650; }
+  .lede { margin: .3rem 0 0; color: var(--w-dim); font-size: .82rem; max-width: 54rem; }
+  nav a { margin-right: 1rem; font-size: .8rem; color: var(--w-dim); text-decoration: none; }
+  nav a[aria-current] { color: var(--w-ink); font-weight: 650; }
+  .lbl { display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+         color: var(--w-dim); margin-bottom: .2rem; }
+  select, .seg button { font: inherit; font-size: .82rem; }
+  select { background: var(--w-panel); color: var(--w-ink); border: 1px solid var(--w-line);
+           border-radius: 6px; padding: .35rem .5rem; }
+  .seg { display: flex; border: 1px solid var(--w-line); border-radius: 6px; overflow: hidden; }
+  .seg button { padding: .35rem .8rem; border: 0; background: transparent; color: var(--w-dim);
+                cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--w-on); color: var(--w-panel); }
+
+  /* The wall. Each pane is a full render of the SAME screen at a different theme, scaled down so a
+     whole design is legible at a glance — the thing you cannot do by switching a picker one at a
+     time, because comparison needs simultaneity. */
+  .wall { display: grid; gap: 1rem; padding: 1rem 1.25rem 3rem;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+  .pane { display: flex; flex-direction: column; gap: .4rem; }
+  .frame { position: relative; overflow: hidden; border: 1px solid var(--w-line);
+           border-radius: 6px; background: var(--w-panel); }
+  .frame iframe { position: absolute; inset: 0; border: 0; transform-origin: top left; }
+  .cap { display: flex; justify-content: space-between; gap: .5rem; font-size: .76rem;
+         align-items: baseline; }
+  .cap b { font-weight: 650; }
+  .cap span { color: var(--w-dim); font-variant-numeric: tabular-nums; }
+  .cap a { color: var(--w-dim); text-decoration: none; font-size: .72rem; }
+  .cap a:hover { color: var(--w-ink); }
+  .empty { padding: 3rem 1.25rem; color: var(--w-dim); }
+  .empty code { background: var(--w-panel); border: 1px solid var(--w-line); border-radius: 4px;
+                padding: .15rem .4rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html">Components</a><a href="foundations.html">Foundations</a>
+    <a href="themes.html">Themes</a><a href="patterns.html">Patterns</a>
+    <a href="compare.html" aria-current="page">Compare</a>
+  </nav>
+  <div class="row" style="margin-top:.6rem">
+    <div>
+      <h1>The same screen, every theme, at once</h1>
+      <p class="lede">
+        Same content, same markup, same numbers in every pane — so the only variable is the design.
+        That constraint is the method: a design you judge beside its alternatives is a design you can
+        actually choose, rather than one you approve because it is the only one in front of you.
+      </p>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:1.25rem; align-items:flex-end">
+      <div><span class="lbl">Screen</span><select id="screen"></select></div>
+      <div><span class="lbl">Width</span>
+        <div class="seg" id="width">
+          <button data-v="1440" aria-pressed="true">1440</button>
+          <button data-v="1100" aria-pressed="false">1100</button>
+          <button data-v="720" aria-pressed="false">720</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wall" id="wall"></div>
+<div class="empty" id="empty" hidden>
+  <p>No screens found. A screen is a standalone page under <code>gallery/screens/</code> that applies
+     whatever theme <code>?theme=</code> asks for — see <code>sheets/README.md</code> for the method
+     and a template.</p>
+</div>
+
+<script type="module">
+  // The registry is imported, never restated: a wall that hardcoded its own theme list would show
+  // five themes the day a sixth was added, and look correct doing it.
+  import { THEMES, applyTheme } from "../src/themes.js";
+
+  const SCREENS = [
+    { id: "cockpit",   label: "Cockpit — sparse, navigational" },
+    { id: "runs",      label: "Runs — dense, tabular" },
+    { id: "agent-run", label: "Reviews — the machine's own voice" },
+  ];
+  const LOGICAL_H = 900;
+
+  const wall = document.getElementById("wall");
+  const sel = document.getElementById("screen");
+  let screen = SCREENS[0].id, logicalW = 1440;
+
+  sel.innerHTML = SCREENS.map((s) => `<option value="${s.id}">${s.label}</option>`).join("");
+
+  wall.innerHTML = THEMES.map((t) => `
+    <div class="pane">
+      <div class="frame"><iframe loading="lazy" title="${t.name}"></iframe></div>
+      <div class="cap">
+        <b>${t.name}</b>
+        <span>${t.surface} · ${t.shell}</span>
+        <a href="#" data-open="${t.id}" target="_blank" rel="noopener">open ↗</a>
+      </div>
+    </div>`).join("");
+
+  function render() {
+    const panes = [...wall.querySelectorAll(".pane")];
+    panes.forEach((pane, i) => {
+      const t = THEMES[i];
+      const src = `screens/${screen}.html?theme=${t.id}`;
+      const frame = pane.querySelector("iframe");
+      if (frame.getAttribute("src") !== src) frame.setAttribute("src", src);
+      pane.querySelector("[data-open]").setAttribute("href", src);
+
+      // Scale a full-width render down rather than letting the pane reflow: a responsive reflow would
+      // hide the very composition being compared, which is the whole point of looking.
+      const box = pane.querySelector(".frame");
+      const k = box.clientWidth / logicalW;
+      frame.style.width = logicalW + "px";
+      frame.style.height = LOGICAL_H + "px";
+      frame.style.transform = `scale(${k})`;
+      box.style.height = LOGICAL_H * k + "px";
+    });
+    // this page's own chrome stays neutral; applyTheme here would restyle the workbench
+    void applyTheme;
+  }
+
+  sel.addEventListener("change", (e) => { screen = e.target.value; render(); });
+  document.getElementById("width").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    logicalW = Number(b.dataset.v);
+    [...e.currentTarget.children].forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  });
+  addEventListener("resize", render);
+
+  // A missing screens/ directory should say so rather than showing six blank rectangles.
+  fetch(`screens/${screen}.html`, { method: "HEAD" })
+    .then((r) => { if (!r.ok) throw 0; render(); })
+    .catch(() => { wall.hidden = true; document.getElementById("empty").hidden = false; });
+</script>
+</body>
+</html>

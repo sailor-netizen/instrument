@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint" data-surface="outline" data-shell="sidebar"
+      data-grid="fine" data-annotate="1" data-hover="mark" data-section-rule="none"
+      data-band="rows" data-leader="0" data-emphasis="fill" data-hero="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviews &middot; an agent at work</title>
+
+<!-- ONE link is the whole system, exactly as on the gallery pages. The attributes above are the house
+     default's own row from the registry, so the page renders as itself before the deferred module has
+     run; applyTheme() then rewrites all eleven in one pass from ?theme=. The one attribute this page
+     ignores is data-shell: a comparison grid renders this file six times and the CONTENT is the
+     control variable, so the DOM is pinned to the sidebar shell and only the design is allowed to
+     differ. -->
+<link rel="stylesheet" href="../../src/instrument.css">
+
+<style>
+  /* The only CSS on this page, and both rules are layout.
+
+     body — host-page plumbing. The library resets box-sizing for i-* elements and deliberately
+     nothing else, so the body's margin, page colour and default face are the host's job. Every
+     value here is a role; there is not a literal in the file.
+
+     .s-stack — .i-panel sets padding and nothing else, so a panel holding a title row, a metadata
+     grid, a trace and a disclosure has nobody to say how far apart they sit. This is that sentence. */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+  .s-stack { display: flex; flex-direction: column; gap: var(--i-3); }
+</style>
+</head>
+<body>
+
+<div class="i-shell is-sidebar">
+
+  <aside class="i-side">
+    <div class="i-brand">flightdeck</div>
+
+    <div class="i-eyebrow i-side-head">Workspace</div>
+    <nav class="i-nav-stack" aria-label="Main">
+      <button type="button" class="i-navitem">Cockpit</button>
+      <button type="button" class="i-navitem">Chat</button>
+      <button type="button" class="i-navitem">Runs</button>
+      <button type="button" class="i-navitem is-on" aria-current="page">Reviews</button>
+      <button type="button" class="i-navitem">Proposals</button>
+      <button type="button" class="i-navitem">Fleet</button>
+      <button type="button" class="i-navitem">Credentials</button>
+    </nav>
+
+    <div class="i-eyebrow i-side-head">Reviews today</div>
+    <nav class="i-nav-stack" aria-label="Reviews today">
+      <button type="button" class="i-navitem is-on" aria-current="true">rv-0e41 &middot; warren</button>
+      <button type="button" class="i-navitem">rv-0e3f &middot; hangar</button>
+      <button type="button" class="i-navitem">rv-0e3c &middot; tradedesk</button>
+    </nav>
+  </aside>
+
+  <main class="i-stage">
+
+    <!-- Where you are, what is true about it right now, and the one action that state implies. Every
+         value on this strip is emitted by a machine, so the whole strip is set in the machine voice. -->
+    <div class="i-ctxbar">
+      <span class="i-ctx-scope">warren</span>
+      <span class="i-ctx-fact"><span class="i-ctx-k">branch</span>
+        <span class="i-ctx-v">v2</span></span>
+      <span class="i-ctx-fact tone-signal"><span class="i-ctx-k">tree</span>
+        <span class="i-ctx-v">11 files, +412 &minus;96</span></span>
+      <span class="i-ctx-fact tone-machine"><span class="i-ctx-k">model</span>
+        <span class="i-ctx-v">claude-opus-4-8</span></span>
+      <span class="i-ctx-fact"><span class="i-ctx-k">tokens</span>
+        <span class="i-ctx-v">142,908</span></span>
+      <span class="i-ctx-fact"><span class="i-ctx-k">spend today</span>
+        <span class="i-ctx-v">$2.9433</span></span>
+      <span class="i-ctx-act"><button type="button" class="i-btn is-quiet">Open the diff</button></span>
+    </div>
+
+    <div class="i-view">
+
+      <header class="i-view-head">
+        <div class="i-view-titles">
+          <h1 class="i-h i-h1">Reviews</h1>
+          <div class="i-view-sub">One reviewer reading the uncommitted work on warren, and a verifier
+            re-deriving every claim it files. Nothing merges while a confirmed finding stands.</div>
+        </div>
+        <div class="i-view-actions">
+          <span class="i-status">rv-0e41 running &middot; 4m 12s &middot; $0.5950 of $1.50</span>
+          <button type="button" class="i-btn is-quiet">Stop the run</button>
+          <button type="button" class="i-btn is-primary">Review the tree</button>
+        </div>
+      </header>
+
+      <section class="i-section">
+        <div class="i-eyebrow">Run rv-0e41 &middot; uncommitted changes</div>
+
+        <div class="i-panel s-stack">
+          <div class="i-split">
+            <h2 class="i-h i-h2">review &middot; warren@v2</h2>
+            <span class="i-tag tone-machine">running</span>
+          </div>
+
+          <dl class="i-kv">
+            <div class="i-kv-pair"><dt>scope</dt>
+              <dd>11 files, +412 &minus;96 &mdash; server/research, server/kb, server/enrich</dd></div>
+            <div class="i-kv-pair"><dt>reviewer</dt>
+              <dd>claude-opus-4-8 &middot; security lens &middot; 3 findings filed</dd></div>
+            <div class="i-kv-pair"><dt>verifier</dt>
+              <dd>claude-opus-4-8 &middot; refute or confirm &middot; 2 of 3 judged</dd></div>
+            <div class="i-kv-pair"><dt>budget</dt><dd>$1.50 &middot; $0.5950 spent</dd></div>
+          </dl>
+
+          <!-- Six steps on a 2px rail. The rail is the system saying "a machine did this" — the same
+               weight that marks the active route in the sidebar. Nothing here animates: trace lines
+               arrive while they are being read, which is the definition of a hot path. -->
+          <div class="i-trace">
+            <div class="i-traceline is-muted">Reading the working tree&hellip;</div>
+            <div class="i-traceline"><b>Read</b> server/research/fetch.mjs &mdash; 388 lines</div>
+            <div class="i-traceline"><b>Read</b> server/kb/search.mjs &mdash; 214 lines</div>
+            <div class="i-traceline"><b>Grep</b> allowedHosts &mdash; 9 hits in 4 files</div>
+            <div class="i-traceline"><b>Bash</b> node --test &mdash; 69 passed in 6.42s</div>
+            <div class="i-traceline"><b>gate</b> PASS &mdash; 7 checks, 0 skipped</div>
+          </div>
+
+          <!-- Open on load, and it stays open with the script removed: is-open is a class, not state
+               the page has to compute. The toggle below is the only interaction on this file. -->
+          <div class="i-disc is-open">
+            <button type="button" class="i-disc-head" aria-expanded="true"
+                    aria-controls="run-tests" onclick="toggleDisc(this)">
+              <span class="i-disc-caret" aria-hidden="true">&#9656;</span>
+              <span class="i-disc-label">node --test</span>
+              <span class="i-disc-meta">69 passed &middot; 6.42s</span>
+            </button>
+            <div class="i-disc-wrap"><div class="i-disc-body" id="run-tests">
+<pre class="i-well">$ node --test test/
+&#10004; ssrf guard rejects 169.254.169.254            (2.118ms)
+&#10004; ssrf guard rejects 10.0.0.0/8                 (0.744ms)
+&#10004; ssrf guard pins the resolved address          (1.207ms)
+&#10004; kb search passes the pattern as argv          (0.918ms)
+&#10004; enrich queue backs off on 429                (12.660ms)
+&#8505; tests 69   pass 69   fail 0   duration_ms 6421.83</pre>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="i-section">
+        <div class="i-eyebrow">Findings &middot; 3</div>
+
+        <!-- Severity and verdict both map through tone, and the mapping belongs to the component
+             rather than the caller: high is crit, medium is signal, low is mute; confirmed is crit,
+             refuted is mute, unverified is signal. -->
+        <div class="i-finding">
+          <span class="i-tag tone-crit">high</span>
+          <span class="i-finding-where">server/research/fetch.mjs:118</span>
+          <span class="i-finding-body">The allowlist runs once, against the URL that was asked for. A
+            302 into link-local space is followed without re-validating the hop, and the suite only
+            ever exercises the first request.
+            <span class="i-tag tone-crit">confirmed</span></span>
+        </div>
+
+        <div class="i-finding is-refuted">
+          <span class="i-tag tone-signal">medium</span>
+          <span class="i-finding-where">server/kb/search.mjs:64</span>
+          <span class="i-finding-body">A search term reaches ripgrep unescaped, so a note titled
+            <em>--files</em> would change the command.
+            <span class="i-tag tone-mute">refuted</span>
+            <span class="i-finding-why">the term is passed as argv behind a bare separator, never
+              through a shell</span></span>
+        </div>
+
+        <div class="i-finding">
+          <span class="i-tag tone-mute">low</span>
+          <span class="i-finding-where">server/enrich/queue.mjs:31</span>
+          <span class="i-finding-body">Retries back off but carry no budget, so a permanently failing
+            note can requeue for the life of the process.
+            <span class="i-tag tone-signal">unverified</span></span>
+        </div>
+
+        <div class="i-callout tone-crit">1 confirmed finding blocks the merge. Re-validate every
+          redirect hop in server/research/fetch.mjs:118 before this branch lands.</div>
+
+        <div class="i-toolbar">
+          <button type="button" class="i-btn is-quiet" disabled>Merge v2</button>
+          <button type="button" class="i-btn is-quiet">Re-verify the refuted finding</button>
+          <button type="button" class="i-btn is-ghost">File as an issue</button>
+          <span class="i-toolbar-status">Judging the third finding &mdash; nothing merged.</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // The whole of this page's interactivity. Plain, so the screen stays framework-free and a grid of
+  // six iframes costs six class toggles rather than six runtimes.
+  function toggleDisc(btn) {
+    const d = btn.closest(".i-disc");
+    btn.setAttribute("aria-expanded", String(d.classList.toggle("is-open")));
+  }
+</script>
+<script type="module">
+  // The registry is imported, never restated. ?theme= is what makes this file comparable: the same
+  // markup, rendered six times, with the design as the only variable.
+  import { applyTheme, storedTheme } from "../../src/themes.js";
+  const t = new URLSearchParams(location.search).get("theme");
+  applyTheme(t || storedTheme());
+</script>
+</body>
+</html>
