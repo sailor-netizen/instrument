@@ -2,8 +2,7 @@
   "name": "instrument",
   "version": "0.4.0",
   "description": "A themeable design system where a theme owns structure, not just colour.",
-  "license": "UNLICENSED",
-  "private": true,
+  "license": "MIT",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -36,6 +35,19 @@
     }
   },
   "scripts": {
-    "gallery": "python -m http.server 4322 --bind 127.0.0.1 --directory gallery"
-  }
+    "check": "node scripts/check.mjs",
+    "gallery": "python -m http.server 4322 --bind 127.0.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sailor-netizen/instrument.git"
+  },
+  "keywords": [
+    "design-system",
+    "css",
+    "themes",
+    "react",
+    "tokens",
+    "design-tokens"
+  ]
 }

@@ -1,0 +1,18 @@
+name: check
+
+# The library's invariants are checked on every push, because a design system's promises rot exactly
+# as fast as nobody verifies them. No install step: scripts/check.mjs has zero dependencies, which is
+# what keeps this job from becoming something people skip.
+on:
+  push:
+  pull_request:
+
+jobs:
+  invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/check.mjs

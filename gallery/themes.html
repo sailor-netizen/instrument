@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en" data-theme="instrument" data-surface="tile" data-shell="sidebar"
+      data-grid="none" data-annotate="0" data-hover="lift">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — themes</title>
+
+<!-- ONE link is the whole system. This page uses NO framework on purpose: it is the standing proof
+     that the identity lives in CSS and a class vocabulary, and that React is a convenience layer over
+     it rather than a requirement. If this page ever needs a build step, something has gone wrong. -->
+<link rel="stylesheet" href="../src/instrument.css">
+
+<style>
+  /* gallery chrome only — never a pattern to copy */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+  .g-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: var(--i-4); flex-wrap: wrap;
+           align-items: flex-end; padding: var(--i-3) var(--i-6);
+           border-bottom: 1px solid var(--i-line-hi); background: var(--i-page); }
+  .g-body { padding: var(--i-6); display: flex; flex-direction: column; gap: var(--i-8); }
+  .g-spec { display: flex; flex-direction: column; gap: var(--i-3); }
+  .g-spec > h2 { margin: 0; font-family: var(--i-mono); font-size: var(--i-h2); color: var(--i-ink); }
+  .g-spec > p  { margin: 0; max-width: var(--i-measure); color: var(--i-dim);
+                 font-size: var(--i-small); }
+  .g-demo { display: flex; flex-wrap: wrap; gap: var(--i-3); align-items: flex-start; }
+  .g-demo > * { min-width: 0; }
+  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint); }
+
+  /* page links — the four gallery pages, current one marked */
+  .g-pages { display: flex; flex-wrap: wrap; align-items: flex-end; }
+  .g-pages a { text-decoration: none; }
+
+  /* anything wider than the measure scrolls inside itself rather than pushing the page sideways */
+  .g-scroll { overflow-x: auto; }
+
+  /* registry table: name + blurb stacked in the row head; a value sitting at the contract's own
+     default is dimmed, so what a theme actually SPENDS is what you read */
+  .g-th { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .g-th b { font-family: var(--i-chrome-face, var(--i-mono)); color: var(--i-ink); }
+  .g-mono { font-family: var(--i-mono); color: var(--i-ink); }
+  .g-off { color: var(--i-faint); }
+
+  /* colour-role matrix. Each row carries its own data-theme, which works because every theme file
+     is scoped to [data-theme=…] as an ANCESTOR selector — so six themes render at once. */
+  .g-matrix { display: grid; gap: 1px; min-width: 46rem; }
+  .g-mx-row { display: contents; }          /* keeps custom-property inheritance, joins the grid */
+  .g-mx-role { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-dim);
+               letter-spacing: 0.04em; text-align: center; padding: 0 var(--i-1) var(--i-2);
+               align-self: end; }
+  .g-mx-name { display: flex; align-items: center; background: var(--i-page); color: var(--i-ink);
+               font-family: var(--i-chrome-face, var(--i-mono)); font-size: var(--i-small);
+               padding: var(--i-2) var(--i-3); }
+  .g-mx-cell { background: var(--i-page); padding: var(--i-2) var(--i-1); }
+  .g-mx-cell i { display: block; height: 1.9rem; border: 1px solid var(--i-line-hi); }
+
+  /* four surface modes at once. The page itself is always under ONE of them, so the demo restates
+     each mode at higher specificity (.g-surf[data-surface] .i-panel = 0,3,0 vs the contract's
+     0,2,0) — otherwise the ambient mode would win in the two cells that disagree with it. */
+  .g-surfs { display: grid; gap: var(--i-4);
+             grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .g-surf-stack { display: flex; flex-direction: column; gap: var(--i-2); }
+  .g-surf[data-surface="tile"] .i-panel {
+    background: var(--i-plane); border: var(--x-rule-w) solid var(--i-line);
+    border-radius: var(--i-radius); padding: var(--i-4); }
+  .g-surf[data-surface="outline"] .i-panel {
+    background: none; border: var(--x-rule-w) solid var(--i-line-hi);
+    border-radius: 0; padding: var(--i-4); }
+  .g-surf[data-surface="rule"] .i-panel {
+    background: none; border: 0; border-top: var(--x-rule-w) solid var(--i-line);
+    border-radius: 0; padding: var(--i-4); padding-inline: 0; }
+  .g-surf[data-surface="none"] .i-panel {
+    background: none; border: 0; border-radius: 0; padding: var(--i-1) 0; }
+
+  /* shell diagrams — divs only, no images. A strip is chrome; the pale block is the stage. */
+  .g-shells { display: grid; gap: var(--i-4);
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .g-shell { display: flex; flex-direction: column; gap: var(--i-2); }
+  .g-fig { display: grid; height: 8rem; border: 1px solid var(--i-line-hi);
+           background: var(--i-page); overflow: hidden; }
+  .g-fig-chrome { background: var(--i-well); display: flex; gap: var(--i-1); padding: var(--i-2);
+                  align-content: flex-start; }
+  .g-fig-chrome.is-col { flex-direction: column; }
+  .g-fig-stage { background: var(--i-plane); margin: var(--i-2); min-height: 0; }
+  .g-fig i { display: block; background: var(--i-line-hi); height: 0.3rem; flex: 0 0 auto; }
+  .g-fig-chrome.is-col i { width: 70%; }
+  .g-fig-chrome:not(.is-col) i { flex: 1 1 auto; }
+  .g-fig i.is-on { background: var(--i-signal); }
+  .g-fig-tile { border: 1px solid var(--i-line-hi); border-radius: var(--i-radius-sm);
+                background: var(--i-plane); display: flex; gap: var(--i-1); padding: var(--i-1);
+                align-items: center; }
+  .g-fig-tile i { flex: 1 1 auto; }
+  .g-fig-floats { display: flex; gap: var(--i-2); padding: var(--i-2) var(--i-2) 0; }
+  .g-fig-foot { margin-top: auto; }
+  .g-fig-col { display: flex; flex-direction: column; background: var(--i-well); }
+</style>
+</head>
+<body>
+
+<div class="g-bar">
+  <nav class="g-pages" aria-label="Gallery pages">
+    <a class="i-navitem" href="index.html">Components</a>
+    <a class="i-navitem" href="foundations.html">Foundations</a>
+    <a class="i-navitem is-on" href="themes.html" aria-current="page">Themes</a>
+    <a class="i-navitem" href="patterns.html">Patterns</a>
+  </nav>
+  <label class="i-themepick"><span class="i-field-label">Theme</span>
+    <select class="i-input" id="theme"></select></label>
+  <label class="i-themepick"><span class="i-field-label">Surface override</span>
+    <select class="i-input" id="surface">
+      <option value="">(theme's own)</option>
+      <option value="tile">tile</option><option value="outline">outline</option>
+      <option value="rule">rule</option><option value="none">none</option>
+    </select></label>
+  <span class="g-note" id="what"></span>
+</div>
+
+<div class="g-body">
+
+  <section class="g-spec">
+    <h2>A theme owns structure, not just colour</h2>
+    <p>This is the whole thesis, so it goes first. Almost everywhere else, "theme" means a palette:
+       swap the tokens on a sidebar-and-cards dashboard and you get the same dashboard in a different
+       colour. That fails the moment someone dislikes the <em>shape</em> of a product — and the shape
+       is usually what they meant. A token swap cannot reach composition.</p>
+    <p>Here a theme also chooses how components draw themselves, where navigation lives, how dense the
+       spacing and type ramps are, whether a grid is painted behind the stage, and whether items carry
+       numbers. Terminal deletes every box in the product. Blueprint numbers every item and moves the
+       navigation into a drafting title block. Same screens, same markup, and no screen aware that any
+       of it happened.</p>
+
+    <div class="i-table" style="--i-cols: 4rem 9rem 1fr" role="table">
+      <div class="i-tr is-head" role="row"><span>layer</span><span>what</span><span>who owns it</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">L0</span><span class="g-mono">palette</span>
+        <span>Private literals, <code>--_</code> prefixed. The only place a hex is legal — which is
+          what makes the lint rule one sentence: a hex outside a theme file or the L0 block is a
+          violation.</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">L1</span><span class="g-mono">roles</span>
+        <span>Semantic tokens, <code>--i-</code> prefixed. The only thing components consume. A
+          component that needs a new literal means the system is missing a role.</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">L2</span><span class="g-mono">structure</span>
+        <span>How components draw and where the shell puts things. Scalars are <code>--x-</code>
+          custom properties; discrete modes are <code>data-*</code> attributes with their rules in
+          <code>contract.css</code>.</span></div>
+    </div>
+
+    <p>Everything hangs off <strong>one attribute</strong>, <code>data-theme</code>.
+       <code>applyTheme()</code> writes it together with every structural attribute it implies, in a
+       single pass, so a half-applied theme is impossible — the failure where the palette switches but
+       the layout doesn't is exactly what makes theming feel broken. It also writes
+       <code>color-scheme</code> rather than each theme declaring its own: there is exactly one
+       <em>global</em> declaration in the codebase, and a second one anywhere would silently win for
+       its subtree and desync the themes. A light-only theme still states its scheme inside its own
+       block, so the stock is right before any JavaScript has run.</p>
+
+    <h2>…and four things it may never do</h2>
+    <p>The freedom above only stays safe because of these. A change that breaks one is the wrong
+       change, not a case for relaxing the rule.</p>
+    <div class="i-table" style="--i-cols: 1.75rem 1fr" role="table">
+      <div class="i-tr" role="row"><span class="g-mono">1</span>
+        <span><strong>Never change what a role means.</strong> <code>--i-crit</code> is "this failed"
+          in every theme, forever. A theme picks the hue; it does not get to repurpose the role. This
+          single rule is why themes swap without auditing every screen.</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">2</span>
+        <span><strong>Never target a view.</strong> A selector naming an app class means the theme is
+          patching a screen instead of expressing itself through the system. Themes target
+          <code>.i-*</code> only.</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">3</span>
+        <span><strong>Contrast is not negotiable.</strong> Body text clears 4.5:1 against its own
+          surface in every theme, light and dark. Computed, never eyeballed — each theme file records
+          its measurements in its header.</span></div>
+      <div class="i-tr" role="row"><span class="g-mono">4</span>
+        <span><strong>One <code>color-scheme</code> declaration.</strong> A light-only theme writes
+          <code>color-scheme: light</code> inside its own block; it does not add a second global.</span></div>
+    </div>
+    <p class="g-note">Depth has no <code>box-shadow</code> anywhere in the system: it is translucency
+       plus a hairline plus the page wash showing through, which is why dark themes stay crisp instead
+       of turning to mud. Terminal's one <code>box-shadow</code> is a zero-blur 1px ring drawn on a
+       cell — a hairline with a spread, not depth — and its file says so.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>The six themes</h2>
+    <p>Generated from the <code>THEMES</code> array in <code>src/themes.js</code> — rows and
+       <em>columns</em> both. The column list is the union of the registry objects' own keys, so a new
+       structure axis appears here the day it is added to a theme, and this table cannot drift from
+       what the product actually applies. Nothing in that registry is a colour; colours are the theme
+       CSS file's job, always.</p>
+    <p>Values sitting at the contract's own default are dimmed, so what remains is what each theme
+       actively spends. <code>shell</code> and <code>scheme</code> have no default and are never
+       dimmed.</p>
+    <div class="i-table" id="registry" role="table"></div>
+    <p class="g-note">Note <code>surface: none</code> on Terminal — dimmed nowhere, because "none" is
+       that theme's loudest decision rather than an unspent axis.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>Colour roles, all six themes at once</h2>
+    <p>Every theme down one axis, every role across. Roles, not colours: <code>signal</code> means
+       "this wants you, or binds you", <code>machine</code> means "the system is speaking",
+       <code>crit</code> and <code>ok</code> are outcomes. Because a role can never change meaning,
+       a column is a single claim rendered six ways — and a theme that had quietly repurposed one
+       would show up here as a swatch that doesn't belong in its column.</p>
+    <p>Three things are worth reading off it. <strong>Crit is the only role that is a hue in all six
+       themes</strong> — failure is the one claim nobody spends on anything else; Blueprint goes
+       further and reserves red entirely, so seeing it at all means something faulted.
+       <strong>Signal is not a colour in two of them.</strong> Blueprint sets it to the hard object
+       line, because a drawing signals with line weight rather than hue; Swiss sets it to ink, because
+       on paper the strongest possible mark <em>is</em> the attention — and a theme that spends colour
+       on attention has none left for alarm. <strong>Ok is graphite in those same two</strong>: a
+       drawing sheet calls a passing item "nominal" and draws it in plain lead, and on Swiss "it
+       worked" is not news.</p>
+    <div class="g-scroll">
+      <div class="g-matrix" id="matrix"></div>
+    </div>
+    <p class="g-note">Five of these rows simply set <code>data-theme</code> on themselves, which works
+       because every theme file scopes its tokens to <code>[data-theme=…]</code> as an <em>ancestor</em>
+       selector rather than to <code>:root</code>. Instrument is the exception and the exception is
+       informative: the house theme has no such block, because it <em>is</em> the <code>:root</code>
+       fallback every other theme overrides — so its row is read from <code>:root</code> at load rather
+       than restated here. It is also the only dual-scheme theme in the set, so that row renders in
+       your system's preferred scheme while the other five are fixed light or fixed dark.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>The four surface modes, one component</h2>
+    <p>Surface is how <code>Panel</code>, <code>Card</code>, <code>Row</code>, <code>Stat</code>,
+       <code>Finding</code> and <code>LoadError</code> draw themselves. It is written once against the
+       component layer through a shared selector, so no component knows which theme is active and no
+       theme has to restate it — that shared selector is what makes "switch the surface" mean
+       <em>all</em> of it. Same two panels, same markup, four modes:</p>
+    <div class="g-surfs">
+      <div class="g-shell">
+        <div class="i-eyebrow">tile</div>
+        <div class="g-surf g-surf-stack" data-surface="tile">
+          <div class="i-panel"><h3 class="i-h i-h3">deploy_template</h3>
+            <p class="i-p is-dim is-small">Filled plane, hairline, radius.</p></div>
+          <div class="i-panel"><h3 class="i-h i-h3">review</h3>
+            <p class="i-p is-dim is-small">The default, and Bento's.</p></div>
+        </div>
+        <p class="g-note">Boundaries are objects. <span data-g-surface="tile"></span></p>
+      </div>
+      <div class="g-shell">
+        <div class="i-eyebrow">outline</div>
+        <div class="g-surf g-surf-stack" data-surface="outline">
+          <div class="i-panel"><h3 class="i-h i-h3">deploy_template</h3>
+            <p class="i-p is-dim is-small">No fill, hard edge, square.</p></div>
+          <div class="i-panel"><h3 class="i-h i-h3">review</h3>
+            <p class="i-p is-dim is-small">The drawing-office register.</p></div>
+        </div>
+        <p class="g-note">Everything is drawn, nothing is filled. <span data-g-surface="outline"></span></p>
+      </div>
+      <div class="g-shell">
+        <div class="i-eyebrow">rule</div>
+        <div class="g-surf g-surf-stack" data-surface="rule">
+          <div class="i-panel"><h3 class="i-h i-h3">deploy_template</h3>
+            <p class="i-p is-dim is-small">The box dissolves into a top rule.</p></div>
+          <div class="i-panel"><h3 class="i-h i-h3">review</h3>
+            <p class="i-p is-dim is-small">Inline padding goes too.</p></div>
+        </div>
+        <p class="g-note">Hierarchy by rule and whitespace. <span data-g-surface="rule"></span></p>
+      </div>
+      <div class="g-shell">
+        <div class="i-eyebrow">none</div>
+        <div class="g-surf g-surf-stack" data-surface="none">
+          <div class="i-panel"><h3 class="i-h i-h3">deploy_template</h3>
+            <p class="i-p is-dim is-small">Nothing draws a container.</p></div>
+          <div class="i-panel"><h3 class="i-h i-h3">review</h3>
+            <p class="i-p is-dim is-small">Density and alignment do it all.</p></div>
+        </div>
+        <p class="g-note">Spacing alone divides. <span data-g-surface="none"></span></p>
+      </div>
+    </div>
+    <p>Under <code>rule</code> and <code>none</code> the collection gaps collapse to zero as well, so
+       adjacent items become a continuous ledger rather than a spaced list. That is also why
+       <code>--x-section-rule</code> exists: once every boundary is gone, a bare micro-label separates
+       two regions far more weakly than a box did, and three themes reached for the same hairline
+       independently — which is the definition of a missing axis rather than a per-theme override.</p>
+    <p class="g-note">These four cells ignore the surface picker in the bar above, on purpose. If the
+       active theme is Blueprint you will also see its registration ticks in the panel corners: a
+       theme's own rules ride on top of whichever surface mode is set, and that layering is real.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>The six shell layouts</h2>
+    <p>The shell is the one place structure genuinely branches, and it branches once. A left sidebar,
+       a bottom status bar and a drafting title block are not the same DOM, and clever CSS pretending
+       otherwise is a compromise in all three — so this is real markup chosen by variant, while
+       everything else in the system stays cascade. Adding a variant touches no view. Each diagram
+       below is built from <code>div</code>s; the pale block is the stage.</p>
+    <div class="g-shells">
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-columns: 34% 1fr">
+          <div class="g-fig-chrome is-col"><i></i><i class="is-on"></i><i></i><i></i></div>
+          <div class="g-fig-stage"></div>
+        </div>
+        <div class="i-eyebrow">sidebar</div>
+        <p class="g-note" data-g-shell="sidebar"></p>
+        <p class="i-p is-dim is-small">The house default. A 2px rail marks the active route — the same
+          rail the agent trace uses, so "you are here" and "a machine did this" are one visual idea.</p>
+      </div>
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-rows: auto auto 1fr">
+          <div class="g-fig-chrome"><i style="flex: 0 0 30%"></i><i style="flex: 0 0 18%"></i></div>
+          <div class="g-fig-chrome"><i class="is-on"></i><i></i><i></i><i></i></div>
+          <div class="g-fig-stage"></div>
+        </div>
+        <div class="i-eyebrow">topnav</div>
+        <p class="g-note" data-g-shell="topnav"></p>
+        <p class="i-p is-dim is-small">No side column at all. A two-tier rule — identity above,
+          destinations spread across the full measure below — so the page starts at the very top of
+          the field.</p>
+      </div>
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-columns: 30% 1fr">
+          <div class="g-fig-chrome is-col"><i style="width: 55%"></i><i class="is-on" style="width: 85%"></i>
+            <i style="width: 62%"></i><i style="width: 74%"></i></div>
+          <div class="g-fig-stage"></div>
+        </div>
+        <div class="i-eyebrow">rail</div>
+        <p class="g-note" data-g-shell="rail"></p>
+        <p class="i-p is-dim is-small">A narrow metadata column set in the human voice, lowercase,
+          with the active item marked by a short dash rather than a filled block.</p>
+      </div>
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-rows: auto 1fr auto">
+          <div class="g-fig-chrome"><i style="flex: 0 0 12%"></i><i style="flex: 0 0 22%"></i>
+            <i style="flex: 0 0 14%"></i></div>
+          <div class="g-fig-stage"></div>
+          <div class="g-fig-chrome"><i class="is-on"></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="i-eyebrow">statusbar</div>
+        <p class="g-note" data-g-shell="statusbar"></p>
+        <p class="i-p is-dim is-small">The TUI. A command line pinned above, a fixed status bar below
+          carrying the destinations as numbered keys, and uninterrupted field between them.</p>
+      </div>
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-rows: auto 1fr">
+          <div class="g-fig-floats">
+            <div class="g-fig-tile" style="flex: 0 0 34%"><i></i></div>
+            <div class="g-fig-tile" style="flex: 1"><i class="is-on"></i><i></i><i></i></div>
+          </div>
+          <div class="g-fig-stage"></div>
+        </div>
+        <div class="i-eyebrow">topbar</div>
+        <p class="g-note" data-g-shell="topbar"></p>
+        <p class="i-p is-dim is-small">The bar is itself a tile, floating on the field with everything
+          else. Bento's rule that nothing is furniture: navigation is one more object in the
+          composition.</p>
+      </div>
+
+      <div class="g-shell">
+        <div class="g-fig" style="grid-template-columns: 1fr 34%">
+          <div class="g-fig-stage"></div>
+          <div class="g-fig-col">
+            <div class="g-fig-chrome is-col"><i style="width: 45%"></i></div>
+            <div class="g-fig-chrome is-col g-fig-foot"><i style="width: 60%"></i>
+              <i class="is-on" style="width: 90%"></i><i style="width: 90%"></i></div>
+          </div>
+        </div>
+        <div class="i-eyebrow">titleblock</div>
+        <p class="g-note" data-g-shell="titleblock"></p>
+        <p class="i-p is-dim is-small">The drafting sheet, and the only variant where the stage comes
+          first in the DOM. Notes at the top of the right column, the title block anchored at its foot
+          carrying the sheet index; destinations are sheet numbers.</p>
+      </div>
+
+    </div>
+    <p class="g-note">Every variant collapses to a stacked page below 60rem rather than a squeezed
+       one — that collapse rule is part of adding a variant, not an afterthought.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>The structure axes</h2>
+    <p>The L2 contract: what a theme may set beyond colour. Every one of these got here the same way —
+       a theme needed something it could not express and was brute-forcing around it, so the contract
+       was short a dimension. Not one was designed up front, and the changelog records which theme
+       asked for each, which is what stops the list growing on speculation. A theme that needs
+       something not on this list is telling you to add an axis, not to write a one-off rule.</p>
+    <div class="g-scroll">
+      <div class="i-table" style="--i-cols: 12rem 4.5rem 11rem minmax(20rem, 1fr)" role="table">
+        <div class="i-tr is-head" role="row"><span>axis</span><span>kind</span><span>values</span>
+          <span>what it solves</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--i-mono · --i-prose</span>
+          <span class="g-mono">scalar</span><span class="g-mono">font stacks</span>
+          <span>The two voices: mono is the machine, prose is the human. That split carries most of
+            the identity and survives having no web fonts — assume there are none, and lean on the one
+            contrast system stacks reliably give you.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--i-display-face</span>
+          <span class="g-mono">scalar</span><span class="g-mono">defaults to --i-mono</span>
+          <span>The figure and page-title face, for a theme whose display voice is not the machine
+            voice.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--i-chrome-face</span>
+          <span class="g-mono">scalar</span><span class="g-mono">defaults to --i-mono</span>
+          <span>Card titles, row titles, buttons, tags and table heads. Split out because those were
+            hardwired to mono, so a serif or grotesque theme had to restate the same idea at six
+            selectors.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-label-case</span>
+          <span class="g-mono">scalar</span><span class="g-mono">none · uppercase</span>
+          <span>How micro-labels are set — eyebrows, stat labels, field labels, kv keys, table
+            heads.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-label-track</span>
+          <span class="g-mono">scalar</span><span class="g-mono">letter-spacing</span>
+          <span>Tracking for those same labels. Wide tracking is most of what makes a caps label read
+            as furniture rather than as text.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-figure</span>
+          <span class="g-mono">scalar</span><span class="g-mono">2.6rem</span>
+          <span>Display-numeral size, and the single biggest lever on how a theme feels. It is a
+            <em>ceiling</em>: each stat is its own query container and the figure resolves to
+            <code>min(--x-figure, 18cqi)</code>, so the column it actually got imposes the real limit.
+            Before that, figure and grid floor were two numbers that had to agree by hand and didn't —
+            a theme raised its figure and a long value ran across its neighbour.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-title</span>
+          <span class="g-mono">scalar</span><span class="g-mono">defaults to --i-h1</span>
+          <span>Page-title size, sibling to the figure. Themes disagree about titles as much as about
+            figures, and pinning it made every theme open its page the same way.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">surface</span>
+          <span class="g-mono">mode</span><span class="g-mono">tile · outline · rule · none</span>
+          <span>How every container-drawing component draws itself. Written once against a shared
+            selector in the component layer — see the demo above.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">shell</span>
+          <span class="g-mono">mode</span>
+          <span class="g-mono">sidebar · topnav · rail · statusbar · topbar · titleblock</span>
+          <span>Where navigation lives. Real DOM, so it is the one component variant rather than a
+            CSS mode.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-stat-floor</span>
+          <span class="g-mono">scalar</span><span class="g-mono">8rem</span>
+          <span>Minimum stat column width. Floors come from CONTENT — a stat is a short number plus a
+            short label — never from how many items one screen happens to pass. A theme that raises
+            the figure must raise this with it, or the container clamp quietly shrinks the numeral
+            back down.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-card-floor</span>
+          <span class="g-mono">scalar</span><span class="g-mono">13rem</span>
+          <span>Minimum card column width — larger, because a card carries a sentence. Tuning a floor
+            so <em>this</em> screen's six items fit one row breaks the next screen's four.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-hero</span>
+          <span class="g-mono">mode</span><span class="g-mono">0 · 1</span>
+          <span>The first stat spans 2×2 and carries the loudest number. Bento's rule that nothing is
+            the same size as anything else — composition as hierarchy, expressed once.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-radius</span>
+          <span class="g-mono">scalar</span><span class="g-mono">10px</span>
+          <span>Corner radius for tiles; the small and pill radii derive from it, so 0 squares the
+            entire product including pills — which is what Swiss, Terminal, Editorial and Blueprint all
+            need.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--i-density</span>
+          <span class="g-mono">scalar</span><span class="g-mono">1</span>
+          <span>Multiplies the whole spacing ramp.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--i-type-scale</span>
+          <span class="g-mono">scalar</span><span class="g-mono">1</span>
+          <span>Multiplies the whole type ramp — the counterpart to density, which scales space. Both
+            levers or neither: a dense theme that only tightened spacing ended up with cramped gaps
+            around house-sized type, which reads as broken rather than dense.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-rule-w</span>
+          <span class="g-mono">scalar</span><span class="g-mono">1px</span>
+          <span>Weight of the primary separator, and of every outline the surface modes draw.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-grid</span>
+          <span class="g-mono">mode</span><span class="g-mono">none · columns · fine</span>
+          <span>A background grid painted on the stage, behind everything.
+            <code>--x-grid-line</code> and <code>--x-grid-size</code> let a theme set the colour and
+            pitch without owning the geometry.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-annotate</span>
+          <span class="g-mono">mode</span><span class="g-mono">0 · 1</span>
+          <span>Item numbers on rows, stats and cards. Implemented as CSS counters so no component has
+            to know its own index — and the reason that is worth stating: making each stat a query
+            container silently broke it, because <code>container-type</code> implies style containment,
+            which scopes counters. Every item numbered <code>01</code>, with a green build. Only the
+            pixels showed it.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-hover</span>
+          <span class="g-mono">mode</span><span class="g-mono">lift · mark · invert</span>
+          <span>What a control does on hover. A control must always announce itself; themes disagree
+            about how. <code>invert</code> reads <code>--x-select-bg</code> and
+            <code>--x-select-fg</code> — it was hardwired to a wash with no foreground token, which is
+            not an inversion, and a mode the contract <em>names</em> has to be a mode it
+            <em>delivers</em>.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-section-rule</span>
+          <span class="g-mono">mode</span><span class="g-mono">none · trailing</span>
+          <span>A hairline running out from a section label to the end of the measure. Under
+            <code>rule</code> and <code>none</code> surfaces every boundary is gone and a bare label
+            separates regions weakly; three themes wanted this independently.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-band</span>
+          <span class="g-mono">mode</span><span class="g-mono">none · rows</span>
+          <span>Zebra banding on dense tables — how a ledger stays trackable once nothing draws a
+            box.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-leader</span>
+          <span class="g-mono">mode</span><span class="g-mono">0 · 1</span>
+          <span>The magazine-index device: a dotted run from a row's title to its meta, so the eye
+            tracks across a wide row without a rule under it.</span></div>
+
+        <div class="i-tr" role="row"><span class="g-mono">--x-emphasis</span>
+          <span class="g-mono">mode</span><span class="g-mono">wash · fill</span>
+          <span>How the primary control carries emphasis. Outline-plus-wash was the only emphasis the
+            system could express, so a theme whose primary button is a solid block of ink with the page
+            punched out of it had to write that as a per-theme rule.</span></div>
+      </div>
+    </div>
+    <p><strong>Scalar or mode?</strong> A size, weight or colour is a <code>--x-</code> custom
+       property — cheap, so prefer it. A discrete choice that changes rules is a <code>data-*</code>
+       attribute written by <code>applyTheme()</code>. Modes cost more, and a mode with two values
+       probably wants to be a scalar instead.</p>
+    <p class="g-note">Watch for coupling before adding a knob. The figure and the stat floor were the
+       cautionary case: the fix was not a third token to tune, it was deriving the figure from its own
+       container so the two can no longer desync. Prefer deriving over adding.</p>
+  </section>
+
+  <section class="g-spec">
+    <h2>Adding a theme</h2>
+    <p>Two files: <code>src/themes/&lt;id&gt;.css</code> for the tokens, and one object in
+       <code>src/themes.js</code> for the structure. They are split because they are enforced by
+       different machinery — tokens are cascade, modes are attributes — and because
+       <code>applyTheme()</code> writing every mode in one pass is what makes a half-applied theme
+       impossible. Then the import goes into <code>src/instrument.css</code>, and nothing else in the
+       product changes.</p>
+    <p>The full procedure — the registry fields, the roles a theme must fill, the contrast bar, the
+       rule about never targeting an app class, and what to do when your theme file starts growing
+       rules instead of tokens — lives in
+       <a class="i-machine" href="../AUTHORING.md">AUTHORING.md</a>, alongside adding a component, a
+       shell variant, and a structure axis. It is not repeated here; one copy is the point.</p>
+    <p class="i-p is-dim is-small">The one line worth carrying out of it: if a theme file is
+       accumulating rules that restate the same idea per selector, or two themes independently wrote
+       the same override, that is the contract missing an axis — and an axis with no consumer is
+       speculation, so use it in at least one theme before you ship it.</p>
+    <div class="i-callout tone-signal">The build passing is not evidence the UI is right. Open the
+      gallery and step through every theme; some of these bugs compile perfectly.</div>
+  </section>
+
+</div>
+
+<script type="module">
+  // The registry is imported, not restated — one source of truth for what a theme IS, shared with
+  // every React consumer. A gallery that hardcoded its own list would drift within a week.
+  import { THEMES, applyTheme, storedTheme } from "../src/themes.js";
+
+  // Same role list as index.html, so the two pages cannot disagree about what a role is.
+  const ROLES = ["page", "plane", "plane-2", "well", "ink", "dim", "faint",
+                 "line", "line-hi", "rail", "signal", "machine", "crit", "ok"];
+
+  // Columns come from the registry's OWN keys, minus the three that identify rather than configure.
+  // Add a structure axis to a theme object and a column appears here with no edit to this file.
+  const META = new Set(["id", "name", "blurb"]);
+  const AXES = [...new Set(THEMES.flatMap(Object.keys))].filter((k) => !META.has(k));
+
+  // The contract's defaults, from the :root block in contract.css (surface's default is the base
+  // rule in components.css). A value equal to its default is an axis the theme did not spend.
+  const DEFAULTS = { surface: "tile", grid: "none", annotate: 0, hover: "lift",
+                     sectionRule: "none", band: "none", leader: 0, emphasis: "wash", hero: 0 };
+
+  const esc = (s) => String(s).replace(/[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  /* ---- the registry table -------------------------------------------------------------------- */
+  const table = document.getElementById("registry");
+  table.style.setProperty("--i-cols",
+    `13rem repeat(${AXES.length}, minmax(4.75rem, max-content))`);
+  table.innerHTML =
+    `<div class="i-tr is-head" role="row"><span>theme</span>${
+      AXES.map((k) => `<span>${esc(k)}</span>`).join("")}</div>` +
+    THEMES.map((t) =>
+      `<div class="i-tr" role="row"><span class="g-th"><b>${esc(t.name)}</b>` +
+        `<span class="g-note">${esc(t.blurb)}</span></span>` +
+      AXES.map((k) => {
+        const v = String(t[k]);
+        const spent = !(k in DEFAULTS) || String(DEFAULTS[k]) !== v;
+        return `<span class="g-mono${spent ? "" : " g-off"}">${esc(v)}</span>`;
+      }).join("") + `</div>`).join("");
+
+  /* ---- the colour-role matrix ---------------------------------------------------------------- */
+  const mx = document.getElementById("matrix");
+  mx.style.gridTemplateColumns = `9rem repeat(${ROLES.length}, minmax(3rem, 1fr))`;
+  mx.innerHTML =
+    `<span></span>${ROLES.map((r) => `<span class="g-mx-role">${esc(r)}</span>`).join("")}` +
+    THEMES.map((t) =>
+      `<div class="g-mx-row" data-theme="${esc(t.id)}">` +
+        `<span class="g-mx-name">${esc(t.name)}</span>` +
+        ROLES.map((r) =>
+          `<span class="g-mx-cell"><i style="background: var(--i-${r})"></i></span>`).join("") +
+      `</div>`).join("");
+
+  /* The house theme has NO [data-theme] block — it lives in :root, because it is the fallback every
+     other theme overrides. So a nested data-theme="instrument" matches nothing and that row would
+     silently inherit whichever theme the page is on, showing a duplicate of it. Restating the roles
+     here would fix the display and reintroduce exactly the drift this page exists to prevent, so the
+     row is PROBED instead: drop the attribute, read what :root resolves to, put it back. Same single
+     source of truth, one frame, no paint in between. */
+  const house = mx.querySelector('.g-mx-row[data-theme="instrument"]');
+  if (house) {
+    const el = document.documentElement;
+    const theme = el.getAttribute("data-theme");
+    const scheme = el.style.colorScheme;
+    el.removeAttribute("data-theme");
+    el.style.colorScheme = "";                       // let :root's own declaration decide
+    const cs = getComputedStyle(el);
+    const probed = [...ROLES.map((r) => `--i-${r}`), "--i-mono"]
+      .map((p) => [p, cs.getPropertyValue(p).trim()]);
+    const houseScheme = cs.colorScheme;
+    if (theme !== null) el.setAttribute("data-theme", theme);
+    el.style.colorScheme = scheme;
+
+    for (const [prop, value] of probed) if (value) house.style.setProperty(prop, value);
+    // --i-chrome-face is undefined at :root and falls back to the machine voice; stated so the row
+    // does not pick up a serif or grotesque from whichever theme happens to be wrapping it.
+    house.style.setProperty("--i-chrome-face", "var(--i-mono)");
+    // Its roles are light-dark() pairs, so the row needs its own scheme or it would resolve through
+    // the page's. This is the one theme that genuinely renders both ways.
+    house.style.colorScheme = houseScheme;
+  }
+
+  /* ---- who uses each surface mode / shell layout, read off the registry ----------------------- */
+  const names = (key, value) =>
+    THEMES.filter((t) => t[key] === value).map((t) => t.name).join(" · ") || "no theme yet";
+  for (const el of document.querySelectorAll("[data-g-surface]")) {
+    el.textContent = names("surface", el.dataset.gSurface);
+  }
+  for (const el of document.querySelectorAll("[data-g-shell]")) {
+    el.textContent = names("shell", el.dataset.gShell);
+  }
+
+  /* ---- the top bar --------------------------------------------------------------------------- */
+  const sel = document.getElementById("theme");
+  const surf = document.getElementById("surface");
+  const what = document.getElementById("what");
+
+  sel.innerHTML = THEMES.map((t) => `<option value="${t.id}">${t.name}</option>`).join("");
+
+  function render() {
+    const t = applyTheme(sel.value);
+    // the override is applied AFTER the theme, so it can demonstrate a component under a surface its
+    // own theme never uses — which is how you find out a new component only works in one of them
+    if (surf.value) document.documentElement.setAttribute("data-surface", surf.value);
+    what.textContent = `${t.blurb}  ·  surface: ${surf.value || t.surface} · shell: ${t.shell}`
+      + ` · grid: ${t.grid} · annotate: ${t.annotate} · hover: ${t.hover}`;
+  }
+  sel.value = storedTheme();
+  sel.addEventListener("change", render);
+  surf.addEventListener("change", render);
+  render();
+</script>
+</body>
+</html>

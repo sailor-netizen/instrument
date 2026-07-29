@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en" data-theme="blueprint" data-surface="outline" data-shell="titleblock"
+      data-grid="fine" data-annotate="1" data-hover="mark" data-section-rule="none"
+      data-band="rows" data-leader="0" data-emphasis="fill" data-hero="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — patterns</title>
+
+<!-- ONE link is the whole system, exactly as on index.html. The attributes above are Blueprint's own
+     row from the registry, so the page renders as itself before the module script has run; applyTheme()
+     rewrites all eleven of them in one pass a moment later. -->
+<link rel="stylesheet" href="../src/instrument.css">
+
+<style>
+  /* gallery chrome only — never a pattern to copy */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+  .g-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: var(--i-4); flex-wrap: wrap;
+           align-items: flex-end; padding: var(--i-3) var(--i-6);
+           border-bottom: 1px solid var(--i-line-hi); background: var(--i-page); }
+  .g-body { padding: var(--i-6); display: flex; flex-direction: column; gap: var(--i-8); }
+  .g-spec { display: flex; flex-direction: column; gap: var(--i-3); }
+  .g-spec > h2 { margin: 0; font-family: var(--i-mono); font-size: var(--i-h2); color: var(--i-ink); }
+  .g-spec > p  { margin: 0; max-width: var(--i-measure); color: var(--i-dim);
+                 font-size: var(--i-small); }
+  .g-demo { display: flex; flex-wrap: wrap; gap: var(--i-3); align-items: flex-start; }
+  .g-demo > * { min-width: 0; }
+  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint); }
+
+  /* page links, so the four gallery pages are one document */
+  .g-nav { display: flex; gap: var(--i-3); flex-wrap: wrap; align-items: baseline;
+           font-family: var(--i-mono); font-size: var(--i-small); }
+  .g-nav a { color: var(--i-dim); text-decoration: none; padding-bottom: 2px;
+             border-bottom: 1px solid transparent; }
+  .g-nav a:hover { color: var(--i-ink); }
+  .g-nav a[aria-current="page"] { color: var(--i-ink); border-bottom-color: var(--i-signal); }
+
+  /* The frame around the composed screen. It stands in for the shell, which is the one place
+     structure genuinely branches. Drag its bottom-right corner: the grids inside are auto-fit with
+     content-derived floors, so you are watching the real reflow, not a breakpoint. */
+  .g-frame { border: 1px solid var(--i-line-hi); overflow: auto; resize: horizontal;
+             min-width: 22rem; max-width: 100%; }
+
+  .g-quad { display: grid; gap: var(--i-4);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+  .g-trio { display: grid; gap: var(--i-4); align-items: start;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+  .g-pane { display: flex; flex-direction: column; gap: var(--i-3);
+            border: 1px solid var(--i-line); padding: var(--i-4); }
+
+  /* SCAFFOLDING, and the only rules on this page that restate the library. The surface modes are
+     written as descendant rules on one attribute, and there is no `[data-surface="tile"]` block at
+     all — tile IS the absence of a mode. So a pane can ADD a mode to its own subtree but cannot
+     subtract the page's, and the tile pane below would silently inherit whatever the running theme
+     draws with. These four rules put the default drawing back inside that one pane. The other three
+     panes are left alone deliberately: restating outline/rule/none here to beat the page's own mode
+     would duplicate the contract, and the collapse you see under Terminal is worth more than the
+     duplication. The padding and gap halves are gated on the two modes that actually strip them, so
+     a theme's own paddings (Blueprint reserves head room for its part numbers and a left margin for
+     its balloons) survive. */
+  .g-pane[data-surface="tile"] :is(.i-panel, .i-card, .i-row, .i-stat, .i-finding, .i-loaderror) {
+    background: var(--i-plane);
+    border: var(--x-rule-w) solid var(--i-line);
+    border-radius: var(--i-radius);
+  }
+  :root:is([data-surface="rule"], [data-surface="none"]) .g-pane[data-surface="tile"]
+    :is(.i-panel, .i-loaderror) { padding: var(--i-4); }
+  :root:is([data-surface="rule"], [data-surface="none"]) .g-pane[data-surface="tile"]
+    :is(.i-row, .i-stat, .i-finding) { padding: var(--i-3) var(--i-4); }
+  :root:is([data-surface="rule"], [data-surface="none"]) .g-pane[data-surface="tile"]
+    :is(.i-rows, .i-stats) { gap: var(--i-2); }
+
+  /* SCAFFOLDING, for the same reason in the other direction. --i-density is declared on :root and
+     the spacing ramp multiplies by it there — and a custom property substitutes its var()s on the
+     element that DECLARES it, then inherits the already-substituted value. Setting --i-density on a
+     child therefore changes nothing unless the ramp is re-declared beside it. In a real app density
+     is a theme scalar set once on <html>, where this problem does not exist. */
+  .g-dense {
+    --i-1: calc(0.25rem * var(--i-density));
+    --i-2: calc(0.5rem  * var(--i-density));
+    --i-3: calc(0.75rem * var(--i-density));
+    --i-4: calc(1rem    * var(--i-density));
+    --i-6: calc(1.5rem  * var(--i-density));
+    --i-8: calc(2rem    * var(--i-density));
+  }
+</style>
+</head>
+<body>
+
+<div class="g-bar">
+  <nav class="g-nav" aria-label="Gallery pages">
+    <a href="index.html">Components</a>
+    <a href="foundations.html">Foundations</a>
+    <a href="themes.html">Themes</a>
+    <a href="patterns.html" aria-current="page">Patterns</a>
+  </nav>
+  <label class="i-themepick"><span class="i-field-label">Theme</span>
+    <select class="i-input" id="theme"></select></label>
+  <label class="i-themepick"><span class="i-field-label">Surface override</span>
+    <select class="i-input" id="surface">
+      <option value="">(theme's own)</option>
+      <option value="tile">tile</option><option value="outline">outline</option>
+      <option value="rule">rule</option><option value="none">none</option>
+    </select></label>
+  <span class="g-note" id="what"></span>
+</div>
+
+<div class="g-body">
+
+  <section class="g-spec">
+    <h2>Composed examples</h2>
+    <p>index.html shows the parts one at a time. This page shows them assembled, because most of what
+       goes wrong in a design system goes wrong between components rather than inside one: a screen
+       that reads flat, a state that looks like a different state, a table that stops being scannable
+       when a theme tightens the spacing. Everything below is library classes and nothing else —
+       where a rule on this page is scaffolding rather than system, it says so and says why.</p>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>A whole screen</h2>
+    <p>One agent cockpit, composed only of library classes: a context strip, a view header, a stats
+       row, a card grid, a row list, a dense table, a trace, findings and a verdict. The frame is
+       gallery chrome standing in for the shell — the six navigation layouts are the one place
+       structure branches, and the one part that wants the React layer. Everything inside it is
+       exactly what a <code>View</code> renders. Drag the frame's corner: the stat and card grids are
+       <code>auto-fit</code> with floors derived from content (a stat is a short number and a short
+       label; a card carries a sentence), so they reflow at the width the content actually needs
+       rather than at a breakpoint someone picked.</p>
+
+    <div class="g-frame">
+      <div class="i-stage">
+
+        <div class="i-ctxbar">
+          <span class="i-ctx-scope">flightdeck</span>
+          <span class="i-ctx-fact"><span class="i-ctx-k">branch</span>
+            <span class="i-ctx-v">master</span></span>
+          <span class="i-ctx-fact tone-signal"><span class="i-ctx-k">tree</span>
+            <span class="i-ctx-v">3 uncommitted</span></span>
+          <span class="i-ctx-fact tone-machine"><span class="i-ctx-k">model</span>
+            <span class="i-ctx-v">claude-opus-4-8</span></span>
+          <span class="i-ctx-fact"><span class="i-ctx-k">spend today</span>
+            <span class="i-ctx-v">$2.9433</span></span>
+          <span class="i-ctx-act"><button type="button" class="i-btn is-quiet">Review the tree</button></span>
+        </div>
+
+        <div class="i-view">
+          <header class="i-view-head">
+            <div class="i-view-titles">
+              <h1 class="i-h i-h1">Cockpit</h1>
+              <div class="i-view-sub">Seven runs today across six hosts. Two proposals are parked on
+                your approval and nothing else is blocked.</div>
+            </div>
+            <div class="i-view-actions">
+              <button type="button" class="i-btn is-quiet">Open a run</button>
+              <button type="button" class="i-btn is-primary">Start a run</button>
+            </div>
+          </header>
+
+          <section class="i-section">
+            <div class="i-eyebrow">Today</div>
+            <div class="i-stats">
+              <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+                <span class="i-stat-v">7</span><span class="i-stat-l">agent runs</span></span></button>
+              <button type="button" class="i-stat is-link is-hot"><span class="i-stat-fit">
+                <span class="i-stat-v">2</span><span class="i-stat-l">awaiting you</span></span></button>
+              <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+                <span class="i-stat-v">$2.9433</span><span class="i-stat-l">spent</span></span></button>
+              <div class="i-stat"><span class="i-stat-fit">
+                <span class="i-stat-v">1,137,125</span><span class="i-stat-l">tokens</span></span></div>
+              <button type="button" class="i-stat is-link"><span class="i-stat-fit">
+                <span class="i-stat-v">14</span><span class="i-stat-l">fleet hosts</span></span></button>
+              <div class="i-stat"><span class="i-stat-fit">
+                <span class="i-stat-v">0</span><span class="i-stat-l">gates failed</span></span></div>
+            </div>
+          </section>
+
+          <section class="i-section">
+            <div class="i-eyebrow">Start a run</div>
+            <div class="i-cards">
+              <button type="button" class="i-card is-link"><span class="i-card-top">
+                <span class="i-card-title">Ask the workspace</span>
+                <span class="i-tag tone-machine">read only</span></span>
+                <span class="i-card-blurb">A scoped agent answers from the repo, showing every file it
+                  opened.</span></button>
+              <button type="button" class="i-card is-link"><span class="i-card-top">
+                <span class="i-card-title">Review the working tree</span>
+                <span class="i-tag tone-machine">read only</span></span>
+                <span class="i-card-blurb">Findings against the uncommitted diff, each with a
+                  verdict.</span></button>
+              <button type="button" class="i-card is-link"><span class="i-card-top">
+                <span class="i-card-title">Plan a fleet change</span>
+                <span class="i-tag tone-signal">changes things</span></span>
+                <span class="i-card-blurb">An agent scouts the fleet and files a proposal for you to
+                  approve.</span></button>
+              <button type="button" class="i-card is-link"><span class="i-card-top">
+                <span class="i-card-title">Deploy a template</span>
+                <span class="i-tag tone-signal">changes things</span></span>
+                <span class="i-card-blurb">Provision a host from a verified hangar template.</span></button>
+            </div>
+          </section>
+
+          <section class="i-section">
+            <div class="i-eyebrow">Awaiting you</div>
+            <div class="i-rows">
+              <button type="button" class="i-row is-link i-striped tone-signal">
+                <span class="i-row-top"><span class="i-row-title">deploy_template</span>
+                  <span class="i-row-meta"><span class="i-tag tone-signal">awaiting you</span></span></span>
+                <span class="i-row-sub">warren &rarr; vessl-02 &middot; LXC 140 &middot; filed 09:14</span></button>
+              <button type="button" class="i-row is-link i-striped tone-signal">
+                <span class="i-row-top"><span class="i-row-title">rotate_credential</span>
+                  <span class="i-row-meta"><span class="i-tag tone-signal">awaiting you</span></span></span>
+                <span class="i-row-sub">broker &middot; claude-max &middot; filed 08:47</span></button>
+              <button type="button" class="i-row is-link is-on i-striped tone-ok">
+                <span class="i-row-top"><span class="i-row-title">restart_service</span>
+                  <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+                <span class="i-row-sub">soundboard &middot; LXC 132 &middot; ran 08:02</span></button>
+            </div>
+          </section>
+
+          <section class="i-section">
+            <div class="i-eyebrow">Run ledger</div>
+            <div class="i-table" style="--i-cols: 7rem 9rem 1fr 6rem 6rem" role="table">
+              <div class="i-tr is-head" role="row">
+                <span role="columnheader">agent</span><span role="columnheader">started</span>
+                <span role="columnheader">model</span><span role="columnheader">cost</span>
+                <span role="columnheader">verdict</span></div>
+              <div class="i-tr" role="row"><span>review</span><span>29 Jul, 09:14</span>
+                <span>claude-opus-4-8</span><span>$0.5950</span>
+                <span><span class="i-tag tone-ok">ok</span></span></div>
+              <div class="i-tr" role="row"><span>builder</span><span>29 Jul, 08:02</span>
+                <span>claude-opus-4-8</span><span>$1.3072</span>
+                <span><span class="i-tag tone-ok">ok</span></span></div>
+              <div class="i-tr" role="row"><span>scout</span><span>28 Jul, 23:41</span>
+                <span>claude-haiku-4-5</span><span>$0.0184</span>
+                <span><span class="i-tag tone-ok">ok</span></span></div>
+              <div class="i-tr" role="row"><span>sysadmin</span><span>28 Jul, 22:07</span>
+                <span>qwen3-14b-awq</span><span>$0.0000</span>
+                <span><span class="i-tag tone-crit">error</span></span></div>
+            </div>
+          </section>
+
+          <section class="i-section">
+            <div class="i-eyebrow">Last run</div>
+            <div class="i-panel">
+              <div class="i-split"><h2 class="i-h i-h2">review &middot; flightdeck</h2>
+                <span class="i-tag tone-ok">gate passed</span></div>
+              <div class="i-trace">
+                <div class="i-traceline is-muted">Reading the workspace&hellip;</div>
+                <div class="i-traceline"><b>Read</b> src/flightdeck/vault/release.py</div>
+                <div class="i-traceline"><b>Grep</b> release_path &mdash; 14 hits in 6 files</div>
+                <div class="i-traceline"><b>Bash</b> npm run check &mdash; 7 invariants hold</div>
+                <div class="i-traceline"><b>gate</b> PASS</div>
+              </div>
+              <div class="i-callout tone-crit">1 confirmed finding blocks the merge.</div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+    <div class="g-note">Everything inside the frame is <code>i-*</code>. The frame, and only the frame,
+      is this page.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>The same screen, four surfaces</h2>
+    <p>Surface is the axis that decides whether the product is made of boxes. It is not a colour and
+       not a variant prop: it is one attribute on the document, and the four modes are written once in
+       <code>contract.css</code> against the component layer, so no component knows which one is
+       running and no theme has to restate them. <strong>tile</strong> is a filled plane, a hairline
+       and a radius — the default, and Bento's. <strong>outline</strong> drops the fill for a hard
+       square edge; that is Blueprint's drawing-office register. <strong>rule</strong> deletes the box
+       entirely and leaves a top rule and whitespace, which is where Swiss and Editorial live.
+       <strong>none</strong> leaves neither: density and alignment do all the dividing, and that is
+       Terminal.</p>
+    <p>Surface is a decision about the <em>document</em>, not about a region, which is why it is an
+       attribute on <code>&lt;html&gt;</code> and not a prop. The four panes below cheat: they scope
+       that attribute to a wrapper, which works only because the modes are descendant rules. It is a
+       one-way cheat — a pane can add a mode to its own subtree but cannot subtract the page's, and
+       where the page's own mode is written later in <code>contract.css</code> than a pane's, the page
+       still wins inside the pane. So under Blueprint, Instrument and Bento all four panes are
+       distinct; under Swiss or Editorial the outline pane collapses into rule, and under Terminal
+       both collapse into none. That is the system telling you something true rather than the demo
+       failing. To see one mode carried across a real screen, set the <strong>surface override</strong>
+       in the top bar and scroll back up — it rewrites the document attribute, which is the only
+       honest way to ask this question.</p>
+    <p>Identical markup in each pane. What is worth watching
+       is that the tags, the callout and the trace rail are unchanged across all four — the mode list
+       names six classes (<code>panel</code>, <code>card</code>, <code>row</code>, <code>stat</code>,
+       <code>finding</code>, <code>loaderror</code>) and nothing else. A verdict, a rail and a run of
+       verbatim output are content rather than containers, so they keep their drawing everywhere. The
+       corollary is the rule in AUTHORING: a new component that draws its own box must either wear one
+       of those six classes or be added to all four mode blocks. That is not pedantry — the surface
+       used to be hand-written on six classes while the mode blocks listed only four of them, so on
+       every non-tile theme findings and load errors kept a filled rounded tile beside square outlined
+       panels, and on Terminal they were the only boxes left on screen.</p>
+
+    <div class="g-quad">
+      <div class="g-pane" data-surface="tile">
+        <div class="g-note">tile &mdash; a filled plane, hairline, radius. Instrument, Bento.</div>
+        <div class="i-stats">
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">runs</span></span></div>
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">2</span><span class="i-stat-l">awaiting</span></span></div>
+        </div>
+        <div class="i-rows">
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">deploy_template</span>
+            <span class="i-row-meta"><span class="i-tag tone-signal">awaiting</span></span></span>
+            <span class="i-row-sub">warren &rarr; vessl-02</span></div>
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">restart_service</span>
+            <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+            <span class="i-row-sub">soundboard &middot; LXC 132</span></div>
+        </div>
+        <div class="i-table" style="--i-cols: 1fr 4rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+        <div class="i-callout tone-crit">1 finding blocks the merge.</div>
+      </div>
+
+      <div class="g-pane" data-surface="outline">
+        <div class="g-note">outline &mdash; no fill, hard edge, square. Blueprint.</div>
+        <div class="i-stats">
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">runs</span></span></div>
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">2</span><span class="i-stat-l">awaiting</span></span></div>
+        </div>
+        <div class="i-rows">
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">deploy_template</span>
+            <span class="i-row-meta"><span class="i-tag tone-signal">awaiting</span></span></span>
+            <span class="i-row-sub">warren &rarr; vessl-02</span></div>
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">restart_service</span>
+            <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+            <span class="i-row-sub">soundboard &middot; LXC 132</span></div>
+        </div>
+        <div class="i-table" style="--i-cols: 1fr 4rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+        <div class="i-callout tone-crit">1 finding blocks the merge.</div>
+      </div>
+
+      <div class="g-pane" data-surface="rule">
+        <div class="g-note">rule &mdash; no box; a top rule and whitespace. Swiss, Editorial.</div>
+        <div class="i-stats">
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">runs</span></span></div>
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">2</span><span class="i-stat-l">awaiting</span></span></div>
+        </div>
+        <div class="i-rows">
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">deploy_template</span>
+            <span class="i-row-meta"><span class="i-tag tone-signal">awaiting</span></span></span>
+            <span class="i-row-sub">warren &rarr; vessl-02</span></div>
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">restart_service</span>
+            <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+            <span class="i-row-sub">soundboard &middot; LXC 132</span></div>
+        </div>
+        <div class="i-table" style="--i-cols: 1fr 4rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+        <div class="i-callout tone-crit">1 finding blocks the merge.</div>
+      </div>
+
+      <div class="g-pane" data-surface="none">
+        <div class="g-note">none &mdash; nothing draws a container; spacing divides. Terminal.</div>
+        <div class="i-stats">
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">7</span><span class="i-stat-l">runs</span></span></div>
+          <div class="i-stat"><span class="i-stat-fit">
+            <span class="i-stat-v">2</span><span class="i-stat-l">awaiting</span></span></div>
+        </div>
+        <div class="i-rows">
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">deploy_template</span>
+            <span class="i-row-meta"><span class="i-tag tone-signal">awaiting</span></span></span>
+            <span class="i-row-sub">warren &rarr; vessl-02</span></div>
+          <div class="i-row"><span class="i-row-top"><span class="i-row-title">restart_service</span>
+            <span class="i-row-meta"><span class="i-tag tone-ok">approved</span></span></span>
+            <span class="i-row-sub">soundboard &middot; LXC 132</span></div>
+        </div>
+        <div class="i-table" style="--i-cols: 1fr 4rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+        <div class="i-callout tone-crit">1 finding blocks the merge.</div>
+      </div>
+    </div>
+    <div class="g-note">Surface says whether there is a box; the theme still says what the box is made
+      of. Under a square theme the tile pane is square, because <code>--x-radius</code> belongs to the
+      theme and <code>data-surface</code> does not touch it.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>A form</h2>
+    <p>Every control is the same two classes: <code>i-field</code> for the label-and-control column,
+       <code>i-input</code> for the control itself, whether that control is a text box, a textarea or
+       a select. One class rather than three is what keeps the control voice identical when a theme
+       changes the chrome face — the same reason the theme picker in this page's own top bar is an
+       <code>i-input</code>. Pills are a choice you can see all of at once; a select is a choice you
+       cannot. The well underneath is recessed rather than raised because it holds verbatim machine
+       output, and the toolbar's status line is the one place a form is allowed to talk back in
+       italics.</p>
+    <p>Two details worth stealing. The focus ring is a real <code>:focus-visible</code> outline in the
+       signal colour with an offset, never a removed outline — a keyboard user has to be able to find
+       the control they are on. And the library states <code>box-sizing: border-box</code> for every
+       <code>i-*</code> element rather than assuming the host page has a reset: without it, any
+       control that carries both an explicit width and padding overflows its parent by exactly padding
+       plus border, which is how a chat composer's textarea once slid underneath its own Send
+       button.</p>
+
+    <div class="i-panel" style="max-width: var(--i-measure)">
+      <div class="i-split"><h2 class="i-h i-h2">File a credential</h2>
+        <span class="i-tag tone-machine">broker</span></div>
+      <p class="i-p is-small is-dim">A credential states how it may leave the vault. Values never do —
+        this form records the release path and the rotation, and the secret itself is handed straight
+        to the broker.</p>
+
+      <div class="g-demo" style="flex-direction: column; align-items: stretch;">
+        <label class="i-field"><span class="i-field-label">Name</span>
+          <input class="i-input" id="cred-name" value="broker/claude-max"></label>
+
+        <label class="i-field"><span class="i-field-label">Vault</span>
+          <select class="i-input" id="cred-vault">
+            <option>tradedesk</option><option selected>hangar-admin</option><option>warren</option>
+          </select></label>
+
+        <div class="i-field"><span class="i-field-label">Release path</span>
+          <div class="i-pills" role="group" aria-label="Release path">
+            <button type="button" class="i-pill is-on" aria-pressed="true">inject</button>
+            <button type="button" class="i-pill" aria-pressed="false">proxy</button>
+            <button type="button" class="i-pill" aria-pressed="false">never leaves</button>
+          </div></div>
+
+        <label class="i-field"><span class="i-field-label">Rotation</span>
+          <input class="i-input" id="cred-rotate" value="90 days"></label>
+
+        <label class="i-field"><span class="i-field-label">Why it exists</span>
+          <textarea class="i-input" id="cred-note" rows="2">Lets the claude-env template mint a session without a fleet operator pasting a token.</textarea></label>
+
+        <pre class="i-well">[preflight:credential] vault 'hangar-admin' reachable
+[preflight:credential] release path 'inject' allowed for this vault
+[preflight:credential] no write performed — dry run</pre>
+
+        <div class="i-callout tone-signal">Saving this writes a standing grant. It will still be
+          releasing after this session ends.</div>
+
+        <div class="i-toolbar">
+          <button type="button" class="i-btn is-primary">Save credential</button>
+          <button type="button" class="i-btn is-quiet">Dry run</button>
+          <button type="button" class="i-btn is-ghost">Cancel</button>
+          <button type="button" class="i-btn is-quiet" disabled>Release now</button>
+          <span class="i-toolbar-status">Nothing written yet.</span>
+        </div>
+      </div>
+    </div>
+    <div class="g-note">"Release now" is disabled rather than hidden: a control you can see and cannot
+      use tells you the capability exists and what it is waiting for.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>An agent run</h2>
+    <p>The shape every agentic surface in this product converges on: what the machine did, what the
+       gate decided, what the review found, and one line of terminal verdict. The 2px rail down the
+       trace is the system saying <em>a machine did this</em> — the middle of three border weights
+       that each mean something (1px is a boundary, 2px is a rail or a spine, 3px is the identity
+       stripe on the rows above). Depth is translucency, a hairline and the page wash showing through;
+       the system draws no shadow for it, which is why it stays crisp in dark mode instead of turning
+       to mud.</p>
+    <p>Nothing here animates. The motion budget forbids it on a hot path, and trace lines and table
+       rows are the definition of one: they arrive while you are reading them. The tile-arrival
+       animation that <code>i-stats</code> and <code>i-cards</code> get on first paint is deliberately
+       not applied to <code>i-tr</code> or <code>i-traceline</code> for exactly that reason. And
+       <code>prefers-reduced-motion</code> does not mean "turn it all off" — travel and scale go,
+       opacity stays, because removing every transition removes the signal that something arrived,
+       which is what a motion-sensitive reader still needs.</p>
+
+    <div class="i-panel">
+      <div class="i-split"><h2 class="i-h i-h2">review &middot; uncommitted changes</h2>
+        <span class="i-tag tone-machine">running</span></div>
+
+      <dl class="i-kv">
+        <div class="i-kv-pair"><dt>scope</dt><dd>flightdeck &middot; 11 files, +412 &minus;96</dd></div>
+        <div class="i-kv-pair"><dt>model</dt><dd>claude-opus-4-8</dd></div>
+        <div class="i-kv-pair"><dt>budget</dt><dd>$1.50 &middot; $0.59 spent</dd></div>
+      </dl>
+
+      <div class="i-trace">
+        <div class="i-traceline is-muted">Reading the workspace&hellip;</div>
+        <div class="i-traceline"><b>Read</b> src/flightdeck/vault/release.py</div>
+        <div class="i-traceline"><b>Read</b> web/server.py</div>
+        <div class="i-traceline"><b>Grep</b> release_path &mdash; 14 hits in 6 files</div>
+        <div class="i-traceline"><b>Bash</b> npm run check &mdash; 7 invariants hold across 5 themes</div>
+        <div class="i-traceline"><b>Bash</b> pytest -q &mdash; 220 passed in 14.21s</div>
+        <div class="i-traceline"><b>gate</b> PASS &mdash; 7 checks, 0 skipped</div>
+      </div>
+
+      <div class="i-callout tone-ok">Gate passed. 7 checks, nothing skipped.</div>
+
+      <div class="i-finding"><span class="i-tag tone-crit">high</span>
+        <span class="i-finding-where">web/server.py:122</span>
+        <span class="i-finding-body">The cross-site guard is a no-op on this route: the token is read
+          and never compared. <span class="i-tag tone-crit">confirmed</span></span></div>
+
+      <div class="i-finding"><span class="i-tag tone-mute">low</span>
+        <span class="i-finding-where">vault/release.py:88</span>
+        <span class="i-finding-body">Release paths are compared case-sensitively, so a vault filed as
+          <em>Inject</em> would never match. <span class="i-tag tone-signal">unverified</span></span></div>
+
+      <div class="i-finding is-refuted"><span class="i-tag tone-signal">medium</span>
+        <span class="i-finding-where">engine/policy.py:41</span>
+        <span class="i-finding-body">Possible unbounded retry.
+          <span class="i-tag tone-mute">refuted</span>
+          <span class="i-finding-why">the budget is enforced one frame up</span></span></div>
+
+      <div class="i-callout tone-crit">1 confirmed finding blocks the merge. Fix web/server.py:122
+        before this branch lands.</div>
+    </div>
+    <div class="g-note">Severity and verdict both map through tone, and the mapping is the component's,
+      not the caller's: critical and high are crit, medium is signal, low is mute; a confirmed verdict
+      is crit, refuted is mute, unverified is signal. The refuted finding stays on screen at reduced
+      opacity because it is evidence the review was checked, not noise.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>Empty, failed, loading</h2>
+    <p>Three states that a screen must never be allowed to invent for itself, shown together because
+       the only way to check them is side by side. <strong>A failed fetch must never look like
+       "none".</strong> On a runs list the difference is mild; on a security screen those two are
+       opposite meanings — "this host has no open findings" and "we could not ask the host" would be
+       the same picture, and one of them is an all-clear you have not earned. So the load error says
+       what it could not reach, says in as many words that this is not the same as it being empty, and
+       offers the retry. The empty state is centred in a capped column with
+       <code>margin-inline: auto</code>, because a capped column pinned to the left of a full-width
+       panel with its own text centred reads as a layout bug rather than as an empty state.</p>
+
+    <div class="g-trio">
+      <div>
+        <div class="g-note">empty &mdash; we asked, there is nothing</div>
+        <div class="i-panel"><div class="i-empty">
+          <h2 class="i-h i-h2">No runs yet</h2>
+          <p class="i-p is-dim is-small">Talk to an agent in Chat — each gated run is metered
+            here.</p></div></div>
+      </div>
+      <div>
+        <div class="g-note">failed &mdash; we could not ask</div>
+        <div class="i-loaderror">
+          <h2 class="i-h i-h2">Couldn't reach the runs store</h2>
+          <p class="i-p is-dim is-small">It may be starting, or unavailable. This is not the same as it
+            being empty.</p>
+          <button type="button" class="i-btn is-quiet">Retry</button></div>
+      </div>
+      <div>
+        <div class="g-note">loading &mdash; we are still asking</div>
+        <div class="i-panel"><p class="i-p is-dim">Loading the run ledger&hellip;</p></div>
+      </div>
+    </div>
+    <div class="g-note">Loading is one dim line of prose and that is the entire component — no
+      skeleton, no spinner. The distinction that costs something is empty versus failed, and that is
+      where the layout goes.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>Density</h2>
+    <p>The same ledger at <code>--i-density</code> 0.8, 1 and 1.25. Density is one multiplier over the
+       whole spacing ramp, so every gap and padding in every component moves together from a single
+       number, and a theme opts in with one declaration. Its counterpart is
+       <code>--i-type-scale</code>, which multiplies the type ramp — and the reason both exist is that
+       one alone is a trap. A theme that tightened only the spacing ended up with house-sized type
+       sitting in cramped gaps, which reads as broken rather than dense; Terminal now moves both at
+       0.74 together. These three panes move space only, which is exactly the half-lever that was the
+       bug — the text is the same size in all three, and you can feel it in the widest one.</p>
+
+    <div class="g-trio">
+      <div class="g-dense" style="--i-density: 0.8">
+        <div class="g-note">--i-density: 0.8</div>
+        <div class="i-table" style="--i-cols: 1fr 5rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>builder</span><span>$1.3072</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>scout</span><span>$0.0184</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+      </div>
+      <div class="g-dense" style="--i-density: 1">
+        <div class="g-note">--i-density: 1 (house)</div>
+        <div class="i-table" style="--i-cols: 1fr 5rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>builder</span><span>$1.3072</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>scout</span><span>$0.0184</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+      </div>
+      <div class="g-dense" style="--i-density: 1.25">
+        <div class="g-note">--i-density: 1.25</div>
+        <div class="i-table" style="--i-cols: 1fr 5rem 4rem" role="table">
+          <div class="i-tr is-head" role="row"><span role="columnheader">agent</span>
+            <span role="columnheader">cost</span><span role="columnheader">out</span></div>
+          <div class="i-tr" role="row"><span>review</span><span>$0.5950</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>builder</span><span>$1.3072</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>scout</span><span>$0.0184</span>
+            <span><span class="i-tag tone-ok">ok</span></span></div>
+          <div class="i-tr" role="row"><span>sysadmin</span><span>$0.0000</span>
+            <span><span class="i-tag tone-crit">err</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="g-note">The column widths are one custom property, <code>--i-cols</code>, set on the
+      table and read by the head row and every body row alike — so a heading cannot drift away from
+      the column it names, at any density. The table scrolls inside itself rather than pushing the
+      page sideways.</div>
+  </section>
+
+  <!-- ======================================================================================== -->
+  <section class="g-spec">
+    <h2>Composition rules</h2>
+    <p>Four rules that decide what may join the system and how it has to behave once it is in. They
+       are the reason nine screens render correctly in six themes with no screen knowing which theme
+       is running.</p>
+
+    <div class="g-demo" style="flex-direction: column; align-items: stretch;">
+
+      <div class="i-panel i-striped tone-signal">
+        <div class="i-eyebrow">Admission</div>
+        <h3 class="i-h i-h3">Three screens, or a real cost</h3>
+        <p class="i-p is-small">A pattern earns a component when it has appeared in three screens, or
+          when getting it wrong carries a real cost — a metric that is silently unclickable, a verdict
+          that reads green when it failed. Two occurrences stay a one-off in the consuming app until
+          they prove themselves. Everything in the compound layer was <em>extracted</em> from working
+          screens rather than designed up front, and the ordering is the point: a library designed in
+          advance guesses at what screens need, one extracted from them knows. Card exists because the
+          Home launcher, the workflow catalog and the fleet host list had independently grown the same
+          shape at three different paddings.</p>
+      </div>
+
+      <div class="i-panel i-striped tone-machine">
+        <div class="i-eyebrow">Colour</div>
+        <h3 class="i-h i-h3">Tone is a meaning, not a colour</h3>
+        <p class="i-p is-small">The five tones are claims: <em>signal</em> (this wants you, or binds
+          you), <em>machine</em> (the system is speaking), <em>crit</em>, <em>ok</em>, <em>mute</em>.
+          A prop asking for "amber" is a prop that has not decided what it means. A theme picks the
+          hue; it never repurposes the role — <code>--i-crit</code> is "this failed" in every theme,
+          forever, which is the single rule that lets six themes swap without auditing every screen.
+          Hues are the scarce resource, so emphasis rides on a second channel instead: fill weight, an
+          outline, a ring, a rail, a stripe, a glyph. Adding a hue needs a changelog note; adding a
+          channel usually does not.</p>
+      </div>
+
+      <div class="i-panel i-striped tone-ok">
+        <div class="i-eyebrow">State</div>
+        <h3 class="i-h i-h3">State is <code>is-*</code></h3>
+        <p class="i-p is-small"><code>is-on</code>, <code>is-link</code>, <code>is-hot</code>,
+          <code>is-refuted</code>. Never <code>active</code>, never <code>selected</code> — one
+          prefix means you can read a class list and know instantly which parts are identity and which
+          are condition. Its sibling rule: anything that does something is a
+          <code>&lt;button&gt;</code>. A div with a click handler is a keyboard trap, which is why
+          every clickable stat, card and row on this page is a real button carrying
+          <code>is-link</code>.</p>
+      </div>
+
+      <div class="i-panel i-striped tone-crit">
+        <div class="i-eyebrow">Surface</div>
+        <h3 class="i-h i-h3">It has to survive all four modes</h3>
+        <p class="i-p is-small">A component is not finished until it renders correctly under
+          <code>tile</code>, <code>outline</code>, <code>rule</code> and <code>none</code>. A
+          hard-coded border looks wrong in Terminal and Blueprint and nobody will know why. Use the
+          shared surface classes or add yours to the four mode blocks — and then look at it, in more
+          than one theme, because passing the checks is not evidence the UI is right. Two bugs in this
+          repo compiled and linted cleanly and were wrong on screen: a <code>container-type</code>
+          added to fix a figure overflow silently scoped the CSS counters that drive annotation, so
+          every numbered item read <code>01</code>; and a <code>display: flex</code> overrode the
+          browser's own <code>dialog:not([open]) { display: none }</code>, so every drawer in the app
+          rendered permanently. Both are why the query container now sits one level in, on
+          <code>i-stat-fit</code>, and why the figure is <code>min(--x-figure, 18cqi)</code> — sized
+          against the column it actually got rather than against a number a theme hoped would fit.</p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script type="module">
+  // The registry is imported, not restated — one source of truth for what a theme IS, shared with
+  // every React consumer. A gallery that hardcoded its own list would drift within a week.
+  import { THEMES, applyTheme, storedTheme } from "../src/themes.js";
+
+  const sel = document.getElementById("theme");
+  const surf = document.getElementById("surface");
+  const what = document.getElementById("what");
+
+  sel.innerHTML = THEMES.map((t) => `<option value="${t.id}">${t.name}</option>`).join("");
+
+  function render() {
+    const t = applyTheme(sel.value);
+    // the override is applied AFTER the theme, so it can demonstrate a component under a surface its
+    // own theme never uses — which is how you find out a new component only works in one of them
+    if (surf.value) document.documentElement.setAttribute("data-surface", surf.value);
+    what.textContent = `${t.blurb}  ·  surface: ${surf.value || t.surface} · shell: ${t.shell}`
+      + ` · grid: ${t.grid} · annotate: ${t.annotate} · hover: ${t.hover}`;
+  }
+  sel.value = storedTheme();
+  sel.addEventListener("change", render);
+  surf.addEventListener("change", render);
+  render();
+</script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 # Instrument
 
+[![check](https://github.com/sailor-netizen/instrument/actions/workflows/check.yml/badge.svg)](https://github.com/sailor-netizen/instrument/actions/workflows/check.yml)
+
 A design system where a **theme owns structure, not just colour**.
 
 Most theming stops at a palette. That fails the moment someone dislikes the *shape* of a product,
@@ -46,10 +48,18 @@ applyTheme("blueprint");
 npm run gallery      # → http://127.0.0.1:4322/gallery/
 ```
 
-Every component in every theme, with a surface override so you can see any component under all four
-surface modes — including the ones its own theme never uses. That is how you find out a new component
-only works in one of them. **It uses no framework**, which is the standing proof that the identity
-lives in CSS and a class vocabulary.
+Four pages, every one framework-free — the standing proof that the identity lives in CSS and a class
+vocabulary rather than in React:
+
+| Page | |
+|---|---|
+| `index.html` | every component, in every theme, with a **surface override** so you can view any component under all four surface modes — including the ones its own theme never uses. That is how you find out a new component only works in one of them. |
+| `foundations.html` | the primitives: the three token layers, every colour role with what it *means*, the type ramp at real size, spacing and what density does to it, the three border weights, the motion budget, and why there is no `box-shadow`. |
+| `themes.html` | all six side by side — a registry-generated table of every structure axis, and a live colour-role matrix so a role that changed meaning between themes would be visible instantly. |
+| `patterns.html` | composed examples: a whole screen under each surface mode, forms, an agent run, empty/error/loading, and a density comparison. |
+
+Every page reads the *real* `themes.js` registry rather than restating it, so the documentation cannot
+drift from the code.
 
 ## The three layers
 
@@ -93,6 +103,24 @@ while the layout doesn't.
 10. **Grid floors come from content, not item count.** Tuning a floor so *this* screen's six items fit
     one row breaks the next screen's four.
 
+## Checking it
+
+```bash
+npm run check
+```
+
+Zero dependencies, runs anywhere Node does, and verifies the promises this README makes rather than
+leaving them as prose: no colour literal outside the token layer, every theme fills every core role,
+no theme reaches into a consuming app's classes, every theme is both registered *and* imported, every
+`@import` resolves, no `box-shadow` anywhere. CI runs the same script — there is no looser second gate.
+
+A design system's claims rot exactly as fast as nobody checks them, which is why these are executable.
+
+**But a green check is not evidence the UI is right.** Two bugs here compiled and linted cleanly and
+were plainly wrong on screen: a `container-type` that silently scoped CSS counters so every annotated
+item numbered `01`, and a `display: flex` that overrode the browser's own
+`dialog:not([open]) { display: none }` so every drawer rendered permanently. Open the gallery.
+
 ## Extending it
 
 See **[AUTHORING.md](AUTHORING.md)** — how to add a component, a theme, a shell variant, or a
@@ -114,11 +142,28 @@ front — a library designed in advance guesses at what screens need; one extrac
 | `src/primitives.jsx` | leaves — type, panel, button, tag, field, pills, well |
 | `src/compounds.jsx` | patterns from real screens — stats, cards, rows, tables, traces, findings |
 | `src/instrument.css` | one import for the whole system, no bundler required |
-| `gallery/index.html` | every component × every theme, framework-free |
+| `gallery/*.html` | four framework-free pages: components · foundations · themes · patterns |
+| `scripts/check.mjs` | the library's own gate — 8 invariants, zero dependencies |
 
 ## Consumers
 
-- **flightdeck** — `frontend/`, via `file:../../instrument`. Six themes, nine screens.
+- **flightdeck** — an agentic developer cockpit. Six themes across nine screens, via `file:`.
 
-Adding one: depend on the package (or copy the folder), import the CSS, set `data-theme`. If you find
-yourself editing the library to make your app work, that is a missing axis — see AUTHORING.md.
+Adding one: depend on the package, import the CSS, set `data-theme`. If you find yourself editing the
+library to make your app work, that is a missing axis — see [AUTHORING.md](AUTHORING.md).
+
+## Where it came from
+
+Not designed up front. The five non-default themes started as **direction sheets** — standalone HTML
+pages rendering the *same* two real screens in five genuinely different visual directions, built so a
+human could put them side by side and pick one rather than have someone iterate blind. Every compound
+in `compounds.jsx` was extracted from a screen that had already grown it, usually at three different
+paddings. Every structure axis exists because a theme hit a wall and said so; `CHANGELOG.md` records
+which theme asked for each.
+
+That order is the whole method. A library designed in advance guesses at what screens need; one
+extracted from them knows.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).

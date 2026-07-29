@@ -4,7 +4,7 @@
    MOTION BUDGET for a dense tool. These are not marketing-page numbers:
      120ms  a control acknowledging a press          (must feel instant)
      150ms  hover / focus / colour                   (--i-fast)
-     220ms  a surface arriving or leaving            (--i-med)
+     260ms  a surface arriving or leaving            (--i-med)
      300ms  a full-height side card                  (--i-slow — longest travel, so longest duration)
 
    WHAT MUST NEVER ANIMATE, because a tool is read and operated rather than admired:

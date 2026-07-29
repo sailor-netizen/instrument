@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en" data-theme="instrument" data-surface="tile" data-shell="sidebar"
+      data-grid="none" data-annotate="0" data-hover="lift">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instrument — foundations</title>
+
+<!-- ONE link is the whole system. This page uses NO framework on purpose: it is the standing proof
+     that the identity lives in CSS and a class vocabulary, and that React is a convenience layer over
+     it rather than a requirement. If this page ever needs a build step, something has gone wrong. -->
+<link rel="stylesheet" href="../src/instrument.css">
+
+<style>
+  /* gallery chrome only — never a pattern to copy */
+  body { margin: 0; background: var(--i-page); color: var(--i-ink); font-family: var(--i-prose); }
+  .g-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: var(--i-4); flex-wrap: wrap;
+           align-items: flex-end; padding: var(--i-3) var(--i-6);
+           border-bottom: 1px solid var(--i-line-hi); background: var(--i-page); }
+  .g-body { padding: var(--i-6); display: flex; flex-direction: column; gap: var(--i-8); }
+  .g-spec { display: flex; flex-direction: column; gap: var(--i-3); }
+  .g-spec > h2 { margin: 0; font-family: var(--i-mono); font-size: var(--i-h2); color: var(--i-ink); }
+  .g-spec > p  { margin: 0; max-width: var(--i-measure); color: var(--i-dim);
+                 font-size: var(--i-small); }
+  .g-demo { display: flex; flex-wrap: wrap; gap: var(--i-3); align-items: flex-start; }
+  .g-demo > * { min-width: 0; }
+  .g-swatches { display: grid; gap: var(--i-2);
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+  .g-sw { display: flex; flex-direction: column; gap: var(--i-1); font-family: var(--i-mono);
+          font-size: var(--i-micro); color: var(--i-dim); }
+  .g-sw i { display: block; height: 2.5rem; border: 1px solid var(--i-line); border-radius: var(--i-radius-sm); }
+  .g-note { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-faint); }
+
+  /* --- foundations-only chrome. Same rule as above: deliberately plain, so it never competes with
+         the thing it is showing. Every value is a role or an axis; there is not a literal colour on
+         this page, which is the system's own first rule. --- */
+  .g-pages { width: 100%; display: flex; flex-wrap: wrap; gap: var(--i-4);
+             font-family: var(--i-mono); font-size: var(--i-micro);
+             letter-spacing: var(--x-label-track); text-transform: var(--x-label-case); }
+  .g-pages a { color: var(--i-dim); text-decoration: none; padding-bottom: 2px;
+               border-bottom: 2px solid transparent; }
+  .g-pages a:hover { color: var(--i-ink); }
+  .g-pages a[aria-current="page"] { color: var(--i-ink); border-bottom-color: var(--i-signal); }
+
+  .g-lead { max-width: var(--i-measure); font-size: var(--i-body); color: var(--i-ink);
+            line-height: 1.55; }
+  .g-spec > h3 { margin: var(--i-3) 0 0; font-family: var(--i-mono); font-size: var(--i-body);
+                 color: var(--i-ink); }
+
+  /* layer table */
+  .g-layers { display: grid; gap: var(--i-3);
+              grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .g-layer { display: flex; flex-direction: column; gap: var(--i-2);
+             border-top: 2px solid var(--i-rail); padding-top: var(--i-2); }
+  .g-layer b { font-family: var(--i-mono); font-size: var(--i-small); color: var(--i-ink); }
+  .g-layer code { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-machine); }
+  .g-layer span { font-size: var(--i-small); color: var(--i-dim); line-height: 1.45; }
+
+  /* colour roles: swatch · token · what it MEANS */
+  .g-roles { display: grid; gap: var(--i-4);
+             grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); }
+  .g-role { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--i-3); align-items: stretch; }
+  .g-role i { display: block; min-height: 3rem; border: 1px solid var(--i-line);
+              border-radius: var(--i-radius-sm); }
+  .g-role b { display: block; font-family: var(--i-mono); font-size: var(--i-row);
+              color: var(--i-ink); }
+  .g-role span { display: block; font-size: var(--i-small); color: var(--i-dim); line-height: 1.45;
+                 margin-top: var(--i-1); }
+
+  /* type ramp, at real size */
+  .g-ramp { display: flex; flex-direction: column; }
+  .g-ramp-row { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: var(--i-4);
+                align-items: baseline; border-top: 1px solid var(--i-line);
+                padding: var(--i-3) 0; }
+  .g-ramp-sample { color: var(--i-ink); line-height: 1.1; word-break: break-word;
+                   font-family: var(--i-mono); font-weight: 700; letter-spacing: -0.01em; }
+  .g-ramp-sample.is-prose { font-family: var(--i-prose); font-weight: 400; letter-spacing: normal; }
+  .g-meta { font-family: var(--i-mono); font-size: var(--i-micro); color: var(--i-dim);
+            line-height: 1.6; }
+  .g-meta b { color: var(--i-ink); font-weight: 700; }
+  .g-px { color: var(--i-machine); }
+
+  /* spacing ramp as bars */
+  .g-space { display: flex; flex-direction: column; gap: var(--i-2); }
+  .g-space-row { display: grid; grid-template-columns: 8rem 6rem 1fr; gap: var(--i-3);
+                 align-items: center; }
+  .g-space-row i { display: block; height: 0.7rem; background: var(--i-signal);
+                   justify-self: start; }
+  .g-space-row i.is-rail { background: var(--i-rail); }
+
+  /* border weights + radius */
+  .g-weights { display: grid; gap: var(--i-4);
+               grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); }
+  .g-rads { display: flex; flex-wrap: wrap; gap: var(--i-4); }
+  .g-rad { display: flex; flex-direction: column; gap: var(--i-2); }
+  .g-rad i { display: block; width: 6rem; height: 3rem; background: var(--i-plane);
+             border: 1px solid var(--i-line-hi); }
+
+  /* motion */
+  .g-durations { display: grid; gap: var(--i-3);
+                 grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+  .g-never { max-width: var(--i-measure); margin: 0; padding-left: var(--i-4);
+             font-size: var(--i-small); color: var(--i-ink); line-height: 1.6; }
+  .g-never li { margin-bottom: var(--i-1); }
+  .g-never li span { color: var(--i-dim); }
+
+  /* live L2 readout */
+  .g-axes { display: grid; grid-template-columns: max-content 1fr; gap: var(--i-1) var(--i-3);
+            font-family: var(--i-mono); font-size: var(--i-micro); }
+  .g-axes dt { color: var(--i-dim); }
+  .g-axes dd { margin: 0; color: var(--i-ink); word-break: break-word; }
+
+  @media (max-width: 46rem) {
+    .g-ramp-row { grid-template-columns: 1fr; gap: var(--i-2); }
+    .g-space-row { grid-template-columns: 1fr; gap: var(--i-1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="g-bar">
+  <nav class="g-pages" aria-label="Gallery pages">
+    <a href="index.html">index</a>
+    <a href="foundations.html" aria-current="page">foundations</a>
+    <a href="themes.html">themes</a>
+    <a href="patterns.html">patterns</a>
+  </nav>
+  <label class="i-themepick"><span class="i-field-label">Theme</span>
+    <select class="i-input" id="theme"></select></label>
+  <label class="i-themepick"><span class="i-field-label">Surface override</span>
+    <select class="i-input" id="surface">
+      <option value="">(theme's own)</option>
+      <option value="tile">tile</option><option value="outline">outline</option>
+      <option value="rule">rule</option><option value="none">none</option>
+    </select></label>
+  <span class="g-note" id="what"></span>
+</div>
+
+<div class="g-body">
+
+  <section class="g-spec">
+    <h2>Foundations</h2>
+    <p class="g-lead">The primitives every component is built from: three token layers, a set of
+      colour <em>roles</em>, two type voices, one spacing ramp, three border weights, one radius axis
+      and a four-step motion budget. Everything on this page is drawn from the live cascade, so
+      switching theme in the bar re-reads the whole page — the swatches, the ramps and the resolved
+      pixel sizes are the running system's values, not a screenshot of them.</p>
+  </section>
+
+  <!-- ============================================================================ THE THREE LAYERS -->
+  <section class="g-spec">
+    <h2>The three layers</h2>
+    <p>A theme in this system is not a palette. That is the mistake worth naming first: five colour
+      swaps over one skeleton produce five versions of the same product, and the skeleton is usually
+      what someone means when they say they don't like how it looks. So a theme owns three layers, and
+      a theme file may override all three.</p>
+
+    <div class="g-layers">
+      <div class="g-layer">
+        <b>L0 · palette</b>
+        <code>--_paper &nbsp;--_amber-dk</code>
+        <span>Private literals, <code>--_</code> prefixed, never consumed by a component. This is the
+          only place a hex or an alpha colour is legal outside a theme file, which makes the lint rule
+          one sentence — <em>a hex outside a theme file or the L0 block is a violation</em> — and
+          makes a re-skin a ten-line edit instead of an audit. <code>npm run check</code> enforces it,
+          on this page too.</span>
+      </div>
+      <div class="g-layer">
+        <b>L1 · roles</b>
+        <code>--i-signal &nbsp;--i-line</code>
+        <span>Semantic tokens. What components actually consume, and the only colour vocabulary they
+          have. A component that needs a new literal is telling you the system is missing a role —
+          the fix is a new role here, not a one-off in the component.</span>
+      </div>
+      <div class="g-layer">
+        <b>L2 · structure</b>
+        <code>--x-radius &nbsp;data-surface</code>
+        <span>How components <em>draw</em> and where the shell <em>puts</em> things. Scalars are
+          <code>--x-</code> custom properties; modes are rules keyed on <code>data-*</code>
+          attributes. This is the layer a palette-only system doesn't have, and it is why Terminal can
+          delete every box in the product without a screen knowing.</span>
+      </div>
+    </div>
+
+    <h3>Why the split</h3>
+    <p>Each layer is enforced by different machinery, which is the real reason they are separate
+      rather than one flat list. L0 is <em>containment</em> — literals in one block are greppable. L1
+      is <em>the cascade</em> — a role resolves through <code>light-dark()</code> driven by exactly
+      one <code>color-scheme</code> declaration, so a theme can never half-switch. L2 splits again by
+      the same logic: scalars live in CSS because the cascade is the right enforcement for a size,
+      while modes live in the registry because <code>applyTheme()</code> writes them all as attributes
+      in one pass — which is what makes a half-applied theme impossible.</p>
+    <p>Everything hangs off <strong>one attribute</strong>, <code>data-theme</code>. There is no
+      second switch to forget, so the palette can never change while the layout doesn't.</p>
+
+    <h3>The current theme's L2, live</h3>
+    <p>Scalars below are read out of the running cascade with <code>getComputedStyle</code>; modes are
+      read from the registry object <code>applyTheme()</code> returned. That is the split, visible:
+      one half is CSS, the other half is JavaScript, and neither can be set without the other landing
+      too. Some scalars print as the <code>calc()</code> they actually are.</p>
+    <div class="g-demo" style="gap: var(--i-8)">
+      <div>
+        <div class="i-eyebrow">Scalars · from the cascade</div>
+        <dl class="g-axes" id="axes" style="margin-top: var(--i-2)"></dl>
+      </div>
+      <div>
+        <div class="i-eyebrow">Modes · from the registry</div>
+        <dl class="g-axes" id="modes" style="margin-top: var(--i-2)"></dl>
+      </div>
+    </div>
+    <p class="g-note">A theme that needs something not on the contract's list is telling you the
+      contract is missing an axis. Every axis in <code>contract.css</code> got there that way — none
+      was designed up front, and <code>CHANGELOG.md</code> records which theme asked for each.</p>
+  </section>
+
+  <!-- ============================================================================== COLOUR ROLES -->
+  <section class="g-spec">
+    <h2>Colour roles</h2>
+    <p>Roles, not colours. A theme picks the hue; it never repurposes the role — <code>--i-crit</code>
+      is "this failed" in every theme, forever. That single rule is why nine screens stay correct
+      across six themes without a component ever asking which one is running. Adding a role means
+      stating a need as a sentence about <em>meaning</em> ("a run the verifier could not judge"), not
+      about appearance ("a yellowish tag"); if the sentence is about appearance, an existing role
+      already covers it.</p>
+
+    <h3>Surfaces</h3>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-page)"></i>
+        <div><b>--i-page</b><span>The field everything sits on. Also the punched-out foreground when a
+          theme's primary control inverts to a solid block of ink.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-plane)"></i>
+        <div><b>--i-plane</b><span>A raised region — a near-transparent fill under a hairline, not a
+          filled card. Panels, cards, rows, stats and zebra bands all read it.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-plane-2)"></i>
+        <div><b>--i-plane-2</b><span>The second tier: a plane inside a plane, and the floating
+          surfaces — tooltip and popover — that must separate from whatever is under them.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-well)"></i>
+        <div><b>--i-well</b><span>Recessed, not raised. Verbatim machine output — logs, diffs,
+          dry-runs — and the ground an input field is cut into.</span></div></div>
+    </div>
+
+    <h3>Text</h3>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-ink)"></i>
+        <div><b>--i-ink</b><span>Text you are meant to read. Clears 4.5:1 against its own surface in
+          every theme, light and dark; the visual gate checks it rather than an eye.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-dim)"></i>
+        <div><b>--i-dim</b><span>Supporting text that must not compete — labels, meta, blurbs, trace
+          lines. Load-bearing enough that its literals are measured, never eyeballed.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-faint)"></i>
+        <div><b>--i-faint</b><span>The tier that recedes furthest: placeholders, disabled controls,
+          annotation numbers, the key half of a context fact.</span></div></div>
+    </div>
+
+    <h3>Lines</h3>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-line)"></i>
+        <div><b>--i-line</b><span>The 1px boundary. The default edge of everything that draws
+          one.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-line-hi)"></i>
+        <div><b>--i-line-hi</b><span>The same boundary, raised: what a hover moves to, the harder edge
+          <code>surface: outline</code> draws instead, and the muted identity stripe.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-rail)"></i>
+        <div><b>--i-rail</b><span>The 2px spine. A trace, a group, the rule under a table
+          head.</span></div></div>
+    </div>
+
+    <h3>Claims</h3>
+    <p>Colour is a claim, never a coat of paint. These four are the entire hue budget of the product;
+      selection, progress and emphasis ride on fill weight, rails and rings instead. Adding a hue
+      needs a changelog note — hues are the scarce resource.</p>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-signal)"></i>
+        <div><b>--i-signal</b><span>This wants you, or it binds you. Attention and obligation: the
+          eyebrow labelling a region, the primary control, the focus ring, the stat that is waiting on
+          a human.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-machine)"></i>
+        <div><b>--i-machine</b><span>The machine is speaking. Identifiers, paths, tool names, anything
+          the system emits verbatim — and the "on" state, because selection is the system telling you
+          what it currently holds.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-crit)"></i>
+        <div><b>--i-crit</b><span>This failed. An outcome, never an emphasis — a failed run must never
+          render in the ok tone, and a loud button must never borrow this one.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-ok)"></i>
+        <div><b>--i-ok</b><span>This succeeded. The quiet outcome: it is the one claim with no wash
+          token, so it colours text and an edge but never fills a surface.</span></div></div>
+    </div>
+
+    <h3>Washes</h3>
+    <p>A wash is the same claim carried at fill weight — how a state can colour a whole surface
+      without introducing a second hue.</p>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-signal-wash)"></i>
+        <div><b>--i-signal-wash</b><span>Behind a primary button, a hot stat, a signal tag.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-machine-wash)"></i>
+        <div><b>--i-machine-wash</b><span>Behind the selected pill, the on card, the active jump
+          key.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-crit-wash)"></i>
+        <div><b>--i-crit-wash</b><span>Behind a failure callout or tag. There is no ok-wash, on
+          purpose.</span></div></div>
+    </div>
+
+    <h3>Atmosphere</h3>
+    <p>The page is lit from opposite corners by its two voices, with the origins off-canvas so only
+      the falloff shows — that is what stops it reading as a decorative blob. Deliberately weaker than
+      the reference it borrows from, because a workspace is stared at for hours rather than scrolled
+      once. Note that no rule inside this package paints them: they are declared for the host's stage,
+      and three of the six themes set them to <code>transparent</code> because those directions want
+      no atmosphere at all.</p>
+    <div class="g-roles">
+      <div class="g-role"><i style="background: var(--i-wash-signal)"></i>
+        <div><b>--i-wash-signal</b><span>The signal corner of the page glow.</span></div></div>
+      <div class="g-role"><i style="background: var(--i-wash-machine)"></i>
+        <div><b>--i-wash-machine</b><span>The machine corner, opposite it.</span></div></div>
+    </div>
+  </section>
+
+  <!-- =============================================================================== TWO VOICES -->
+  <section class="g-spec">
+    <h2>The two type voices</h2>
+    <p>Mono is the machine; prose is the human. That split carries most of the identity, and it
+      survives having no web fonts — which is the point. Themes ship into apps with no font loading,
+      so the system leans on what system stacks genuinely give you: monospace against grotesque
+      against a <code>Georgia</code>-class serif. That contrast is the biggest type lever available
+      and it costs nothing.</p>
+
+    <div class="g-roles">
+      <div class="g-role" style="grid-template-columns: 1fr">
+        <div><b>--i-mono · the machine voice</b>
+          <span style="font-family: var(--i-mono); color: var(--i-ink); font-size: var(--i-small)">
+            836cd44cd560e171 · src/flightdeck/kernel/peer.py · gate PASS</span>
+          <span>Headings, labels, identifiers, numbers, verdicts, traces, tags, table heads — anything
+            the system emits or states about itself. Numbers set in it are tabular, so columns of them
+            line up.</span></div></div>
+      <div class="g-role" style="grid-template-columns: 1fr">
+        <div><b>--i-prose · the human voice</b>
+          <span style="font-family: var(--i-prose); color: var(--i-ink); font-size: var(--i-small)">
+            An agent scouts the fleet and files a proposal you approve or deny.</span>
+          <span>Descriptions, help, chat, blurbs, the value half of a key/value pair, and what you
+            type into a field. Capped at <code>--i-measure</code> (68ch) so a paragraph never runs the
+            full width of a workspace.</span></div></div>
+    </div>
+
+    <h3>Two derived faces</h3>
+    <p><code>--i-display-face</code> (figures and the page title) and <code>--i-chrome-face</code>
+      (card titles, row titles, buttons, tags, table heads) both default to <code>--i-mono</code>.
+      They exist because a theme whose display voice is <em>not</em> the machine voice was otherwise
+      forced to restate that at six separate selectors — the symptom that a structure axis was
+      missing. Editorial points both at its serif; the machine voice underneath is untouched.</p>
+  </section>
+
+  <!-- ================================================================================ TYPE RAMP -->
+  <section class="g-spec">
+    <h2>The type ramp</h2>
+    <p>Rendered at real size, with the token beside each step and the size it resolves to in the theme
+      you are currently looking at. There is <strong>one fluid axis and it is the root font-size</strong>
+      — <code>clamp(16px, 0.7vw + 9px, 34px)</code>, set once in <code>instrument.css</code>. The ramp
+      is therefore plain <code>rem</code>: it is already fluid <em>through</em> the root, and layering
+      <code>clamp()</code> on top of a fluid root compounds the scaling, which was a v0.1 bug.
+      <code>--i-type-scale</code> multiplies every step, and is the counterpart to
+      <code>--i-density</code>: one scales text, the other scales space.</p>
+
+    <div class="g-ramp">
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample" style="font-size: var(--i-display)" data-measure="fontSize">1,137,125</span>
+        <span class="g-meta"><b>--i-display</b><br>2.6rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · the display step. Declared in the ramp; no rule in
+          <code>src/</code> reads it — figures size through <code>--x-figure</code> and titles through
+          <code>--x-title</code>, both L2.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample" style="font-size: var(--i-h1)" data-measure="fontSize">Heading one · the page</span>
+        <span class="g-meta"><b>--i-h1</b><br>1.7rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · the house page title. <code>.i-h1</code> actually reads
+          <code>--x-title</code>, which defaults to this and which every theme re-pitches, because
+          pinning it made every theme open its page the same way.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample" style="font-size: var(--i-h2)" data-measure="fontSize">Heading two · a region</span>
+        <span class="g-meta"><b>--i-h2</b><br>1.22rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · a region inside a view.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample is-prose" style="font-size: var(--i-body)" data-measure="fontSize">Body — the human voice, and the size a field is typed into.</span>
+        <span class="g-meta"><b>--i-body</b><br>1rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · prose, inputs, key/value values, the <code>.i-h3</code>
+          step.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample is-prose" style="font-size: var(--i-small)" data-measure="fontSize">Small — supporting detail that must not compete.</span>
+        <span class="g-meta"><b>--i-small</b><br>0.87rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · buttons, pills, blurbs, findings, row titles, callouts,
+          key/value pairs.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample" style="font-size: var(--i-row)" data-measure="fontSize">27 Jul, 21:47 · $0.5950 · claude-opus-4-8</span>
+        <span class="g-meta"><b>--i-row</b><br>0.86rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · the dense-listing step: table cells, row meta, trace lines,
+          wells. A hair under <code>--i-small</code> and separate from it so ledgers can tighten
+          without dragging prose down with them.</span>
+      </div>
+      <div class="g-ramp-row">
+        <span class="g-ramp-sample" style="font-size: var(--i-micro); letter-spacing: var(--x-label-track); text-transform: var(--x-label-case)" data-measure="fontSize">Micro · the label tier</span>
+        <span class="g-meta"><b>--i-micro</b><br>0.7rem &times; --i-type-scale<br>
+          <span class="g-px"></span> · eyebrows, field labels, stat labels, tags, table heads. Always
+          set through <code>--x-label-case</code> and <code>--x-label-track</code>, so a theme decides
+          whether the label tier shouts.</span>
+      </div>
+    </div>
+
+    <p class="g-note">Two measures, not a size: <code>--i-measure</code> (68ch) caps prose and load
+      errors; <code>--i-measure-tight</code> (46ch) caps an empty state, which is read in one glance
+      rather than in lines.</p>
+  </section>
+
+  <!-- ============================================================================ SPACE + DENSITY -->
+  <section class="g-spec">
+    <h2>Space, and what density does to it</h2>
+    <p>One ramp, named for its quarter-rem multiples, every step multiplied by
+      <code>--i-density</code>. The bars below are drawn at the token's own width, so they grow and
+      shrink as you switch theme — Editorial runs at 1.35 because with no boxes left, whitespace is
+      the only thing dividing anything; Terminal runs at 0.74.</p>
+
+    <div class="g-space">
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-1)"></i>
+        <b class="g-meta">--i-1</b><span class="g-meta">0.25rem &times; --i-density · <span class="g-px"></span> · icon gaps, tag internals</span></div>
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-2)"></i>
+        <b class="g-meta">--i-2</b><span class="g-meta">0.5rem &times; --i-density · <span class="g-px"></span> · gaps inside a component</span></div>
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-3)"></i>
+        <b class="g-meta">--i-3</b><span class="g-meta">0.75rem &times; --i-density · <span class="g-px"></span> · gaps between components, row padding</span></div>
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-4)"></i>
+        <b class="g-meta">--i-4</b><span class="g-meta">1rem &times; --i-density · <span class="g-px"></span> · the workhorse: panel and card padding</span></div>
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-6)"></i>
+        <b class="g-meta">--i-6</b><span class="g-meta">1.5rem &times; --i-density · <span class="g-px"></span> · between sections, shell columns</span></div>
+      <div class="g-space-row"><i data-measure="width" style="width: var(--i-8)"></i>
+        <b class="g-meta">--i-8</b><span class="g-meta">2rem &times; --i-density · <span class="g-px"></span> · the stage's own inset</span></div>
+      <div class="g-space-row"><i class="is-rail" data-measure="width" style="width: var(--i-section)"></i>
+        <b class="g-meta">--i-section</b><span class="g-meta">clamp(1.75rem, 1rem + 2.2vw, 3rem) · <span class="g-px"></span> · the stage's top inset. <em>Not</em> density-multiplied: it is a page-edge measure that answers to the viewport, not to how tight a theme runs.</span></div>
+    </div>
+
+    <h3>Density and type-scale move together</h3>
+    <p>They are two levers on one decision. A theme that only tightened spacing ended up with cramped
+      gaps around house-sized type, which reads as broken rather than dense — so Terminal moves both
+      to 0.74, Editorial takes density to 1.35 with type at 1.06, and Blueprint condenses to 0.82 /
+      0.94. Both levers or neither.</p>
+    <p class="g-note">The same coupling rule governs the grid: <code>--x-stat-floor</code> and
+      <code>--x-card-floor</code> come from <em>content</em> — a stat is a short number plus a short
+      label, a card carries a sentence — not from how many items one screen happens to pass. Tuning a
+      floor so this screen's six items fit one row breaks the next screen's four.</p>
+  </section>
+
+  <!-- =========================================================================== BORDER WEIGHTS -->
+  <section class="g-spec">
+    <h2>Three border weights, three meanings</h2>
+    <p>The weight is the message. A hairline separates; a rail attributes; a stripe identifies. Nothing
+      in the system uses a fourth weight, and none of the three is decorative — if you find yourself
+      reaching for 2px to make something look important, the answer is a role or a fill, not a
+      thicker line.</p>
+
+    <div class="g-weights">
+      <div>
+        <div class="i-panel">
+          <div class="i-eyebrow">1px · a boundary</div>
+          <p class="i-p is-small is-dim" style="margin-top: var(--i-2)">This panel's own edge. A
+            hairline over a near-transparent fill — the default edge of everything that draws
+            one.</p>
+        </div>
+        <p class="g-meta" style="margin-top: var(--i-2)"><b>--i-line</b> · drawn at
+          <code>--x-rule-w</code> by the shared surface, which the contract defaults to 1px and every
+          shipped theme keeps there. It says "these are two things", nothing more.</p>
+      </div>
+
+      <div>
+        <div class="i-trace">
+          <div class="i-traceline is-muted">Reading the workspace…</div>
+          <div class="i-traceline"><b>Read</b> src/flightdeck/kernel/peer.py</div>
+          <div class="i-traceline"><b>gate</b> PASS</div>
+        </div>
+        <p class="g-meta" style="margin-top: var(--i-2)"><b>2px · --i-rail</b> · a spine, and the
+          system saying "a machine did this". The same 2px weight marks the active route in the
+          sidebar shell (in signal) and the active tab in topnav (in ink); a table's head rule borrows
+          the rail <em>colour</em> at hairline weight to sit one step above
+          <code>--i-line</code>.</p>
+      </div>
+
+      <div>
+        <div class="i-panel i-striped tone-signal">
+          <div class="i-eyebrow">3px · an identity</div>
+          <p class="i-p is-small is-dim" style="margin-top: var(--i-2)">This one wants you.</p>
+        </div>
+        <div class="i-panel i-striped tone-crit" style="margin-top: var(--i-2)">
+          <p class="i-p is-small is-dim">And this one failed.</p>
+        </div>
+        <p class="g-meta" style="margin-top: var(--i-2)"><b>--i-stripe-w</b> · a plane's identity
+          edge — a whole surface claimed by a tone without being filled by it. Painted with
+          <code>::before</code> rather than a border, because a border cannot be full-bleed under a
+          radius. The colour always comes from a semantic role.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================================================================================== RADIUS -->
+  <section class="g-spec">
+    <h2>Radius</h2>
+    <p>One structural axis, <code>--x-radius</code>, and everything else derives from it — so a theme
+      sets corners once. <code>--x-radius: 0</code> squares the entire product, <em>including pills</em>,
+      which is what Swiss, Terminal, Editorial and Blueprint all need. The boxes below are drawn from
+      the derived tokens and print what they resolve to right now.</p>
+
+    <div class="g-rads">
+      <div class="g-rad"><i style="border-radius: var(--i-radius)" data-measure="borderTopLeftRadius"></i>
+        <span class="g-meta"><b>--i-radius</b><br>= --x-radius<br><span class="g-px"></span></span></div>
+      <div class="g-rad"><i style="border-radius: var(--i-radius-sm)" data-measure="borderTopLeftRadius"></i>
+        <span class="g-meta"><b>--i-radius-sm</b><br>= --x-radius &times; 0.7<br><span class="g-px"></span></span></div>
+      <div class="g-rad"><i style="border-radius: var(--i-radius-pill)" data-measure="borderTopLeftRadius"></i>
+        <span class="g-meta"><b>--i-radius-pill</b><br>max(&times;0.7, min(&times;100, 100px))<br><span class="g-px"></span></span></div>
+      <div class="g-rad" style="justify-content: flex-end">
+        <span class="i-tag tone-machine">a real pill</span>
+        <span class="g-meta">tags and pills read the pill token, so they square with everything
+          else</span></div>
+    </div>
+
+    <p class="g-note">Two traps recorded in the source, both worth reading before touching the
+      derivation. <strong>Write <code>0px</code>, not <code>0</code>:</strong> the pill formula
+      contains <code>min(var(--x-radius) * 100, 100px)</code>, and a unitless zero makes that a
+      number-versus-length mismatch — an invalid length that only <em>looks</em> right because
+      <code>border-radius</code> falls back to 0 anyway. <strong>The component layer reads the derived
+      <code>--i-radius*</code> trio, not <code>--x-radius</code>;</strong> across the component and
+      shell layers the only rule reading the axis directly is the topbar tile. Bento, Editorial and
+      Blueprint therefore bind the derived tokens in their own blocks — Editorial's note calls it a
+      contract gap in as many words, and says it needs deleting the moment the component layer
+      migrates.</p>
+  </section>
+
+  <!-- =================================================================================== MOTION -->
+  <section class="g-spec">
+    <h2>The motion budget</h2>
+    <p>Four durations, and they are not marketing-page numbers — this is a dense tool, read and
+      operated rather than admired. Every one of them runs on the same easing curve
+      (<code>--i-ease</code>), so motion in the product has one accent.</p>
+
+    <div class="g-durations">
+      <div class="g-layer"><b>120ms · --i-press</b>
+        <span>A control acknowledging the press itself, not just the result. Must feel instant.
+          Expressed as <em>scale</em>, never translate: a button inside a row that translates nudges
+          its neighbours, a scale is contained.</span></div>
+      <div class="g-layer"><b>150ms · --i-fast</b>
+        <span>Hover, focus, colour, border. The everyday transition — a control announcing itself, and
+          the tooltip that names one.</span></div>
+      <div class="g-layer"><b>260ms · --i-med</b>
+        <span>A surface arriving or leaving: the popover, the drawer's backdrop, a disclosure
+          expanding, the first paint of a tile collection.</span></div>
+      <div class="g-layer"><b>300ms · --i-slow</b>
+        <span>The full-height side card. The longest travel in the product, so the longest
+          duration.</span></div>
+    </div>
+
+    <p class="g-note">One discrepancy, reported rather than smoothed over: the budget written at the
+      top of <code>overlays.css</code> lists the third step as <strong>220ms</strong>, while
+      <code>tokens.css</code> declares <code>--i-med: 260ms</code>. The token is what actually runs, so
+      that is the number above; the comment is stale.</p>
+
+    <div class="g-demo" style="align-items: center; margin-top: var(--i-2)">
+      <button class="i-btn is-primary">press me · 120ms</button>
+      <button class="i-btn is-quiet">hover me · 150ms</button>
+      <div class="i-panel i-lift" style="padding: var(--i-3) var(--i-4)">
+        <span class="g-meta">a lift, 150ms</span></div>
+    </div>
+
+    <h3>What must never animate</h3>
+    <ol class="g-never">
+      <li>Anything that <strong>moves text the user is already reading</strong>.
+        <span>A list must not reflow under the eye.</span></li>
+      <li>Anything on a <strong>hot path</strong>: streaming trace lines, table rows arriving, log
+        output. <span>The arrival animation on tile collections is deliberately not applied to
+        <code>.i-tr</code> or <code>.i-traceline</code> for exactly this reason — rows and trace lines
+        arrive while they are being read.</span></li>
+      <li>The <strong>height of a scrolling region while it scrolls</strong>.</li>
+    </ol>
+    <p>The positive form of the same rule: the tile rise runs only on the first paint of a collection,
+      and only on opacity and scale. A list that animates on every update is fighting its reader.</p>
+
+    <h3>Reduced motion is not "off"</h3>
+    <p>Removing every transition takes away the signal that something arrived, which is precisely what
+      a motion-sensitive user still needs. So travel and scale go — the drawer and popover stop
+      translating — while opacity, which moves nothing, stays and stays fast. Under
+      <code>prefers-reduced-motion: reduce</code> the four durations collapse to 1ms / 1ms / 80ms /
+      80ms.</p>
+  </section>
+
+  <!-- =========================================================================== NO BOX-SHADOW -->
+  <section class="g-spec">
+    <h2>Why there is no box-shadow</h2>
+    <p>There is no <code>box-shadow</code> in this system, and that is a decision rather than an
+      omission. <strong>Depth is translucency plus a hairline plus the page wash showing through.</strong>
+      A shadow simulates a light source the rest of the product does not have; stack a few of them in
+      dark mode and the near-black surfaces they fall on turn to mud, because a dark shadow on a dark
+      field carries no contrast — only blur. Hairline-over-translucency stays crisp in both schemes
+      because the edge is the depth cue and the fill is the distance cue, and both survive being
+      inverted.</p>
+    <p>It also keeps the layering honest. A shadow makes anything look raised, so it lets you skip the
+      question of what a surface <em>is</em>. Without one, a plane has to declare itself
+      (<code>--i-plane</code>), a second tier has to declare itself (<code>--i-plane-2</code>), and
+      something recessed has to be genuinely recessed (<code>--i-well</code>) — three named states
+      instead of an arbitrary elevation number.</p>
+    <p>Two things that are not shadows and are allowed. <strong>Focus rings are
+      <code>outline</code></strong> — <code>2px solid var(--i-signal)</code>, offset, never removed —
+      and <code>outline</code> is deliberately left free for that job. And Terminal draws its character
+      grid with a zero-blur <code>box-shadow</code> ring on each cell, which is a hairline with a 1px
+      spread rather than depth; painting it as a backdrop behind the grid instead lights up a solid
+      block wherever a wrapped row runs short of cells, which is not something a character grid does.
+      That exception is documented at the rule.</p>
+  </section>
+
+</div>
+
+<script type="module">
+  // The registry is imported, not restated — one source of truth for what a theme IS, shared with
+  // every React consumer. A gallery that hardcoded its own list would drift within a week.
+  import { THEMES, applyTheme, storedTheme } from "../src/themes.js";
+
+  // L2 scalars, read from the live cascade rather than transcribed. A transcription is a claim that
+  // goes stale the first time a theme is tuned; getComputedStyle cannot be wrong.
+  const SCALARS = ["--i-density", "--i-type-scale", "--x-radius", "--x-rule-w", "--x-figure",
+                   "--x-title", "--x-label-case", "--x-label-track", "--x-stat-floor",
+                   "--x-card-floor"];
+
+  const sel = document.getElementById("theme");
+  const surf = document.getElementById("surface");
+  const what = document.getElementById("what");
+  const axes = document.getElementById("axes");
+  const modes = document.getElementById("modes");
+
+  sel.innerHTML = THEMES.map((t) => `<option value="${t.id}">${t.name}</option>`).join("");
+
+  const pairs = (rows) => rows.map(([k, v]) =>
+    `<dt>${k}</dt><dd>${v}</dd>`).join("");
+
+  // Every [data-measure] element prints what its own token resolves to in the running theme, into
+  // the .g-px in the same row. This is the whole reason the page can claim a size at all.
+  function measure() {
+    document.querySelectorAll("[data-measure]").forEach((el) => {
+      const out = el.parentElement.querySelector(".g-px");
+      if (out) out.textContent = getComputedStyle(el)[el.dataset.measure];
+    });
+  }
+
+  function render() {
+    const t = applyTheme(sel.value);
+    // the override is applied AFTER the theme, so it can demonstrate a foundation under a surface its
+    // own theme never uses — which is how you find out a primitive only works in one of them
+    if (surf.value) document.documentElement.setAttribute("data-surface", surf.value);
+    what.textContent = `${t.blurb}  ·  surface: ${surf.value || t.surface} · shell: ${t.shell}`
+      + ` · grid: ${t.grid} · annotate: ${t.annotate} · hover: ${t.hover}`;
+
+    const cs = getComputedStyle(document.documentElement);
+    axes.innerHTML = pairs(SCALARS.map((n) => [n, cs.getPropertyValue(n).trim() || "(unset)"]));
+    modes.innerHTML = pairs([
+      ["data-theme", t.id],
+      ["data-surface", surf.value || t.surface],
+      ["data-shell", t.shell],
+      ["data-grid", t.grid],
+      ["data-annotate", t.annotate],
+      ["data-hover", t.hover],
+      ["data-section-rule", t.sectionRule],
+      ["data-band", t.band],
+      ["data-leader", t.leader],
+      ["data-emphasis", t.emphasis],
+      ["data-hero", t.hero],
+      ["color-scheme", t.scheme],
+    ]);
+    measure();
+  }
+  sel.value = storedTheme();
+  sel.addEventListener("change", render);
+  surf.addEventListener("change", render);
+  render();
+  // the ramps are rem-based and the root is fluid, so the resolved sizes change with the viewport
+  addEventListener("resize", measure);
+</script>
+</body>
+</html>
