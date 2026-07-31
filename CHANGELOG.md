@@ -66,6 +66,12 @@ Also in this release, none of them axes:
   page links to every other, and a count of axes stated in prose has to be the real count. The last
   one was written after finding two docs claiming "fifteen" when the contract declared twenty-one.
 
+- **`<instrument-theme-select>` ships with the system** (`theme-select.js`). Products were each
+  hand-rolling the same `<select>` over `THEMES` + `applyTheme`; it is now a framework-free custom
+  element: one `<option>` per registry entry, applies on change through the one attribute writer,
+  emits a bubbling `theme-change` event for hosts with their own persistence, and never applies on
+  mount — the host owns the boot theme. First consumer: gamedock's settings drawer.
+
 ## 0.4.0
 
 Eight axes, all requested by theme authors who hit the wall rather than invented up front.

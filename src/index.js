@@ -14,6 +14,7 @@
 export { Drawer, Disclosure, Popover, Tooltip } from "./overlays.jsx";
 export { Shell } from "./shell.jsx";
 export { THEMES, DEFAULT_THEME, applyTheme, storedTheme, themeById } from "./themes.js";
+export { InstrumentThemeSelect } from "./theme-select.js";
 export { Btn, Empty, Eyebrow, Field, H, P, Panel, Pills, Tag, Well } from "./primitives.jsx";
 export {
   Callout,

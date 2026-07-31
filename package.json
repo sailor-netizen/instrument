@@ -1,11 +1,12 @@
 {
   "name": "instrument",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A themeable design system where a theme owns structure, not just colour.",
   "license": "MIT",
   "type": "module",
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./src/theme-select.js"
   ],
   "files": [
     "src",
@@ -18,6 +19,7 @@
     ".": "./src/index.js",
     "./css": "./src/instrument.css",
     "./themes": "./src/themes.js",
+    "./theme-select": "./src/theme-select.js",
     "./tokens.css": "./src/tokens.css",
     "./contract.css": "./src/contract.css",
     "./components.css": "./src/components.css",
