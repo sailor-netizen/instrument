@@ -75,7 +75,12 @@ class Theme:
 
     @property
     def is_light(self) -> bool:
-        """A plate lighter than mid-grey will not hold an edge on the launcher's white page."""
+        """A plate lighter than mid-grey will not hold an edge on the launcher's white page.
+
+        Meaningless for the CSS-variable flavour, whose plate is resolved by a cascade that does not
+        exist yet — so it declines to answer rather than parsing 'var(--i-page)' as a colour."""
+        if not self.plate.startswith("#"):
+            return False
         h = self.plate.lstrip("#")
         r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
         return (0.299 * r + 0.587 * g + 0.114 * b) > 128
@@ -128,6 +133,50 @@ def load_theme(theme_id: str) -> Theme:
 
 def theme_ids() -> list[str]:
     return ["instrument"] + sorted(p.stem for p in (_SRC / "themes").glob("*.css"))
+
+
+# A "theme" whose every role is a CSS custom property rather than a literal.
+#
+# The whole reason the tiles bake literals is that Cloudflare loads them through <img>, from another
+# origin, with no cascade to resolve a variable against. That constraint does NOT apply on a page of
+# ours that INLINES them: an inline <svg> is part of the document and sees every --i-* role the theme
+# sets. So the same generator emits a second flavour, and a tile on Fleet Home recolours itself when
+# the theme changes instead of being a picture of one theme.
+#
+# radius stays 0: the stripe's corner is computed in path arithmetic, and a var() cannot be arithmetic
+# at generation time. Every theme but bento is square anyway, and on our own page CSS owns the corner.
+CSS_VARS = Theme(id="css-vars", plate="var(--i-page)", ink="var(--i-ink)", dim="var(--i-dim)",
+                 signal="var(--i-signal)", radius=0.0)
+
+
+def _vars_to_style(svg: str) -> str:
+    """Move `var()` paints out of presentation attributes and into a `style` declaration.
+
+    THE TRAP, AND IT IS SILENT. `fill="var(--i-page)"` looks reasonable and is not: custom properties
+    resolve in CSS declarations, NOT in SVG presentation attributes. The browser sees an invalid paint
+    and falls back to the initial value — BLACK. On Beacon, whose page is #08090c, a black plate is
+    indistinguishable from a correct one, so the whole set looked fine; rendering the same page in
+    `swiss`, whose page is #fbfaf7, turned every tile into a black square.
+
+    `style="fill:var(--i-page)"` IS a declaration, so it resolves. Same values, different home."""
+    def fix(m: re.Match) -> str:
+        tag = m.group(0)
+        decls = []
+        for prop in ("fill", "stroke"):
+            am = re.search(rf'\s{prop}="(var\([^"]+\))"', tag)
+            if am:
+                decls.append(f"{prop}:{am.group(1)}")
+                tag = tag.replace(am.group(0), "")
+        if not decls:
+            return tag
+        # A self-closing tag ends `/>`, so the attribute has to go BEFORE the slash. Appending after
+        # it produced `<rect .../ style="…">`, which is not markup at all.
+        inner = tag[1:-1].rstrip()
+        close = "/>" if inner.endswith("/") else ">"
+        inner = inner[:-1].rstrip() if inner.endswith("/") else inner
+        return f'<{inner} style="{";".join(decls)}"{close}'
+
+    return re.sub(r"<(?:rect|path|circle|ellipse|g)\b[^>]*>", fix, svg)
 
 
 # ---- the plate, identical on every tile ---------------------------------------------------------
@@ -378,6 +427,28 @@ def main() -> int:
         i = args.index("--theme")
         theme_id = args[i + 1]
         args = args[:i] + args[i + 2:]
+    if "--css-vars" in args:
+        args.remove("--css-vars")
+        out = pathlib.Path(args[0] if args else "icons-css")
+        _emit(CSS_VARS, out)
+        for f in out.glob("*.svg"):                       # var() must live in style=, not an attribute
+            f.write_text(_vars_to_style(f.read_text(encoding="utf-8")), encoding="utf-8")
+        import xml.etree.ElementTree as ET
+        stray, broken = [], []
+        for f in out.glob("*.svg"):
+            txt = f.read_text(encoding="utf-8")
+            if 'fill="var(' in txt or 'stroke="var(' in txt:
+                stray.append(f.name)
+            try:
+                ET.fromstring(txt)          # malformed SVG renders as NOTHING — catch it here
+            except ET.ParseError as exc:
+                broken.append(f"{f.name}: {exc}")
+        if stray:
+            raise SystemExit(f"var() still in a presentation attribute: {stray}")
+        if broken:
+            raise SystemExit("the rewrite produced invalid markup: " + "; ".join(broken[:3]))
+        print(f"  all var() paints moved into style= across {len(list(out.glob('*.svg')))} files")
+        return 0
     if "--all-themes" in args:
         args.remove("--all-themes")
         root = pathlib.Path(args[0] if args else "icons")

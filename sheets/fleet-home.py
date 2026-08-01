@@ -87,13 +87,64 @@ GROUPS: list[tuple[str, list[tuple[str, str, str, str]]]] = [
 ]
 
 
-def theme_block(theme_id: str) -> str:
-    """Beacon's tokens, lifted verbatim from the theme file. Read, never retyped."""
-    css = (_HERE.parent / "src" / "themes" / f"{theme_id}.css").read_text(encoding="utf-8")
-    body = re.search(rf'\[data-theme="{theme_id}"\]\s*\{{(.*?)\n\}}', css, re.S).group(1)
-    keep = [ln.rstrip() for ln in body.splitlines()
-            if re.match(r"\s*--(i|x)-[a-z0-9-]+:", ln) or re.match(r"\s*color-scheme:", ln)]
-    return "\n".join(keep)
+def _tokens(theme_id: str) -> str:
+    """One theme's declarations, lifted verbatim from its own file. Read, never retyped."""
+    if theme_id == "instrument":
+        css = (_HERE.parent / "src" / "tokens.css").read_text(encoding="utf-8")
+        body = re.search(r":root\s*\{(.*?)\n\}", css, re.S).group(1)
+    else:
+        css = (_HERE.parent / "src" / "themes" / f"{theme_id}.css").read_text(encoding="utf-8")
+        body = re.search(rf'\[data-theme="{theme_id}"\]\s*\{{(.*?)\n\}}', css, re.S).group(1)
+    # PARSED BY DECLARATION, NOT BY LINE — and the difference is not cosmetic.
+    #
+    # The first version kept lines matching `--foo:` and dropped everything else, which silently
+    # corrupts two very common shapes:
+    #
+    #   1. A MULTI-LINE VALUE. beacon.css has
+    #          --i-mono: ui-monospace, "Cascadia Code", …, Menlo,
+    #                    Consolas, "Liberation Mono", monospace;
+    #      Keeping only the first line leaves a declaration with no `;`, so it swallows the NEXT
+    #      declarations until it finds one — `--i-prose` and `--i-page` both became part of
+    #      `--i-mono`'s value. Every theme lost its page colour.
+    #   2. A TRAILING COMMENT THAT WRAPS. swiss.css has `--i-faint: …; /* 5.1:1 on paper —` with the
+    #      `*/` on the next line, so the emitted sheet carried an unterminated comment that ate
+    #      declarations across theme blocks.
+    #
+    # Neither errored. The tell was every icon plate rendering BLACK — `fill: var(--i-page)` with
+    # --i-page undefined falls back to the initial paint — while the page still looked right, because
+    # `color-scheme: dark` gives the browser a dark default canvas even with no background set. Two
+    # bugs hiding behind a coincidence.
+    body = re.sub(r"/\*.*?\*/", " ", body, flags=re.S)          # comments first, across lines
+    keep = []
+    for decl in body.split(";"):
+        name, sep, value = decl.partition(":")
+        name = name.strip()
+        if not sep or not value.strip():
+            continue
+        if name.startswith("--") or name == "color-scheme":
+            keep.append(f"  {name}: {' '.join(value.split())};")
+    out = "\n".join(keep)
+    for probe in ("--i-page", "--i-ink"):
+        if f"{probe}:" not in out:
+            raise SystemExit(f"theme '{theme_id}': {probe} did not survive extraction")
+    return out
+
+
+def all_theme_blocks() -> tuple[str, list[str]]:
+    """EVERY installed theme, so the page can switch without a reload.
+
+    This is the whole argument for owning the page. The tiles are inlined and drawn in `var(--i-*)`,
+    so changing the theme repaints the ICONS too — a thing an `<img>` on Cloudflare's launcher can
+    never do, because an image from another origin has no cascade to inherit from.
+
+    Beacon is first and doubles as `:root`, so the page has a theme before any script runs; a picker
+    that only works after JS would show an unstyled flash on every load."""
+    others = sorted(p.stem for p in (_HERE.parent / "src" / "themes").glob("*.css")
+                    if p.stem != "beacon")
+    ids = ["beacon", "instrument", *others]
+    blocks = [f':root, [data-theme="beacon"] {{\n{_tokens("beacon")}\n}}']
+    blocks += [f'[data-theme="{i}"] {{\n{_tokens(i)}\n}}' for i in ids[1:]]
+    return "\n".join(blocks), ids
 
 
 def build(theme_id: str, icons_dir: pathlib.Path) -> str:
@@ -123,6 +174,9 @@ def build(theme_id: str, icons_dir: pathlib.Path) -> str:
                 f'<span class="dot" data-state="?" title="checking"></span></a>')
         sections.append(f'<section><h2>{group}</h2><div class="grid">{"".join(tiles)}</div></section>')
 
+    themes_css, theme_list = all_theme_blocks()
+    picker = "".join(f'<option value="{i}">{i}</option>' for i in theme_list)
+
     return f"""<!doctype html>
 <html lang="en" data-theme="{theme_id}">
 <meta charset="utf-8">
@@ -132,9 +186,7 @@ def build(theme_id: str, icons_dir: pathlib.Path) -> str:
 <meta name="theme-color" content="#08090c">
 <link rel="icon" href="/icon-192.png">
 <style>
-:root {{
-{theme_block(theme_id)}
-}}
+{themes_css}
 * {{ box-sizing: border-box }}
 body {{
   margin: 0; background: var(--i-page); color: var(--i-ink);
@@ -186,12 +238,39 @@ h2 {{
 .dot[data-state="unreachable"] {{ background: var(--i-signal) }}
 .tile.hide {{ display: none }}
 section.hide {{ display: none }}
+
+/* MOTION, ON HOVER ONLY — which is the whole reason it can exist here.
+   The Cloudflare launcher loads each tile as an <img>, so its animation would have to be baked into
+   the file and would run on all 24 at once: a grid of things moving simultaneously reads as a fault
+   panel, not a set of logos. Here the SVGs are INLINE, so CSS can hold them still until the pointer
+   arrives and animate exactly one. Nothing moves unless you are looking at it. */
+.tile .ic svg {{ transition: transform .18s ease }}
+@media (prefers-reduced-motion: no-preference) {{
+  .tile:hover .ic svg, .tile:focus-visible .ic svg {{ transform: scale(1.06) }}
+  /* the identity stripe is the tile's claim, so it is the part that answers */
+  .tile .ic svg > path:first-of-type, .tile .ic svg > rect:nth-of-type(3) {{
+    transition: opacity .2s ease;
+  }}
+}}
+/* The amber tiles hold the credentials; on hover they say so a little louder rather than differently. */
+.tile:hover {{ transform: translateY(-1px); transition: transform .15s ease }}
+
+.themes {{ margin-left: auto; display: flex; align-items: center; gap: 8px }}
+.themes label {{ font-family: var(--i-mono); font-size: 10px; color: var(--i-faint);
+                 text-transform: uppercase; letter-spacing: .14em }}
+select {{
+  background: var(--i-plane); color: var(--i-ink); border: 1px solid var(--i-line);
+  border-radius: var(--x-radius); font-family: var(--i-mono); font-size: 12px; padding: 5px 8px;
+}}
+select:focus {{ outline: 2px solid var(--i-signal); outline-offset: 1px }}
 footer {{ margin-top: 30px; color: var(--i-faint); font-family: var(--i-mono); font-size: 10.5px }}
 </style>
 
 <header>
   {mark}
   <h1>Salior Fleet</h1>
+  <span class="themes"><label for="t">theme</label>
+    <select id="t">{picker}</select></span>
 </header>
 <p class="sum" id="sum">checking&nbsp;…</p>
 <input id="q" placeholder="type to filter · enter opens · esc clears" autofocus autocomplete="off">
@@ -245,6 +324,20 @@ fetch({STATUS_URL!r}, {{ cache: 'no-store' }})
   }})
   .catch(() => {{ document.getElementById('sum').textContent = 'status unavailable'; }});
 
+/* THEME. The tiles are inline SVG drawn in var(--i-*), so flipping data-theme repaints the icons as
+   well as the page — the reason this page exists rather than a second copy of Cloudflare's.
+   Persisted, and read back before first paint would be better still; the picker only ever sets an
+   attribute, so a failed localStorage costs the preference and never the page. */
+const sel = document.getElementById('t');
+const KEY = 'fleet-home-theme';
+try {{ const saved = localStorage.getItem(KEY); if (saved && [...sel.options].some(o => o.value === saved)) {{
+  document.documentElement.dataset.theme = saved; sel.value = saved;
+}} }} catch (e) {{ /* private mode: the default theme still applies, which is the part that matters */ }}
+sel.addEventListener('change', () => {{
+  document.documentElement.dataset.theme = sel.value;
+  try {{ localStorage.setItem(KEY, sel.value); }} catch (e) {{}}
+}});
+
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {{}});
 </script>
 </html>
@@ -257,7 +350,7 @@ def main() -> int:
     if "--theme" in args:
         i = args.index("--theme"); theme = args[i + 1]; args = args[:i] + args[i + 2:]
     out = pathlib.Path(args[0] if args else "fleet-home.html")
-    html = build(theme, _HERE / "launcher-icons")
+    html = build(theme, _HERE / "launcher-icons-css")
     out.write_text(html, encoding="utf-8")
     n = sum(len(items) for _, items in GROUPS)
     print(f"fleet-home [{theme}] -> {out}  {n} tiles, {len(html):,} bytes")
