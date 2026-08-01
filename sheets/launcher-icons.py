@@ -400,6 +400,56 @@ def wordmark(t: Theme) -> str:
         "</svg>")
 
 
+def logo(t: Theme) -> str:
+    """The animated mark — the one artefact that is seen ALONE and large.
+
+    WHY ONLY THIS ONE MOVES. Twenty-four tiles animating at 40px in a grid is not a logo, it is a
+    fault indicator; the eye reads simultaneous motion as "something is wrong here" and there is
+    nowhere to rest. Instrument's whole register is "instruments, not decoration", so motion has to
+    be spent where it says something. It is spent here: a mark seen on its own, at size, once per
+    sign-in. The tiles stay still.
+
+    SMIL rather than CSS keyframes. Both are permitted in an `<img>` — that context runs declarative
+    animation and blocks script — but SMIL needs no `<style>` element, and a `<style>` inside an SVG
+    that someone later inlines into a page leaks its rules into that page's cascade. The tiles
+    already avoid `id` for the same class of reason.
+
+    The motion is the rose being STRUCK: the two axes draw out from the centre, the diagonals follow,
+    the stripe wipes down. Then it holds. It repeats slowly so a page left open still shows something
+    alive, rather than a loop that demands attention every two seconds."""
+    axis, diag = 52.0, 50.9
+    hold = "6s"
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" '
+        'role="img" aria-label="Salior Fleet">'
+        # the identity stripe, wiping down
+        f'<rect width="5" height="96" fill="{t.signal}" fill-opacity=".95">'
+        f'<animate attributeName="height" values="0;96;96" keyTimes="0;0.13;1" dur="{hold}" '
+        'repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.8 0.2 1;0 0 1 1"/></rect>'
+        # the two axes, struck from the centre out
+        f'<g stroke="{t.plate}" fill="none" stroke-width="5" stroke-linecap="square">'
+        f'<path d="M54 22v52" stroke-dasharray="{axis}">'
+        f'<animate attributeName="stroke-dashoffset" values="{axis};0;0" keyTimes="0;0.2;1" '
+        f'dur="{hold}" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.8 0.2 1;0 0 1 1"/>'
+        "</path>"
+        f'<path d="M28 48h52" stroke-dasharray="{axis}">'
+        f'<animate attributeName="stroke-dashoffset" values="{axis};{axis};0;0" '
+        f'keyTimes="0;0.08;0.28;1" dur="{hold}" repeatCount="indefinite" calcMode="spline" '
+        'keySplines="0 0 1 1;0.2 0.8 0.2 1;0 0 1 1"/></path></g>'
+        # the diagonals, quieter and later — the same two-weight glyph as the static mark
+        f'<g stroke="{t.plate}" stroke-opacity=".55" fill="none" stroke-width="4" '
+        'stroke-linecap="square">'
+        f'<path d="M36 30l36 36" stroke-dasharray="{diag}">'
+        f'<animate attributeName="stroke-dashoffset" values="{diag};{diag};0;0" '
+        f'keyTimes="0;0.18;0.4;1" dur="{hold}" repeatCount="indefinite" calcMode="spline" '
+        'keySplines="0 0 1 1;0.2 0.8 0.2 1;0 0 1 1"/></path>'
+        f'<path d="M72 30L36 66" stroke-dasharray="{diag}">'
+        f'<animate attributeName="stroke-dashoffset" values="{diag};{diag};0;0" '
+        f'keyTimes="0;0.24;0.46;1" dur="{hold}" repeatCount="indefinite" calcMode="spline" '
+        'keySplines="0 0 1 1;0.2 0.8 0.2 1;0 0 1 1"/></path></g>'
+        "</svg>")
+
+
 def _emit(t: Theme, out: pathlib.Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
     icons = build_icons(t)
@@ -407,6 +457,7 @@ def _emit(t: Theme, out: pathlib.Path) -> None:
         (out / f"{name}.svg").write_text(render(t, spec, LABELS[name]), encoding="utf-8")
     (out / "poster.svg").write_text(poster(t, icons), encoding="utf-8")
     (out / "wordmark.svg").write_text(wordmark(t), encoding="utf-8")
+    (out / "logo.svg").write_text(logo(t), encoding="utf-8")
     sizes = {n: len((out / f"{n}.svg").read_text(encoding="utf-8")) for n in icons}
     missing = set(LABELS) ^ set(icons)
     if missing:
