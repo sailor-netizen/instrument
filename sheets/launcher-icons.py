@@ -274,6 +274,20 @@ def build_icons(t: Theme) -> dict[str, dict]:
         "prowlarr": {  # a funnel — indexers narrowing to one result
             "rail": True,
             "glyph": f'<g stroke="{t.ink}" {G}><path d="M14 14h40L38 34v12l-8-6V34z"/></g>'},
+        # --- the GPU box -----------------------------------------------------------------------------
+        # Three real services that were only ever reachable from the old hand-written dashboard.
+        # They had been borrowing other tiles' glyphs, which is how a set starts lying about itself.
+        "llm": {  # a die with pins — the only chip form in the set
+            "glyph": f'<g stroke="{t.ink}" {G}><rect x="20" y="20" width="28" height="28"/></g>'
+                     f'<g {G2}><path d="M27 20v-7M41 20v-7M27 48v7M41 48v7'
+                     f'M20 27h-7M20 41h-7M48 27h7M48 41h7"/></g>'},
+        "searxng": {  # the magnifier — free to use now that Warren took the wikilink brackets
+            "glyph": f'<g stroke="{t.ink}" {G}><circle cx="30" cy="28" r="12"/>'
+                     f'<path d="M39 37l11 11"/></g>'},
+        "voicebox": {  # a speaker throwing two arcs — speech, not the level meter Navidrome owns
+            "glyph": f'<path d="M16 26h8l10-8v28l-10-8h-8z" fill="{t.ink}"/>'
+                     f'<g {G2}><path d="M42 24a12 12 0 0 1 0 16"/>'
+                     f'<path d="M48 18a20 20 0 0 1 0 28"/></g>'},
         # --- media: transport and storage (outline, no rail) ----------------------------------------
         "qbittorrent": {  # arrow into a tray
             "glyph": f'<g stroke="{t.ink}" {G}><path d="M34 12v22M24 28l10 10 10-10"/></g>'
@@ -305,6 +319,7 @@ LABELS = {
     "navidrome": "Navidrome", "kavita": "Kavita", "radarr": "Radarr", "sonarr": "Sonarr",
     "lidarr": "Lidarr", "mylar": "Mylar", "shelfarr": "Shelfarr", "bazarr": "Bazarr",
     "prowlarr": "Prowlarr", "qbittorrent": "qBittorrent", "soulseek": "Soulseek",
+    "llm": "LLM", "searxng": "SearXNG", "voicebox": "VoiceBox",
     "decypharr": "Decypharr",
 }
 
@@ -400,8 +415,14 @@ def wordmark(t: Theme) -> str:
         "</svg>")
 
 
-def logo(t: Theme) -> str:
+def logo(t: Theme, *, on_light: bool = True) -> str:
     """The animated mark — the one artefact that is seen ALONE and large.
+
+    TWO VARIANTS, BECAUSE THE HOST DECIDES THE INK. Cloudflare renders `login_design.logo_path`
+    inside a WHITE card, so that copy draws in the theme's dark plate. Fleet Home is our own page and
+    is Beacon-dark, so its copy draws in ink. The first version shipped one file for both and was
+    invisible on whichever host it was not drawn for — a mark is not a colour, it is a colour PLUS an
+    assumption about what is behind it, and that assumption has to be in the filename.
 
     WHY ONLY THIS ONE MOVES. Twenty-four tiles animating at 40px in a grid is not a logo, it is a
     fault indicator; the eye reads simultaneous motion as "something is wrong here" and there is
@@ -419,6 +440,7 @@ def logo(t: Theme) -> str:
     alive, rather than a loop that demands attention every two seconds."""
     axis, diag = 52.0, 50.9
     hold = "6s"
+    stroke = t.plate if on_light else t.ink
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" '
         'role="img" aria-label="Salior Fleet">'
@@ -427,7 +449,7 @@ def logo(t: Theme) -> str:
         f'<animate attributeName="height" values="0;96;96" keyTimes="0;0.13;1" dur="{hold}" '
         'repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.8 0.2 1;0 0 1 1"/></rect>'
         # the two axes, struck from the centre out
-        f'<g stroke="{t.plate}" fill="none" stroke-width="5" stroke-linecap="square">'
+        f'<g stroke="{stroke}" fill="none" stroke-width="5" stroke-linecap="square">'
         f'<path d="M54 22v52" stroke-dasharray="{axis}">'
         f'<animate attributeName="stroke-dashoffset" values="{axis};0;0" keyTimes="0;0.2;1" '
         f'dur="{hold}" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.8 0.2 1;0 0 1 1"/>'
@@ -437,7 +459,7 @@ def logo(t: Theme) -> str:
         f'keyTimes="0;0.08;0.28;1" dur="{hold}" repeatCount="indefinite" calcMode="spline" '
         'keySplines="0 0 1 1;0.2 0.8 0.2 1;0 0 1 1"/></path></g>'
         # the diagonals, quieter and later — the same two-weight glyph as the static mark
-        f'<g stroke="{t.plate}" stroke-opacity=".55" fill="none" stroke-width="4" '
+        f'<g stroke="{stroke}" stroke-opacity=".55" fill="none" stroke-width="4" '
         'stroke-linecap="square">'
         f'<path d="M36 30l36 36" stroke-dasharray="{diag}">'
         f'<animate attributeName="stroke-dashoffset" values="{diag};{diag};0;0" '
@@ -457,7 +479,8 @@ def _emit(t: Theme, out: pathlib.Path) -> None:
         (out / f"{name}.svg").write_text(render(t, spec, LABELS[name]), encoding="utf-8")
     (out / "poster.svg").write_text(poster(t, icons), encoding="utf-8")
     (out / "wordmark.svg").write_text(wordmark(t), encoding="utf-8")
-    (out / "logo.svg").write_text(logo(t), encoding="utf-8")
+    (out / "logo.svg").write_text(logo(t, on_light=True), encoding="utf-8")
+    (out / "logo-on-dark.svg").write_text(logo(t, on_light=False), encoding="utf-8")
     sizes = {n: len((out / f"{n}.svg").read_text(encoding="utf-8")) for n in icons}
     missing = set(LABELS) ^ set(icons)
     if missing:
