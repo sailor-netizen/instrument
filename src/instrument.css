@@ -29,6 +29,7 @@
 @import "./themes/editorial.css";
 @import "./themes/bento.css";
 @import "./themes/blueprint.css";
+@import "./themes/beacon.css";
 @import "./shell.css";
 @import "./components.css";
 @import "./overlays.css";

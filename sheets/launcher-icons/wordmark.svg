@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Salior Fleet">
-  <rect x="0" y="0" width="5" height="96" fill="#eaa640" fill-opacity=".95"/>
-  <g stroke="#e8ebf2" fill="none" stroke-width="5" stroke-linecap="square"><path d="M54 22v52M28 48h52"/></g>
-  <g stroke="#98a2b3" fill="none" stroke-width="4" stroke-linecap="square"><path d="M36 30l36 36M72 30L36 66"/></g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Salior Fleet"><rect width="5" height="96" fill="#ffa726" fill-opacity=".95"/><g stroke="#08090c" fill="none" stroke-width="5" stroke-linecap="square"><path d="M54 22v52M28 48h52"/></g><g stroke="#08090c" stroke-opacity=".55" fill="none" stroke-width="4" stroke-linecap="square"><path d="M36 30l36 36M72 30L36 66"/></g></svg>

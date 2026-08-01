@@ -1,0 +1,107 @@
+/* ==============================================================================================
+   BEACON — opaque plates for ground you don't own.
+
+   WHY THIS EXISTS, WHEN THE HOUSE VOICE IS ALREADY DARK. Instrument's surface technique is stated
+   in tokens.css: "depth is translucency + hairline + wash". That is a good technique and it has one
+   precondition — you must own the page underneath. `--i-plane` is `rgba(255,255,255,0.028)`, which
+   is not a colour, it is a RELATIONSHIP with a backdrop.
+
+   Beacon is for the places where that precondition fails. The fleet's marks now travel outside the
+   product: 24 tiles inside Cloudflare's App Launcher, a landing-page poster, a sign-in emblem — all
+   rendered on a page whose background is not ours and cannot be inspected, at ~40px, exported as
+   standalone SVG with no cascade to resolve a variable against. A near-transparent plane there is
+   not subtle; it is absent.
+
+   So every surface here is OPAQUE, and the boundary is a real weight rather than a hairline. The
+   measurement that produced this theme: on a white host, `blueprint` and `swiss` planes sat at
+   1.04:1 against the page — no tile body at all — while both spend their attention role on near
+   black (`swiss` sets --i-signal to its own ink, 1.00:1), so neither can say "this one holds your
+   credentials" in a channel that survives being small. That is not a flaw in them; it is their
+   thesis meeting a host they were not written for.
+
+   THE THREE RULES
+     1. No surface is defined as an alpha over the page. Every one is a literal, so it renders the
+        same on white, on black, and flattened into an SVG.
+     2. Boundaries are visible at 40px. --i-line here is a real value, not a 10% white, because a
+        hairline that dissolves is a tile with a ragged edge.
+     3. The hue is chosen for SATURATION, not for taste. --i-signal is a saturated amber so it still
+        reads as amber after being scaled to a 3px stripe and passed through someone else's colour
+        management. Contrast alone does not survive that; chroma does.
+
+   Everything else is Instrument's, unchanged: colour is still a claim, amber still means "this
+   wants you or binds you", teal is still the machine speaking, red and green are still outcomes.
+   A theme picks a hue; it never repurposes a role.
+   ============================================================================================== */
+
+[data-theme="beacon"] {
+  color-scheme: dark;
+
+  /* TYPE. The house pairing — a machine voice and a human one. Beacon changes the SURFACES, not the
+     voice; there is no argument for a different family in a theme about holding an edge. */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo,
+            Consolas, "Liberation Mono", monospace;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+             sans-serif;
+
+  /* SURFACES — four opaque depths, not four alphas. The steps are wide enough to survive being
+     flattened and rescaled: a 3% lift reads on a calibrated monitor and vanishes in a thumbnail. */
+  --i-page:    #08090c;   /* the field a mark is cut into — deeper than carbon, for max headroom */
+  --i-plane:   #14161b;
+  --i-plane-2: #1e212a;
+  --i-well:    #030405;
+
+  /* Atmosphere off. A wash is a gradient over a known backdrop, and this theme's whole premise is
+     that the backdrop is unknown. Terminal turns these off for its own reason; same result. */
+  --i-wash-signal:  transparent;
+  --i-wash-machine: transparent;
+
+  /* BOUNDARIES. The three weights keep their meanings, but --i-line is a LITERAL that still reads
+     at 1px on a 40px tile — the house value (10% white) is invisible once flattened onto white. */
+  --i-line:    #333842;
+  --i-line-hi: #4d5460;
+  --i-rail:    #6b7280;
+
+  --i-ink:   #f2f4f8;   /* 17.8:1 on --i-page */
+  --i-dim:   #a7b0bf;   /* 8.9:1 on --i-page — labels, secondary strokes, the bezel */
+  --i-faint: #757e8c;   /* chrome only; never a label */
+
+  /* CLAIMS. Saturated on purpose — see rule 3. Hue, not lightness, is what survives scaling. */
+  --i-signal:  #ffa726;   /* this wants you, or binds you */
+  --i-machine: #2dd4bf;   /* the machine is speaking */
+  --i-crit:    #ff5a4e;   /* this failed */
+  --i-ok:      #4ade80;   /* this is fine */
+  --i-signal-wash:  rgba(255, 167, 38, 0.15);
+  --i-machine-wash: rgba(45, 212, 191, 0.14);
+  --i-crit-wash:    rgba(255, 90, 78, 0.14);
+
+  /* STRUCTURE. Square, because a radius is a house style and this theme is trying to be legible on
+     someone else's page, where a rounded chip reads as a generic app icon. `0px` and not `0`:
+     tokens.css derives --i-radius-pill through min(var(--x-radius) * 100, 100px), and a unitless
+     zero makes that a number-vs-length mismatch — the same trap terminal.css documents. */
+  --x-radius: 0px;
+  --x-rule-w: 1px;
+  --x-label-case: uppercase;
+  --x-label-track: 0.14em;
+  --x-figure: 2.2rem;
+  --x-title: 1.6rem;
+  --x-stat-floor: 8rem;
+  --x-card-floor: 13rem;
+  --x-grid-line: var(--i-line);
+  --x-grid-size: 1.5rem;
+}
+
+/* ----------------------------------------------------------------------------------------------
+   The two things the axes cannot say. Both follow from "opaque, and legible off its home page".
+   ---------------------------------------------------------------------------------------------- */
+
+/* 1. A tile's edge is drawn, not implied. surface=tile normally leans on the plane/page delta doing
+      the separating; here the delta is deliberately modest so the theme survives flattening, which
+      means the boundary has to carry it instead. */
+[data-theme="beacon"] .i-panel,
+[data-theme="beacon"] .i-stat,
+[data-theme="beacon"] .i-card { border-color: var(--i-line-hi); }
+
+/* 2. emphasis=fill puts the primary control in the signal hue; make the text on it the FIELD rather
+      than the ink, because saturated amber under near-white is the one pairing in this palette that
+      does not clear 4.5:1. */
+[data-theme="beacon"] .i-btn.is-primary { color: var(--i-well); }
