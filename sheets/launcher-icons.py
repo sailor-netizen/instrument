@@ -209,12 +209,60 @@ LABELS = {
 }
 
 
+# The picture on the launcher's own landing page, built from the SAME glyphs as the tiles.
+#
+# Cloudflare ships a stock illustration there — a cartoon of a person at a browser — which is the one
+# element of that page most obviously not ours. `landing_page_design.image_url` replaces it (verified
+# by read-back; `background_color` and `text_color` on that object are silently dropped, so the page
+# stays white and this has to be drawn for light).
+#
+# Generated rather than drawn so it cannot drift: it is literally ten of the real tiles. Whatever the
+# launcher shows, this shows. A hand-made illustration of a product is out of date the first time the
+# product changes.
+# Eighteen rather than a token few: the page says "everything running under one login", and a
+# handful of tiles undersells that while leaving the slot mostly empty. The two amber tiles — the
+# credential surfaces — open the middle row, so the one hue in the set sits at the optical centre
+# instead of in a corner.
+POSTER = ["fleet-home", "grafana", "omada", "agentdesk", "soundboard", "warren",
+          "flightdeck", "broker", "tradedesk", "quant", "jellyfin", "navidrome",
+          "sonarr", "radarr", "lidarr", "prowlarr", "qbittorrent", "decypharr"]
+
+
+def poster() -> str:
+    """Eighteen tiles, three rows — the launcher, drawn as itself."""
+    tile, gap, pad = 56, 16, 28
+    cols = 6
+    # Derived from the tile count, not hardcoded — changing POSTER's length used to clip the last
+    # row and run the rail through it, because the row count was written down in two places.
+    rows = -(-len(POSTER) // cols)
+    w = pad * 2 + cols * tile + (cols - 1) * gap
+    h = pad * 2 + rows * tile + (rows - 1) * gap + 18
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" '
+             f'height="{h}" role="img" aria-label="The Salior fleet">']
+    for i, name in enumerate(POSTER):
+        col, row = i % cols, i // cols
+        x = pad + col * (tile + gap)
+        y = pad + row * (tile + gap)
+        spec = ICONS[name]
+        inner = [PLATE, stripe(spec.get("amber", False)), spec["glyph"]]
+        if spec.get("rail"):
+            inner.append(RAIL)
+        parts.append(f'<svg x="{x}" y="{y}" width="{tile}" height="{tile}" viewBox="0 0 64 64">'
+                     + "".join(inner) + "</svg>")
+    # A single 2px rail under the whole panel — the system's spine, marking these as one group.
+    parts.append(f'<path d="M{pad} {h - 16}h{w - pad * 2}" stroke="{DIM}" stroke-opacity=".45" '
+                 f'stroke-width="{RAIL_W}"/>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def main() -> int:
     out = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "icons")
     out.mkdir(parents=True, exist_ok=True)
     for name, spec in ICONS.items():
         svg = render(name, spec, LABELS[name])
         (out / f"{name}.svg").write_text(svg, encoding="utf-8")
+    (out / "poster.svg").write_text(poster(), encoding="utf-8")
     sizes = {n: len((out / f"{n}.svg").read_text(encoding="utf-8")) for n in ICONS}
     print(f"{len(ICONS)} icons -> {out}")
     print(f"largest {max(sizes, key=sizes.get)} at {max(sizes.values())} bytes, "
