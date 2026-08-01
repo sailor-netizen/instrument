@@ -181,6 +181,11 @@
    tile and everything else sizes down from it. Composition as hierarchy, expressed once. */
 [data-hero="1"] .i-stats > :first-child { grid-column: span 2; grid-row: span 2; }
 [data-hero="1"] .i-stats > :first-child .i-stat-fit { height: 100%; justify-content: flex-end; }
+/* Cards get the same rule, minus the row span. A stat is one figure and fills whatever box it is
+   given; a card is a stack of real content, so forcing double height leaves a hole under short
+   cards instead of hierarchy. Width alone is what carries the emphasis here. Asked for by a
+   launcher whose two game tiles read as one indecisive pair of equal boxes. */
+[data-hero="1"] .i-cards > :first-child { grid-column: span 2; }
 
 /* ----------------------------------------------------------------------------------------------
    SURFACE MODES.  Written once, against the component layer, so no component knows which theme is

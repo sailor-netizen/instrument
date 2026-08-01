@@ -66,6 +66,21 @@ Also in this release, none of them axes:
   page links to every other, and a count of axes stated in prose has to be the real count. The last
   one was written after finding two docs claiming "fifteen" when the contract declared twenty-one.
 
+- **`[data-hero="1"]` spans the first CARD, not only the first stat.** The rule existed for
+  `.i-stats` and stopped there, so a page whose hierarchy lives in cards had no way to say "this one
+  matters most" and rendered an indecisive row of equal boxes — a launcher's two game tiles is what
+  surfaced it. Cards take the column span but **not** the row span stats get: a stat is one figure
+  that fills its box, a card is a stack of real content, and forcing double height leaves a hole
+  under a short card instead of hierarchy.
+
+- **`patterns/precision-workspace-flightline/` — the first entry in a `patterns/` layer.** A pattern
+  is a way of composing a whole application (layer hierarchy, workspace-before-dashboard, a
+  tool-hosting contract) that sits *above* what a theme decides, so it had nowhere to live in a repo
+  whose units are themes and axes. It arrived from a real build that used this system end to end.
+  Its `tokens.css` is kept in its **own** vocabulary rather than rewritten, with a README mapping
+  each token onto the instrument role it corresponds to — pasting it as-is would give a product two
+  parallel token systems, which the brief itself lists as an anti-pattern.
+
 - **`<instrument-theme-select>` ships with the system** (`theme-select.js`). Products were each
   hand-rolling the same `<select>` over `THEMES` + `applyTheme`; it is now a framework-free custom
   element: one `<option>` per registry entry, applies on change through the one attribute writer,
