@@ -1,0 +1,4 @@
+# Committed golden SVGs are byte-compared in embeds/render.test.mjs; on Windows, git's default
+# CRLF normalisation would rewrite them on checkout and break that comparison. Pin to LF so the
+# snapshot test stays green cross-platform — the CLI (embeds/cli.mjs) writes \n only.
+embeds/posters/*.svg text eol=lf

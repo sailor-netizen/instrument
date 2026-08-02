@@ -38,7 +38,9 @@
   },
   "scripts": {
     "check": "node scripts/check.mjs",
-    "gallery": "node scripts/serve.mjs"
+    "gallery": "node scripts/serve.mjs",
+    "embeds": "node embeds/cli.mjs",
+    "embeds:validate": "node embeds/validate.mjs"
   },
   "repository": {
     "type": "git",

@@ -286,8 +286,27 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   }
 }
 
+/* 14. The embed renderer's own suite passes. These SVGs ship in READMEs through GitHub's camo
+       proxy, whose CSP is unforgiving; the node:test suites under embeds/ are what verify each
+       output stays self-contained and inside budget. Run as a child so a test failure fails the
+       gate rather than a silent pass. */
+{
+  const embeds = join(ROOT, "embeds");
+  if (existsSync(embeds)) {
+    // Explicit file list rather than a directory: `node --test <dir>` delegates to Node's own
+    // glob-based discovery, which does not reliably match an absolute Windows path (backslashes),
+    // and failed with an opaque MODULE_NOT_FOUND rather than actually discovering the suites.
+    const testFiles = readdirSync(embeds).filter((f) => f.endsWith(".test.mjs")).map((f) => join(embeds, f));
+    const { spawnSync } = await import("node:child_process");
+    const r = spawnSync(process.execPath, ["--test", ...testFiles], { encoding: "utf8" });
+    if (r.status !== 0) {
+      fail("embed-tests", `node --test embeds/*.test.mjs exited ${r.status}\n${(r.stderr || r.stdout || "").trim().slice(-800)}`);
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 13;
+const RULES = 14;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);
