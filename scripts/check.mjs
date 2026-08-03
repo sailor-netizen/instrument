@@ -305,8 +305,32 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   }
 }
 
+/* 15. sheets/'s own tests pass. That directory — the launcher icon set, Fleet Home, the contact
+       sheet — ships 27 SVGs to a public Cloudflare Worker and the HTML for home.salior.ai with no
+       other gate of any kind. Same reasoning as rule 14: run as a child so a failure fails the gate
+       rather than a silent pass. `python3` first, `python` as a fallback for a Windows dev box where
+       the launcher isn't aliased. */
+{
+  const suite = join(ROOT, "sheets", "test_sheets.py");
+  if (!existsSync(suite)) {
+    // A MISSING suite is a failure, not a pass. Wrapping the check in `if (existsSync)` would mean
+    // deleting the file makes rule 15 succeed silently — the precise shape of "a check that cannot
+    // fail" this whole gate exists to prevent.
+    fail("sheets-tests", `${suite} is missing — this gate cannot be satisfied by deleting it`);
+  } else {
+    const { spawnSync } = await import("node:child_process");
+    let r = spawnSync("python3", [suite], { encoding: "utf8" });
+    if (r.error) r = spawnSync("python", [suite], { encoding: "utf8" });
+    if (r.error) {
+      fail("sheets-tests", `no python3/python interpreter found to run ${suite}: ${r.error.message}`);
+    } else if (r.status !== 0) {
+      fail("sheets-tests", `python ${suite} exited ${r.status}\n${(r.stderr || r.stdout || "").trim().slice(-800)}`);
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 14;
+const RULES = 15;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);
