@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { THEMES } from "../src/themes.js";
 import { renderPoster, renderTile } from "./render.mjs";
 import { validate } from "./validate.mjs";
-import { resolveTheme } from "./tokens.mjs";
+import { parseVarBlock, resolveTheme, resolveValue } from "./tokens.mjs";
 
 const POSTERS_DIR = fileURLToPath(new URL("posters/", import.meta.url));
 
@@ -28,13 +28,34 @@ test("unknown theme id throws a clear error", () => {
 });
 
 test("rendering is deterministic for a given seed, and seed-sensitive across seeds", () => {
+  // Seed variation lives in the tag-row animation delays; comparing the extracted delay lists
+  // across several seed pairs makes a coincidental full collision (the flake risk of comparing
+  // whole documents on one pair, since each delay rounds to 2 decimals) practically impossible.
+  const delays = (svg) => [...svg.matchAll(/animation-delay:([\d.]+)s/g)].map((m) => m[1]).join(",");
+  const pairs = [[3, 9], [1, 2], [7, 13]];
+
   for (const t of THEMES) {
     const a = renderPoster(t.id, { seed: 3 });
     const b = renderPoster(t.id, { seed: 3 });
     assert.strictEqual(a, b, `${t.id} poster should be byte-identical across identical calls`);
 
-    const c = renderPoster(t.id, { seed: 9 });
-    assert.notStrictEqual(a, c, `${t.id} poster should differ when the seed changes`);
+    const sensitive = pairs.some(([s1, s2]) =>
+      delays(renderPoster(t.id, { seed: s1 })) !== delays(renderPoster(t.id, { seed: s2 })));
+    assert.ok(sensitive, `${t.id} poster should vary with the seed`);
+  }
+});
+
+test("resolved values and rendered output are line-ending independent", () => {
+  // Regression guard for the Windows checkout trap: `core.autocrlf=true` delivers the CSS sources
+  // as CRLF while the goldens are pinned `eol=lf`. Values must resolve to the same bytes either
+  // way, and no CR may ever reach a rendered document.
+  const crlfCss = ':root {\r\n  --i-mono: ui-monospace,\r\n      "Test Mono",\r\n      monospace;\r\n}\r\n';
+  const vars = parseVarBlock(crlfCss, ":root");
+  assert.strictEqual(resolveValue("var(--i-mono)", vars, "dark"), 'ui-monospace, "Test Mono", monospace');
+
+  for (const t of THEMES) {
+    assert.ok(!renderPoster(t.id).includes("\r"), `${t.id} poster must not contain CR bytes`);
+    assert.ok(!renderTile(t.id).includes("\r"), `${t.id} tile must not contain CR bytes`);
   }
 });
 

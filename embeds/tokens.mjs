@@ -15,6 +15,11 @@ import { THEMES } from "../src/themes.js";
 
 const TOKENS_PATH = fileURLToPath(new URL("../src/tokens.css", import.meta.url));
 
+/** Read a CSS source with line endings normalised. On Windows, `core.autocrlf=true` checks the
+ *  sources out as CRLF while the committed goldens are pinned `eol=lf` — if checkout EOL reached
+ *  the renderer, the same commit would render different bytes on different machines. */
+const readCss = (p) => readFileSync(p, "utf8").replace(/\r\n?/g, "\n");
+
 /** The roles the renderer draws with — the subset of L1 colour roles every theme fills (see
  *  scripts/check.mjs rule 2's CORE list, plus the wash roles the poster needs for tag fills). */
 export const COLOR_ROLES = [
@@ -103,7 +108,10 @@ export function resolveValue(rawOrName, vars, usedScheme) {
     return resolveValue(usedScheme === "light" ? light : dark, vars, usedScheme);
   }
 
-  return input;
+  // A resolved literal is collapsed to single-spaced text: theme CSS declares its font stacks
+  // across multiple indented lines, and copying that whitespace verbatim into attributes would
+  // bloat every output and make its bytes depend on the source file's line endings.
+  return input.replace(/\s+/g, " ");
 }
 
 /**
@@ -126,12 +134,12 @@ export function resolveTheme(themeId) {
     throw new Error(`Unknown theme id: "${themeId}". Known: ${known}`);
   }
 
-  const tokensCss = readFileSync(TOKENS_PATH, "utf8");
+  const tokensCss = readCss(TOKENS_PATH);
   const root = parseVarBlock(tokensCss, ":root");
 
   const themeCssPath = fileURLToPath(new URL(`../src/themes/${themeId}.css`, import.meta.url));
   const theme = existsSync(themeCssPath)
-    ? parseVarBlock(readFileSync(themeCssPath, "utf8"), `[data-theme="${themeId}"]`)
+    ? parseVarBlock(readCss(themeCssPath), `[data-theme="${themeId}"]`)
     : new Map();
 
   const vars = new Map(root);
