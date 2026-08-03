@@ -40,7 +40,8 @@
     "check": "node scripts/check.mjs",
     "gallery": "node scripts/serve.mjs",
     "embeds": "node embeds/cli.mjs",
-    "embeds:validate": "node embeds/validate.mjs"
+    "embeds:validate": "node embeds/validate.mjs",
+    "sheets:test": "python3 sheets/test_sheets.py"
   },
   "repository": {
     "type": "git",
