@@ -1,3 +1,7 @@
 node_modules/
 .shots/
 .adw/
+
+# Python bytecode from sheets/ — never useful in a repo
+__pycache__/
+*.pyc

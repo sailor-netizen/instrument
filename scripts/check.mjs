@@ -312,7 +312,12 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
        the launcher isn't aliased. */
 {
   const suite = join(ROOT, "sheets", "test_sheets.py");
-  if (existsSync(suite)) {
+  if (!existsSync(suite)) {
+    // A MISSING suite is a failure, not a pass. Wrapping the check in `if (existsSync)` would mean
+    // deleting the file makes rule 15 succeed silently — the precise shape of "a check that cannot
+    // fail" this whole gate exists to prevent.
+    fail("sheets-tests", `${suite} is missing — this gate cannot be satisfied by deleting it`);
+  } else {
     const { spawnSync } = await import("node:child_process");
     let r = spawnSync("python3", [suite], { encoding: "utf8" });
     if (r.error) r = spawnSync("python", [suite], { encoding: "utf8" });
