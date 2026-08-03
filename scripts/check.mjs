@@ -57,10 +57,26 @@ for (const f of themeFiles) {
       patching someone's screen instead of expressing itself through the system — and it would break
       the moment that app renamed a class it never agreed to keep. */
 for (const f of themeFiles) {
-  const bad = [...read(join(THEMES_DIR, f)).matchAll(/\.(?!i-)[a-z][a-z0-9-]*\s*[,{]/gi)]
-    .map((m) => m[0].trim())
-    .filter((sel) => !/^\.(is-|tone-)/.test(sel));
-  if (bad.length) fail("themes-target-i-only", `themes/${f}: ${[...new Set(bad)].join(" ")}`);
+  // Allow-list the CLASS NAME, never try to find the end of a selector.
+  //
+  // This used to match `/\.(?!i-)[a-z][a-z0-9-]*\s*[,{]/`, which only fires when a foreign class is
+  // the last thing before a comma or a brace. Everything that continues — `.fd-panel:hover`,
+  // `.fd-rail > *`, `.fd-panel::before`, `.fd-panel[data-open]` — walked straight past it, and this
+  // script runs in CI on every push, so the invariant read as holding. Instrument ships to six
+  // consuming apps via npm; a theme patching their classes breaks on their next rename.
+  //
+  // So: drop comments, take the selector text left of each `{` (skipping at-rules, whose prelude is
+  // not a selector), and inspect every class token in it regardless of what follows.
+  const css = read(join(THEMES_DIR, f)).replace(/\/\*[\s\S]*?\*\//g, " ");
+  const bad = new Set();
+  for (const block of css.split("{")) {
+    const sel = block.slice(block.lastIndexOf("}") + 1).trim();
+    if (!sel || sel.startsWith("@")) continue;
+    for (const [, name] of sel.matchAll(/\.([a-zA-Z_][\w-]*)/g)) {
+      if (!/^(i-|is-|tone-)/.test(name)) bad.add(`.${name}`);
+    }
+  }
+  if (bad.size) fail("themes-target-i-only", `themes/${f}: ${[...bad].join(" ")}`);
 }
 
 /* 4. Every stylesheet the aggregate entry point imports actually exists. A broken @import fails
