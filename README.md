@@ -11,6 +11,16 @@ navigation layout, its density, its background grid and whether items are annota
 every box in the product; Blueprint numbers every item and moves the nav into a drafting title block.
 Same nine screens, and no screen aware that any of it happened.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="embeds/posters/instrument.poster.svg">
+  <img alt="The same miniature dashboard rendered by the Instrument theme (dark) and Blueprint (light) — structure, not palette, is what changed" src="embeds/posters/blueprint.poster.svg" width="100%">
+</picture>
+
+*That image is not a mockup: [`embeds/render.mjs`](embeds/render.mjs) renders it from the live
+theme registry and token CSS, animated, one per theme — [all seven](embeds/posters), regenerated
+by `node embeds/cli.mjs` and byte-checked in `npm run check`. Dark viewers get Instrument, light
+viewers get Blueprint.*
+
 ```bash
 npm i instrument@file:../instrument      # or copy the folder; both work
 ```
