@@ -1,0 +1,124 @@
+/* ==============================================================================================
+   ARCADE — depth by emitted light.
+
+   WHERE IT CAME FROM. This is the GamerBois hub's own look, brought into the system rather than
+   left as one page's private stylesheet. The hub is a Discord Activity for a group of friends: a
+   server list, a soundboard, a game catalog. It was styled once, by hand, and it worked — so the
+   question was never whether to keep it, only whether it could be said in Instrument's vocabulary
+   instead of in 212 lines nobody else can reuse.
+
+   THE ONE REAL DIFFERENCE. Instrument's house technique for depth is stated in tokens.css:
+   translucency + hairline + wash. Beacon already showed that technique has a precondition — you
+   must own the page underneath — and swapped it for opaque plates. Arcade breaks it from the other
+   side: here a surface is separated from the page not by being lighter than it, but by EMITTING.
+   Its planes are barely lifted (#141322 over #0b0a14 is a 2% step, less than bento's) and the
+   separation is carried almost entirely by coloured glow on the elements that matter.
+
+   That is a legitimate technique and a narrow one. It works because this theme owns a dark violet
+   page and never leaves it — a glow is a relationship with a dark backdrop the same way a wash is a
+   relationship with a known one. On a light host this theme has nothing to say; use beacon.
+
+   WHAT IT REFUSES TO DO. The palette arrived with five accents (mint, pink, violet, amber, red) and
+   the temptation is to spend them all. Instrument's rule holds: a theme picks a hue, it never
+   repurposes a role. So they are mapped by MEANING, not by which looked nicest where —
+
+     mint   -> --i-ok       it was already the LIVE dot: an outcome, and a good one
+     red    -> --i-crit     already the failure colour
+     amber  -> --i-signal   already "this wants you": the wake button, the boot spinner
+     violet -> --i-machine  already the focus ring, which is the machine indicating state
+
+   Pink gets NO role. It is the wordmark's colour and a brand voice, not a claim about a value, and
+   the honest thing is to expose it as a theme-local for a page to use on its own name rather than
+   invent a sixth semantic slot for it. If pink ever means something, that is the day it earns a
+   token.
+   ============================================================================================== */
+
+[data-theme="arcade"] {
+  color-scheme: dark;
+
+  /* TYPE. The house pairing. The hub's own stack was already a mono for labels and a system sans
+     for prose — the same split Instrument makes — so there is nothing to change here. */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo,
+            Consolas, "Liberation Mono", monospace;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+             sans-serif;
+
+  /* SURFACES. Deliberately shallow steps — see the thesis. The lift is not doing the work. */
+  --i-page:    #0b0a14;   /* deep violet-black, not neutral: the glow needs a hue to sit against */
+  --i-plane:   #141322;
+  --i-plane-2: #1a1830;
+  --i-well:    #08070f;
+
+  /* ATMOSPHERE. On, and coloured, because this is the theme where it carries the depth. */
+  --i-wash-signal:  rgba(239, 192, 39, 0.10);
+  --i-wash-machine: rgba(167, 139, 250, 0.12);
+
+  /* BOUNDARIES. A violet-tinted line rather than white-at-10%: a neutral hairline on a violet page
+     reads as grime. Kept as a literal so it survives being screenshotted into Discord. */
+  --i-line:    #2a2745;
+  --i-line-hi: #3b3760;
+  --i-rail:    #221f3a;
+
+  /* INK. */
+  --i-ink:   #eef0f6;
+  --i-dim:   #8e93ab;
+  --i-faint: #5b5f78;
+
+  /* ROLES — mapped by meaning; see the thesis for why pink is absent. */
+  --i-signal:  #efc027;
+  --i-machine: #a78bfa;
+  --i-ok:      #43e078;
+  --i-crit:    #e24b4a;
+
+  --i-signal-wash:  rgba(239, 192, 39, 0.13);
+  --i-machine-wash: rgba(167, 139, 250, 0.14);
+  --i-crit-wash:    rgba(226, 75, 74, 0.13);
+
+  /* The wordmark's colour. NOT a role — a page may use it on its own name and nowhere else. */
+  --i-arcade-brand: #ff5ea8;
+
+  /* STRUCTURE. Generous radii and wide tracking are the other half of the look: the hub's panels
+     were 8–14px with pills at 999px, and its labels were tracked 1–3px uppercase. */
+  --x-radius:      14px;
+  --x-rule-w:      1px;
+  --x-label-case:  uppercase;
+  --x-label-track: 0.18em;
+  --x-title:       2rem;
+  --x-figure:      3rem;
+  --x-stat-floor:  11rem;
+  --x-card-floor:  14rem;
+  --x-grid-line:   var(--i-line);
+  --x-grid-size:   5rem;
+
+  --i-radius:    var(--x-radius);
+  --i-radius-sm: 8px;
+
+  --i-density:    1;
+  --i-type-scale: 1;
+  --i-display-face: var(--i-prose);
+}
+
+/* The technique itself. Scoped to the theme, because a glow is this theme's argument and would be
+   noise in any other: the elements that carry meaning emit, everything else stays flat. Kept to
+   box-shadow and text-shadow — compositor-friendly, and they do not affect layout. */
+[data-theme="arcade"] .i-tag.tone-ok,
+[data-theme="arcade"] .i-tag.tone-crit,
+[data-theme="arcade"] .i-tag.tone-signal {
+  text-shadow: 0 0 0.6em currentColor;
+}
+
+[data-theme="arcade"] .i-btn.is-primary {
+  box-shadow: 0 0 0 1px var(--i-signal), 0 0 1.2em -0.4em var(--i-signal);
+}
+
+[data-theme="arcade"] .i-navitem.is-on .i-navitem-mark {
+  text-shadow: 0 0 0.7em currentColor;
+}
+
+/* NOTE — there is deliberately no `prefers-reduced-motion` block here, and an earlier draft had
+   one. Nothing above moves: a box-shadow and a text-shadow are static. Reducing them under that
+   query was a category error with a real cost — it silently handed everyone with the OS setting on
+   a theme whose planes are a 2% lift and whose depth had just been removed. Caught by rendering it
+   in an environment where the query happens to match, which is the only reason it was not shipped.
+
+   If a future version animates a glow, the animation goes behind the query; the glow does not. */
