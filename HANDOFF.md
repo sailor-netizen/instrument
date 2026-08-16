@@ -1,7 +1,7 @@
 # instrument — handoff
 
-**For a design session working inside this repo.** Written 2026-08-16. Everything below is read from
-the running code and its own docs; where it summarises, the authoritative file is named.
+**For a design session working in this repo.** Written 2026-08-16, read from the running code and its
+own docs; where this summarises, the authoritative file is named.
 
 The short version: **this repo has a method, and the method is the product.** Read §2 before
 designing anything.
@@ -19,7 +19,7 @@ in the product; Blueprint numbers every item and moves the nav into a drafting t
 screens, and **no screen aware that any of it happened.**
 
 Framework-free. One stylesheet is the whole system; React is a convenience layer over the same class
-vocabulary, never a requirement — the fleet server-renders in some places and runs React in others.
+vocabulary, never a requirement.
 
 ```
 src/
@@ -37,7 +37,7 @@ Import order is the layering and it is not arbitrary. `src/instrument.css` is th
 ## 2. ⚠ Start with a direction sheet, not a theme
 
 This is the repo's own instruction and the reason its themes don't all look like one product in
-several palettes. `sheets/README.md`:
+several palettes. From `sheets/README.md`:
 
 ```
 1. SHEET      hand-written HTML, one screen, one direction. No library, no rules.
@@ -49,25 +49,25 @@ several palettes. `sheets/README.md`:
               CHANGELOG.md against the theme that asked for it
 ```
 
-Why it matters, in the repo's words: the alternative is one person iterating on one design until
+Why it matters, in the repo's own words: the alternative is one person iterating on one design until
 someone says stop, which has two failure modes that are hard to see from inside — *you approve a
 design because it is the only one in front of you*, and an assistant asked to "make it better"
-guesses, ships a variation, and hears "a bit better", which is the sound of nobody knowing what to do
-next. **Sheets replace guessing with picking.**
+guesses, ships a variation, and hears *"a bit better"*, which is the sound of nobody knowing what to
+do next. **Sheets replace guessing with picking.**
 
-`sheets/_template.html` is the starting point. `sheets/*.html` holds the five that became themes.
-
-**`sheets/DIRECTIONS.md` is the vocabulary for describing a direction** — ten axes, each with a blank
-brief: FIELD, SKELETON, SCALE SPREAD, DENSITY, TYPE STRATEGY, COLOUR BUDGET, CHROME WEIGHT,
-BEHAVIOUR UNDER THE HAND, THE SIGNATURE MOVE, and THE COST. Its §4 — *"two directions, or two
-palettes?"* — is the test for whether a proposed theme earns its place.
+- `sheets/_template.html` — the starting point for a new sheet.
+- `sheets/*.html` — the five that became themes.
+- **`sheets/DIRECTIONS.md` is the vocabulary for describing a direction:** ten axes, each with a
+  blank brief — FIELD, SKELETON, SCALE SPREAD, DENSITY, TYPE STRATEGY, COLOUR BUDGET, CHROME WEIGHT,
+  BEHAVIOUR UNDER THE HAND, THE SIGNATURE MOVE, and THE COST. Its §4, *"two directions, or two
+  palettes?"*, is the test for whether a proposed theme earns its place.
 
 ⚠ Those ten are a vocabulary for *describing* directions. They are **not** the contract's structure
-axes (§4). The check script once conflated the two.
+axes (§4), which are a different countable thing that happens to share the noun.
 
 ## 3. The four invariants
 
-From `AUTHORING.md`. If a change breaks one, the change is wrong — not the invariant.
+From `AUTHORING.md`. If a change would break one, the change is wrong — not the invariant.
 
 1. **A component never contains a literal.** Colours, sizes and spacing come from `--i-*` roles and
    `--x-*` axes. The lint rule is stateable because of this: *a hex outside a theme file or the L0
@@ -82,18 +82,22 @@ From `AUTHORING.md`. If a change breaks one, the change is wrong — not the inv
 ## 4. The contract
 
 **Roles a theme must fill** — the check enforces twelve:
-`page · plane · well · line · line-hi · ink · dim · faint · signal · machine · crit · ok`
-plus, by convention: `plane-2`, `rail`, the three washes (`signal-wash`, `machine-wash`, `crit-wash`),
-the two atmospheres (`wash-signal`, `wash-machine`), and `mono` / `prose`.
 
-**Meanings, fixed across every theme:** `signal` = this wants you or binds you · `machine` = the
+```
+page · plane · well · line · line-hi · ink · dim · faint · signal · machine · crit · ok
+```
+
+plus, by convention: `plane-2`, `rail`, the washes (`signal-wash`, `machine-wash`, `crit-wash`), the
+atmospheres (`wash-signal`, `wash-machine`), and `mono` / `prose`.
+
+**Meanings are fixed across every theme:** `signal` = this wants you or binds you · `machine` = the
 machine speaking · `crit` = failed · `ok` = succeeded.
 
 **Contrast is not negotiable.** `--i-ink` on `--i-page` and `--i-dim` on `--i-plane` both clear
 4.5:1. Compute it; do not eyeball it.
 
-**Structure axes** (`--x-*`, consumed via `[data-*]` selectors in `contract.css`) — twenty-three
-scalars today:
+**Structure axes** — twenty-three `--x-*` scalars, consumed through `[data-*]` selectors in
+`contract.css`:
 
 ```
 annotate  aside  band  card-floor  emphasis  figure  figure-fit  grid  grid-line  grid-size
@@ -103,7 +107,7 @@ select-fg  stat-floor  surface  title
 
 Every one got there because a theme couldn't express something and was brute-forcing around it.
 `CHANGELOG.md` records which theme asked for each — that is what stops the list growing on
-speculation.
+speculation. **Do not add one speculatively;** `every-axis-is-consumed` will fail it, and should.
 
 **Modes live in the registry, not in CSS.** `applyTheme()` writes eleven `data-*` attributes in one
 pass, which is what makes a half-applied theme impossible. Setting a mode in a theme's CSS looks
@@ -126,6 +130,10 @@ exactly like setting a scalar and does nothing; the check catches it.
 
 **Nothing in that object is a colour.** Colours are the CSS file's job, always.
 
+Adding a theme is **one CSS file + one registry object + one import** in `src/instrument.css`. Keep
+the `[data-theme]` rules section short — more than ~30 lines means the contract is missing an axis,
+and adding the axis beats brute-forcing around it.
+
 ## 5. The class vocabulary
 
 Components consume roles only. Compose these rather than reinventing them:
@@ -137,15 +145,21 @@ Components consume roles only. Compose these rather than reinventing them:
   `.i-view-main` `.i-view-aside` `.i-section` `.i-eyebrow` `.i-split`
 - **Content** — `.i-card`(`-top`/`-title`/`-blurb`) `.i-cards` `.i-panel` `.i-well` `.i-empty`
   `.i-callout` `.i-kv` `.i-rows` `.i-row`(`-title`/`-sub`/`-meta`/`-top`) `.i-table` `.i-tr`
-  `.i-stats` `.i-stat`(`-v`/`-l`) `.i-finding` `.i-trace` `.i-disc` `.i-log`-family
+  `.i-stats` `.i-stat`(`-v`/`-l`) `.i-finding` `.i-trace` `.i-disc`
 - **Controls** — `.i-btn`(`.is-primary`/`.is-ghost`/`.is-small`) `.i-field` `.i-input` `.i-tag`
   `.i-pill` `.i-pills`
 - **Tone, never colour** — `tone-signal` `tone-machine` `tone-crit` `tone-ok` `tone-mute`
-- **State is `is-*`** — `is-on` `is-link` `is-hot` `is-dim` `is-head`, never `active`/`selected`
+- **State is `is-*`** — `is-on` `is-link` `is-hot` `is-dim` `is-head`; never `active`, never `selected`
 
-⚠ `.i-table` is a **flex column of `.i-tr` grids**, not a `<table>`; its columns come from an
-`--i-cols` custom property the host sets. That matters for any consumer whose CSP forbids inline
-styles — keyring hit exactly this.
+Two shapes worth knowing before you design against them:
+
+- **`.i-table` is a flex column of `.i-tr` grids, not a `<table>`.** Its columns come from an
+  `--i-cols` custom property that the host sets per table. A host that cannot set a custom property
+  per element — anything server-rendered under a CSP that forbids inline styles — cannot use it as
+  shipped. Worth deciding whether that is a gap the system should close.
+- **A component that draws a box** must use `.i-panel`/`.i-card` or be added to the four
+  `[data-surface]` blocks in `contract.css`. One that hard-codes its own border looks wrong in
+  Terminal and Blueprint and nobody knows why.
 
 ## 6. The gate
 
@@ -154,23 +168,25 @@ with; it is the definition of "the system still holds". Highlights:
 
 `no-literals-outside-tokens` · `theme-fills-every-role` · `themes-target-i-only` (a theme may never
 name a consuming app's class) · `every-theme-is-imported` · `registry-matches-files` ·
-`modes-live-in-the-registry` · `theme-sets-a-real-axis` · `every-axis-is-consumed` (an axis with no
-consumer is speculation) · `screens-compose-not-restyle` · `gallery-is-navigable` ·
-`wall-shows-every-sheet` · `docs-count-the-real-axes`.
+`modes-live-in-the-registry` · `theme-sets-a-real-axis` · `every-axis-is-consumed` ·
+`screens-compose-not-restyle` · `gallery-is-navigable` · `wall-shows-every-sheet` ·
+`docs-count-the-real-axes`.
 
-Other commands: `npm run gallery` (→ `127.0.0.1:4322/gallery/`) and `node embeds/cli.mjs`
-(regenerates one animated poster + tile per theme from the live registry — they must come back
-byte-identical unless a theme changed).
+Other commands:
+
+- `npm run gallery` → `127.0.0.1:4322/gallery/`
+- `node embeds/cli.mjs` regenerates one animated poster + tile per theme from the live registry. They
+  must come back **byte-identical** unless a theme actually changed — that is the determinism claim.
 
 **Look at your work here:** `gallery/compare.html` renders the same screen in **every theme at
-once**, which is the point — comparison needs simultaneity, and switching a picker one theme at a
-time tells you what each looks like, never which is better. `gallery/screens/*.html` take `?theme=`
-so a screen can be screenshotted under any theme.
+once**, which is the point — switching a picker one theme at a time tells you what each looks like,
+never which is better. `gallery/screens/*.html` take `?theme=` so any screen can be screenshotted
+under any theme.
 
 ## 7. Where it stands
 
-**Eight themes**, with their structural combinations — useful for judging whether a new one is
-genuinely distinct or a palette:
+**Eight themes.** Their structural combinations, which is the fastest way to judge whether a proposed
+theme is genuinely distinct or a palette:
 
 | id | surface | shell | scheme | hover | sectionRule | band | leader | emphasis | hero |
 |---|---|---|---|---|---|---|---|---|---|
@@ -182,36 +198,37 @@ genuinely distinct or a palette:
 | blueprint | outline | titleblock | light | mark | none | rows | 0 | fill | 0 |
 | beacon | tile | rail | dark | mark | none | rows | 0 | fill | 0 |
 | arcade | tile | topbar | dark | lift | none | none | 0 | wash | 1 |
-| **vault** *(PR #1)* | rule | sidebar | dark | mark | trailing | rows | 1 | fill | 0 |
+| **vault** *(unmerged, PR #1)* | rule | sidebar | dark | mark | trailing | rows | 1 | fill | 0 |
 
-Two of these are worth reading for how a theme argues its own existence: **beacon** (opaque surfaces,
-because instrument's translucency assumes you own the page underneath — and marks now travel into
-Cloudflare's App Launcher where you don't) and **vault** (a register rather than a dashboard).
+**Beacon** is the one to read for how a theme argues its own existence: instrument's surface technique
+is translucency over the page, which has a precondition — you must own the page underneath. Beacon is
+for where that fails, so every surface is a literal and every boundary a real weight. The theme file
+states the measurement that produced it.
 
-**`vault` is open in PR #1 and is the newest, weakest-tested member.** It passes the check and the
-argument holds, but it was written **straight into the contract with no direction sheet** — the exact
-thing §2 says not to do. Treat it as one candidate, not a starting point to defend. Replacing it is a
-perfectly good outcome.
+**`vault` is unmerged, is the newest and least-tested member, and was written straight into the
+contract with no direction sheet** — the exact thing §2 says not to do. It passes the check and its
+argument holds (a register rather than a dashboard: rules instead of boxes, a dotted leader from an
+entry out to its state, banded rows). Treat it as **one candidate, not a starting point to defend.**
+Replacing it, or dropping it entirely, is a perfectly good outcome — PR #1 is the only place it
+exists.
 
-**Consumers:** flightdeck (npm `file:`), keyring (vendored CSS, PR #17), and the direction sheets.
-Because class names and token names are the contract, a rename here breaks them on their next deploy
-— which is what `themes-target-i-only` exists to prevent.
+**Class names and token names are the contract.** Apps consume this system by those names, so a
+rename breaks them on their next deploy. That is what `themes-target-i-only` exists to prevent, and
+it is the reason a theme may never reach into a consuming app's classes.
 
-## 8. Good next moves
+## 8. Open questions worth a decision
 
-1. **Run the sheet loop properly.** `sheets/_template.html` + the blank brief in `DIRECTIONS.md` §3,
-   three to five directions, then `gallery/compare.html` and pick. That is the repo's method and the
-   last theme skipped it.
-2. **Translate the winner** and note what the contract could not express — those gaps are the real
-   output, and they become axes recorded in `CHANGELOG.md` against the theme that asked.
-3. **Consider the edge.** `A → B, with direction` — "this app may use that credential" — is a
-   relation, and no component in the system draws one. It currently lives in keyring's own stylesheet
-   built only on `--i-*` roles, so it could move up. A pattern is admitted when it appears in three
-   screens or when getting it wrong carries a real cost; a permission that renders correctly and
-   means the wrong thing is the second kind.
-4. **Do not add an axis speculatively.** `every-axis-is-consumed` will fail, and it should.
+1. **Does the system draw relations?** `A → B, with direction` — one thing may use another — is a
+   relation, and no component here expresses one. The admission rule from `AUTHORING.md` is that a
+   pattern earns a place when it appears in three screens, or when getting it wrong carries a real
+   cost. A permission that renders correctly and means the wrong thing is the second kind.
+2. **Should `.i-table` work without a per-element custom property?** See §5.
+3. **How many themes is the right number?** Eight is a lot to keep green, and every one is a place a
+   new component must be checked. Retiring one is a legitimate move.
 
----
+## 9. If you do one thing
 
-*The keyring side of this — what that console must say and the states that drive it — is
-`keyring/DESIGN-BRIEF.md`. Do this repo first; keyring is a consumer of whatever is decided here.*
+Run the loop in §2 properly: `sheets/_template.html` plus the blank brief in `DIRECTIONS.md` §3,
+three to five directions, then `gallery/compare.html` and pick. Translate the winner, and treat what
+the contract *couldn't* express as the real output — those gaps become axes, recorded in
+`CHANGELOG.md` against the theme that asked for them.
