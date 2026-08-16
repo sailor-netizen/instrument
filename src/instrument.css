@@ -32,6 +32,7 @@
 @import "./themes/beacon.css";
 @import "./themes/arcade.css";
 @import "./themes/vault.css";
+@import "./themes/paper.css";
 @import "./shell.css";
 @import "./components.css";
 @import "./overlays.css";

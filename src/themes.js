@@ -144,6 +144,28 @@ export const THEMES = [
     hero: 0,
   },
   {
+    // The register in daylight — the plain, quiet, high-contrast light surface most production
+    // admin tools actually are. Structurally it is the argument AGAINST Vault's ornament: no
+    // dotted leader (a table's columns already align), no section rule (a second grid competing
+    // with the content's own), banded rows kept because on white they cost nothing and carry a
+    // forty-row register. Blueprint is the other light `outline`-ish theme and it annotates
+    // everything; Swiss has a visible column grid and enormous figures. Nothing else is quiet.
+    id: "paper",
+    name: "Paper",
+    blurb: "Ink on white. Hairlines, banded rows, no ornament — the interface gets out of the way.",
+    surface: "tile",
+    shell: "sidebar",
+    scheme: "light",
+    grid: "none",
+    annotate: 0,
+    hover: "mark",
+    sectionRule: "none",
+    band: "rows",
+    leader: 0,
+    emphasis: "fill",
+    hero: 0,
+  },
+  {
     id: "bento",
     name: "Bento Console",
     blurb: "Unequal tiles on midnight navy. Composition is the hierarchy.",
