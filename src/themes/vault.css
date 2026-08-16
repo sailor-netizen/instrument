@@ -1,0 +1,96 @@
+/* ==============================================================================================
+   VAULT — a ledger, not a dashboard.
+
+   WHY THIS EXISTS. The seven themes before it all answer "how should a screen of things look?".
+   Vault answers a narrower question that keyring asked and none of them could: *how should a
+   REGISTER look* — a bound list of who may open what, read down a column by someone checking, not
+   browsed.
+
+   That question has a structural answer, which is the only kind that earns a theme here. A register
+   is rows and rules. Boxing each entry (`tile`) turns forty credentials into forty cards and puts
+   the scan back on the reader; drawing each entry's own outline does the same with thinner ink. So
+   Vault takes `surface: rule` and spends its structure budget on the three things a ledger needs:
+
+     - a DOTTED LEADER (`leader: 1`) carrying the eye from an entry's name out to its state, which is
+       the one movement this screen performs over and over. Editorial is the only other theme that
+       asks for it, and it is light, ruled and rail-navigated — a different page entirely.
+     - ZEBRA BANDING (`band: rows`), because the leader is only readable if the row it belongs to is.
+     - a TRAILING SECTION RULE, the hairline running out from each section label, so a register reads
+       as one continuous document rather than a stack of unrelated panels.
+
+   No other theme combines rule surfaces with a sidebar in a dark scheme; the nearest, Editorial, is
+   light. That gap is why this is a theme and not a stylesheet in one app.
+
+   THE PALETTE, AND WHY IT IS WARM. Ledgers are paper, and paper at night is not blue. The ink here
+   is a warm off-white on a faintly warm carbon, the attention role is BRASS — the colour of a key,
+   and the one warm-metal hue that does not read as either a warning or a link — and the machine
+   voice is a cold cyan set against it, so the two never blur at a glance. Contrast was computed,
+   not eyeballed: ink/page 15.3:1, dim/plane 7.2:1, faint/plane 4.9:1, and every status role clears
+   4.5:1 on both page and plane.
+
+   A theme picks a hue; it never repurposes a role. Brass is still "this wants you", cyan is still
+   the machine speaking, red and green are still outcomes.
+   ============================================================================================== */
+
+[data-theme="vault"] {
+  color-scheme: dark;
+
+  /* TYPE. The house pairing, unchanged — a register has more machine text than most screens
+     (names, scopes, client ids, hashes), and the mono/grotesque split is what keeps the human
+     sentences from being read as data. */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo,
+            Consolas, "Liberation Mono", monospace;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+             sans-serif;
+
+  /* SURFACES. Four warm-carbon depths. They sit close together on purpose: with `surface: rule`
+     almost nothing is filled, so these are read as the page, the occasional well, and the band —
+     not as a stack of plates. */
+  --i-page:    #101113;
+  --i-plane:   #17191c;
+  --i-plane-2: #1f2226;
+  --i-well:    #0a0b0c;
+
+  /* Atmosphere stays on but stays quiet: a wash under the attention role only, at the strength a
+     ruled surface can carry without the rules disappearing into it. */
+  --i-wash-signal:  rgba(217, 164, 65, 0.05);
+  --i-wash-machine: rgba(95, 179, 201, 0.04);
+
+  /* BOUNDARIES. The rules ARE the surface treatment here, so all three weights are literals rather
+     than alphas over an unknown plane — a hairline that dissolves takes the whole layout with it. */
+  --i-line:    #2a2c30;
+  --i-line-hi: #3d4046;
+  --i-rail:    #4b4f56;
+
+  /* INK. Warm, because the page is. */
+  --i-ink:   #e9e7e2;
+  --i-dim:   #a9a59d;
+  --i-faint: #8b867d;
+
+  /* THE FOUR CLAIMS. Brass = this wants you or binds you. Cyan = the machine is speaking.
+     Red and green stay outcomes. */
+  --i-signal:  #d9a441;
+  --i-machine: #5fb3c9;
+  --i-crit:    #e5675c;
+  --i-ok:      #6fbf8b;
+
+  --i-signal-wash:  rgba(217, 164, 65, 0.13);
+  --i-machine-wash: rgba(95, 179, 201, 0.12);
+  --i-crit-wash:    rgba(229, 103, 92, 0.13);
+
+  /* SCALARS. Dense by default — a register is scanned, and air between rows is distance the eye
+     has to travel. The figure is held back for the same reason: in a ledger the entries are the
+     content, and a headline number competing with them is noise. */
+  --i-density: 0.86;
+  --x-figure: 1.9rem;
+  --x-title: var(--i-h2);
+  --x-radius: 3px;
+}
+
+/* The only rules the axes cannot express: a register's leader has to land on something. The dotted
+   line runs to the row's meta, so the meta needs a page-coloured backstop to sit on — otherwise the
+   dots run under it and the two read as one texture. */
+[data-theme="vault"] .i-row-meta {
+  background: var(--i-page);
+  padding-left: 0.4em;
+}

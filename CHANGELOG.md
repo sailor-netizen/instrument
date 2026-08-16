@@ -4,6 +4,25 @@ Structure axes are the interesting entries. Each one exists because a theme coul
 something and was brute-forcing around it — that is the only good reason to add one, and recording
 *which* theme asked is what stops the list growing on speculation.
 
+## Unreleased
+
+**An eighth theme: `vault`.** No axis was added — which is the point of recording it here. Vault is
+the first theme that asked for nothing the contract could not already express, so it is evidence the
+twenty-eight axes are carrying their weight rather than a sign they need a twenty-ninth.
+
+It exists because keyring needed a **register**, not a dashboard: a bound list of who may open what,
+read down a column by someone checking. That has a structural answer — rules instead of boxes
+(`surface: rule`), a dotted leader from each entry out to its state (`leader: 1`), banded rows to
+keep the leader readable (`band: rows`), and a trailing section rule so the page reads as one
+document. No theme had paired ruled surfaces with a dark scheme and a sidebar; Editorial, the only
+other consumer of `leader`, is light and rail-navigated.
+
+Warm palette on the argument that ledgers are paper and paper at night is not blue: warm off-white
+ink on warm carbon, **brass** for the attention role (the colour of a key, and the one warm metal
+that reads as neither a warning nor a link), cold cyan for the machine voice. Contrast computed, not
+eyeballed — ink/page 15.3:1, dim/plane 7.2:1, faint/plane 4.9:1, every status role above 4.5:1 on
+both page and plane.
+
 ## 0.5.0
 
 Two axes, both found by **measuring** rather than by a theme author hitting a wall.

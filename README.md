@@ -17,7 +17,7 @@ Same nine screens, and no screen aware that any of it happened.
 </picture>
 
 *That image is not a mockup: [`embeds/render.mjs`](embeds/render.mjs) renders it from the live
-theme registry and token CSS, animated, one per theme — [all seven](embeds/posters), regenerated
+theme registry and token CSS, animated, one per theme — [all eight](embeds/posters), regenerated
 by `node embeds/cli.mjs` and byte-checked in `npm run check`. Dark viewers get Instrument, light
 viewers get Blueprint.*
 
@@ -68,7 +68,7 @@ vocabulary rather than in React:
 | `themes.html` | all six side by side — a registry-generated table of every structure axis, and a live colour-role matrix so a role that changed meaning between themes would be visible instantly. |
 | `patterns.html` | composed examples: a whole screen under each surface mode, forms, an agent run, empty/error/loading, and a density comparison. |
 | `compare.html` | **the same screen in every theme at once.** Comparison needs simultaneity — switching a picker one theme at a time tells you what each looks like, never which one is better. |
-| `screens/*.html` | standalone real screens that apply whatever theme `?theme=` asks for. What the wall iframes, and what an assistant can screenshot to see its own work in six themes. |
+| `screens/*.html` | standalone real screens that apply whatever theme `?theme=` asks for. What the wall iframes, and what an assistant can screenshot to see its own work in every theme. |
 
 Every page reads the *real* `themes.js` registry rather than restating it, so the documentation cannot
 drift from the code.
@@ -169,7 +169,7 @@ library to make your app work, that is a missing axis — see [AUTHORING.md](AUT
 ## Proposing a new look
 
 Don't start by writing a theme — a theme written straight into the contract inherits the contract's
-assumptions, which is how six themes become one theme in six palettes.
+assumptions, which is how a set of themes becomes one theme in several palettes.
 
 Start with a **direction sheet**: a hand-written page, free to ignore this library entirely, exploring
 the *composition* rather than the colours. Compare several. Translate the winner.

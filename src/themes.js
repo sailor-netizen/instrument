@@ -124,6 +124,26 @@ export const THEMES = [
     hero: 0,
   },
   {
+    // A register, not a dashboard: rules instead of boxes, a dotted leader from each entry out to
+    // its state, banded rows to keep that leader readable. Editorial is the only other theme asking
+    // for `leader`, and it is light and rail-navigated — no theme paired ruled surfaces with a dark
+    // scheme and a sidebar before this one. See themes/vault.css for the argument.
+    id: "vault",
+    name: "Vault",
+    blurb: "A ledger at night: warm carbon, brass attention, rules and dotted leaders.",
+    surface: "rule",
+    shell: "sidebar",
+    scheme: "dark",
+    grid: "none",
+    annotate: 0,
+    hover: "mark",
+    sectionRule: "trailing",
+    band: "rows",
+    leader: 1,
+    emphasis: "fill",
+    hero: 0,
+  },
+  {
     id: "bento",
     name: "Bento Console",
     blurb: "Unequal tiles on midnight navy. Composition is the hierarchy.",
