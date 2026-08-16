@@ -1,0 +1,106 @@
+/* ==============================================================================================
+   PAPER — the register in daylight.
+
+   WHY THIS EXISTS. Eight themes and every one of them is either a dark instrument panel or a
+   *designed* light surface — Blueprint is a drafting sheet, Swiss is a poster, Editorial is a
+   magazine. None of them is the plain, quiet, high-contrast light register that most production
+   admin tools actually are, and that gap is not a palette gap: it is the whole class of screen
+   where the interface is supposed to disappear and leave the data.
+
+   That question has a structural answer, which is the only kind that earns a theme here.
+
+     - NO LEADER. Vault and Editorial both draw a dotted line from an entry out to its state, which
+       is a beautiful device and reads unmistakably as a bound paper ledger. This theme is the
+       opposite claim: a table is a table, columns already align, and a dotted rule between them is
+       ornament pretending to be structure.
+     - NO SECTION RULE. A hairline running out from every label is a second grid competing with the
+       one the content already has. Removing it is what lets a light page hold many small labels
+       without turning into a diagram of itself.
+     - BANDED ROWS stay. On white, zebra is the cheapest possible way to keep a forty-row register
+       readable, and it costs no ink at all.
+     - TILES on a white page, which means a tile is a faintly grey plate with a drawn edge rather
+       than a lit box. Depth comes from the edge, never from a shadow: shadows on white read as
+       decoration within about two seconds of looking.
+
+   What makes it distinct is the combination. Blueprint is the other `surface: outline` light theme
+   and it numbers and annotates everything; Swiss is `rule` with a visible column grid and enormous
+   figures. Nothing else is quiet.
+
+   THE PALETTE, AND WHY IT IS COOL. Ink on paper under an office light is not warm — the warm
+   registers are already taken by Editorial's cream and Vault's carbon, and both of them are making
+   a point about being documents. This one is making a point about being a tool, so the neutrals are
+   very slightly blue and the four claims are the darkest legible version of each hue rather than
+   the brightest: on white, a bright amber is illegible and a bright red is a toy.
+
+   CONTRAST IS COMPUTED, NOT EYEBALLED. Against the page: ink 17.96:1 · dim 6.97:1 · faint 4.83:1 ·
+   signal 5.02:1 · machine 5.47:1 · crit 5.92:1 · ok 5.02:1. Against the plane every one drops by
+   roughly 0.3 and the lowest, `faint`, still holds 4.55:1. All seven clear 4.5:1 on both — which is
+   the check that mattered, because `faint` is what the micro labels are set in and the first draft
+   used #79818d, measured 4.00:1, and was darkened until it passed rather than kept because it
+   looked right.
+
+   A theme picks a hue; it never repurposes a role. Amber is still "this wants you", teal is still
+   the machine speaking, red and green are still outcomes.
+   ============================================================================================== */
+
+[data-theme="paper"] {
+  color-scheme: light;
+
+  /* TYPE. The house pairing, unchanged. A register has more machine text than most screens (names,
+     scopes, client ids, hashes), and the mono/grotesque split is what stops the human sentences
+     being read as data. */
+  --i-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo,
+            Consolas, "Liberation Mono", monospace;
+  --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+             sans-serif;
+
+  /* SURFACES. The page is actually white — not off-white. A near-white page with near-white plates
+     on it is the light-mode failure that makes everything look slightly dirty; separating them
+     properly is what lets a plate read as a plate without a shadow. */
+  --i-page:    #ffffff;
+  --i-plane:   #f7f8fa;
+  --i-plane-2: #eef0f4;
+  --i-well:    #f2f3f6;
+
+  /* Atmosphere is nearly nothing. On white, a wash at dark-mode strength is a stain. */
+  --i-wash-signal:  rgba(180, 83, 9, 0.04);
+  --i-wash-machine: rgba(15, 118, 110, 0.04);
+
+  /* BOUNDARIES. Three weights, because on white the edge is doing the work the fill does in a dark
+     theme: a hairline between rows, a heavier one under a heading, and a rail dark enough to read
+     as a deliberate mark rather than a rendering artefact. */
+  --i-line:    #e2e5ea;
+  --i-line-hi: #c8ccd4;
+  --i-rail:    #9aa1ad;
+
+  /* INK. Not black. #000 on #fff is harsher than any real printed page and makes long columns
+     shimmer; this is the ink of a good laser printer. */
+  --i-ink:   #14171c;
+  --i-dim:   #525a66;
+  --i-faint: #6b7280;
+
+  /* THE FOUR CLAIMS, at the darkest legible version of each hue. */
+  --i-signal:  #b45309;
+  --i-machine: #0f766e;
+  --i-crit:    #c02626;
+  --i-ok:      #15803d;
+
+  --i-signal-wash:  rgba(180, 83, 9, 0.09);
+  --i-machine-wash: rgba(15, 118, 110, 0.08);
+  --i-crit-wash:    rgba(192, 38, 38, 0.08);
+
+  /* SCALARS. Slightly more open than Vault: on white there is no glow to separate one row from the
+     next, so the space between them is the separation. The figure stays modest — in a register the
+     entries are the content, and a headline number competing with them is noise. */
+  --i-density: 0.82;
+  --x-figure: 1.5rem;
+  --x-title: var(--i-h2);
+  --x-radius: 4px;
+}
+
+/* The only rule the axes cannot express. instrument's zebra is written for dark themes, where a
+   band is a lift; on white it has to be a darkening, and at dark-mode strength it reads as a
+   defect rather than a band. */
+[data-theme="paper"] [data-band="rows"] .i-row:nth-child(even) {
+  background: #fafbfc;
+}
