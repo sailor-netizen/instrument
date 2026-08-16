@@ -124,14 +124,14 @@ export const THEMES = [
     hero: 0,
   },
   {
-    // A register, not a dashboard: rules instead of boxes, a dotted leader from each entry out to
-    // its state, banded rows to keep that leader readable. Editorial is the only other theme asking
-    // for `leader`, and it is light and rail-navigated — no theme paired ruled surfaces with a dark
-    // scheme and a sidebar before this one. See themes/vault.css for the argument.
+    // A register, not a dashboard: a dotted leader from each entry out to its state, banded rows to
+    // keep that leader readable, and a trailing section rule so the page reads as one document.
+    // Editorial is the only other theme asking for `leader`, and it is light and rail-navigated.
+    // ⚠ This was `surface: rule` and it did not survive a browser — see themes/vault.css.
     id: "vault",
     name: "Vault",
-    blurb: "A ledger at night: warm carbon, brass attention, rules and dotted leaders.",
-    surface: "rule",
+    blurb: "A ledger at night: warm carbon, brass attention, dense banded tiles.",
+    surface: "tile",
     shell: "sidebar",
     scheme: "dark",
     grid: "none",

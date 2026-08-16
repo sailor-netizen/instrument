@@ -6,10 +6,15 @@
    REGISTER look* — a bound list of who may open what, read down a column by someone checking, not
    browsed.
 
-   That question has a structural answer, which is the only kind that earns a theme here. A register
-   is rows and rules. Boxing each entry (`tile`) turns forty credentials into forty cards and puts
-   the scan back on the reader; drawing each entry's own outline does the same with thinner ink. So
-   Vault takes `surface: rule` and spends its structure budget on the three things a ledger needs:
+   That question has a structural answer, which is the only kind that earns a theme here. Vault takes
+   `surface: tile` and spends its structure budget on the three things a ledger needs:
+
+   ⚠ It took `surface: rule` first, on the argument that boxing each entry turns forty credentials
+   into forty cards and puts the scan back on the reader. That argument is true of the CATALOGUE —
+   which is a table under any surface mode — and false of everything around it. Measured in a browser
+   at 1050px rather than reasoned about: with no boxes at all, groups dissolved into a column of
+   loose text at enormous spacing and the page stopped being readable. Density does the work `rule`
+   was supposed to do, and tiles do the grouping nothing else was doing.
 
      - a DOTTED LEADER (`leader: 1`) carrying the eye from an entry's name out to its state, which is
        the one movement this screen performs over and over. Editorial is the only other theme that
@@ -18,8 +23,9 @@
      - a TRAILING SECTION RULE, the hairline running out from each section label, so a register reads
        as one continuous document rather than a stack of unrelated panels.
 
-   No other theme combines rule surfaces with a sidebar in a dark scheme; the nearest, Editorial, is
-   light. That gap is why this is a theme and not a stylesheet in one app.
+   What makes it distinct is the combination: no other theme pairs a dotted leader with banded rows
+   and a trailing section rule, and Editorial — the only other consumer of `leader` — is light, cream
+   and rail-navigated. That gap is why this is a theme and not a stylesheet in one app.
 
    THE PALETTE, AND WHY IT IS WARM. Ledgers are paper, and paper at night is not blue. The ink here
    is a warm off-white on a faintly warm carbon, the attention role is BRASS — the colour of a key,
@@ -43,21 +49,19 @@
   --i-prose: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
              sans-serif;
 
-  /* SURFACES. Four warm-carbon depths. They sit close together on purpose: with `surface: rule`
-     almost nothing is filled, so these are read as the page, the occasional well, and the band —
-     not as a stack of plates. */
+  /* SURFACES. Four warm-carbon depths, wide enough apart to read as distinct plates now that the
+     surface mode fills them — a tile that cannot be told from its page is not grouping anything. */
   --i-page:    #101113;
-  --i-plane:   #17191c;
-  --i-plane-2: #1f2226;
+  --i-plane:   #191c20;
+  --i-plane-2: #23272c;
   --i-well:    #0a0b0c;
 
-  /* Atmosphere stays on but stays quiet: a wash under the attention role only, at the strength a
-     ruled surface can carry without the rules disappearing into it. */
+  /* Atmosphere stays quiet. A ledger is read, not admired. */
   --i-wash-signal:  rgba(217, 164, 65, 0.05);
   --i-wash-machine: rgba(95, 179, 201, 0.04);
 
-  /* BOUNDARIES. The rules ARE the surface treatment here, so all three weights are literals rather
-     than alphas over an unknown plane — a hairline that dissolves takes the whole layout with it. */
+  /* BOUNDARIES. Literals rather than alphas over an unknown plane — a hairline that dissolves takes
+     the tile edge with it, and the tile edge is what separates one group from the next. */
   --i-line:    #2a2c30;
   --i-line-hi: #3d4046;
   --i-rail:    #4b4f56;
@@ -81,8 +85,8 @@
   /* SCALARS. Dense by default — a register is scanned, and air between rows is distance the eye
      has to travel. The figure is held back for the same reason: in a ledger the entries are the
      content, and a headline number competing with them is noise. */
-  --i-density: 0.86;
-  --x-figure: 1.9rem;
+  --i-density: 0.78;
+  --x-figure: 1.5rem;
   --x-title: var(--i-h2);
   --x-radius: 3px;
 }
