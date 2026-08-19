@@ -1,0 +1,75 @@
+/* ==============================================================================================
+   THE 3D LAYER — tokens.  Zero literals, as everywhere: every colour here is a reference to a
+   role already defined in tokens.css, so a re-skin still reaches the scene.
+
+   WHY THIS IS CSS AND NOT A JS CONFIG OBJECT.
+   Instrument's claim is that a theme owns STRUCTURE, not just colour. A 3D layer configured in
+   JavaScript would fail that claim immediately: themes are CSS files, so a JS-configured scene is
+   one a theme cannot reach. Putting the controls here means `three.js` reads the SAME cascade the
+   2D UI reads, and a theme changes the scene the same way it changes a card.
+
+   THE LOAD-BEARING TOKEN IS `--i-3d`.
+     auto  the layer renders (subject to reduced-motion and the caller opting in at all)
+     none  the layer does not render AT ALL — no canvas, no WebGL context, no cost
+
+   `none` is not "hide it with opacity". createBackdrop() returns a no-op handle and never creates a
+   context. That is the difference between a theme recolouring the scene and a theme DECIDING it,
+   and it is the whole reason this file exists. Terminal deletes every box in the product; it
+   deletes this too, and is still Terminal.
+
+   WHAT THIS LAYER MAY NEVER DO, mirroring overlays.css's motion budget:
+     - carry a fact that is not also readable in the DOM (it is decoration; the 2D UI is the record)
+     - sit on a hot path — nothing here may block first paint or a streaming update
+     - animate when the user asked for less motion (see the reduced-motion block below)
+   ============================================================================================== */
+
+:root {
+  /* auto | none — the switch a theme owns. */
+  --i-3d: auto;
+
+  /* STRUCTURAL, not decorative. Unitless multipliers so a theme scales the scene the way
+     --i-density scales the 2D UI. 0 is a legal value for every one of them. */
+  --i-3d-density: 1;      /* how much is in the scene */
+  --i-3d-motion: 1;       /* how much it moves — 0 is a still scene, not a stopped one */
+  --i-3d-depth: 1;        /* how far back it goes */
+  --i-3d-scale: 1;        /* element size relative to the field */
+
+  /* Colour comes from the existing roles. A theme that never heard of this file still tints the
+     scene correctly, because it already filled these. */
+  --i-3d-ground: var(--i-page);
+  --i-3d-form: var(--i-line);
+  --i-3d-accent: var(--i-signal);
+  --i-3d-accent-2: var(--i-machine);
+
+  /* Opacity of the whole layer against the page. Decoration sits UNDER content, always. */
+  --i-3d-veil: 0.55;
+}
+
+/* The canvas is furniture, not content: it never takes pointer events, never takes focus, and never
+   participates in the reading order. `aria-hidden` is set in JS as well — belt and braces, because
+   this element is the one thing on the page a screen-reader user gains nothing from. */
+.i-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: var(--i-3d-veil);
+}
+
+/* Anything that shares a stacking context with the layer sits above it. */
+.i-3d-over {
+  position: relative;
+  z-index: 1;
+}
+
+/* REDUCED MOTION. Not "slower" — still. The scene may exist (a static backdrop is not a motion
+   problem), but nothing in it moves. three.js reads this via matchMedia too; the token is here so a
+   theme can see the same truth the renderer sees. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --i-3d-motion: 0;
+  }
+}
