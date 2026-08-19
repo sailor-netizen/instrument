@@ -122,3 +122,13 @@
    in an environment where the query happens to match, which is the only reason it was not shipped.
 
    If a future version animates a glow, the animation goes behind the query; the glow does not. */
+
+/* The 3D layer. Arcade is the one theme whose whole argument is spectacle, so it is the one theme
+   that turns the backdrop up rather than merely allowing it. Density and depth only — motion is
+   left at the default so `prefers-reduced-motion` still wins, and a still field is still a field. */
+[data-theme="arcade"] {
+  --i-3d-density: 1.8;
+  --i-3d-depth: 1.35;
+  --i-3d-veil: 0.7;
+  --i-3d-form: var(--i-signal);
+}

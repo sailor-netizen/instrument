@@ -125,3 +125,9 @@
 /* 5. Banded rows. data-band:rows zebras the ledger; a list of rows is the same ledger without a
       table around it, and with no box and no gap it loses its horizontal tracking the same way. */
 [data-theme="terminal"] .i-rows > .i-row:nth-child(even) { background: var(--i-plane); }
+
+/* 6. The 3D layer. Terminal deletes every box in the product; it deletes the scene too. This is the
+      whole point of `--i-3d` being a token rather than a JS flag: the theme DECIDES the layer, it
+      does not merely tint it. `none` means createBackdrop() builds no WebGL context at all, so a
+      Terminal user pays nothing for a decoration the theme rejects on principle. */
+[data-theme="terminal"] { --i-3d: none; }
