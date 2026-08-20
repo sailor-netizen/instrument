@@ -345,8 +345,47 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   }
 }
 
+/* 16. The 3D layer never multiplies two theme colours together. InstancedMesh multiplies each
+       instance colour by the material's, so a material set to one token and instances set to
+       another produce a PRODUCT — always darker than either — meaning a light theme could not
+       render a light scene however its tokens were written. That shipped once: measured against
+       their own pages, the three light themes rendered decoration at 2.75–3.62 contrast (at or near
+       TEXT contrast, behind content) while the one dark theme rendered at 2.47 and disappeared.
+       Wrong in both directions, from one line, and invisible in code review.
+
+       So: if three.js colours instances at all, its material colour must be the multiply identity.
+       A static rule, because the alternative is rendering five themes and eyeballing them. */
+{
+  const f = join(SRC, "three.js");
+  if (!existsSync(f)) {
+    // Same reasoning as rules 14 and 15: deleting the file must not satisfy the gate.
+    fail("three-colour-identity", `${f} is missing — this gate cannot be satisfied by deleting it`);
+  } else {
+    const src = read(f);
+    if (/setColorAt/.test(src)) {
+      const mat = src.match(/new\s+THREE\.Mesh\w*Material\s*\(\s*\{[\s\S]*?\}\s*\)/);
+      if (!mat) {
+        fail("three-colour-identity", "three.js calls setColorAt but no material literal was found to check");
+      } else if (!/color:\s*0xffffff\b/.test(mat[0])) {
+        const found = mat[0].match(/color:[^,\n]*/);
+        fail("three-colour-identity",
+             "three.js colours instances via setColorAt, so the material colour must be 0xffffff " +
+             "(the identity for InstancedMesh's multiply). Found: " +
+             (found ? found[0].trim() : "no color: key"));
+      }
+      // The theme's colours must still reach the scene SOMEWHERE, or "identity material" would be
+      // satisfied by a layer that renders plain white and reads no tokens at all.
+      for (const token of ["cfg.form", "cfg.accent"]) {
+        if (!src.includes(token)) {
+          fail("three-colour-identity", `three.js never reads ${token} — the cascade no longer reaches the scene`);
+        }
+      }
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 15;
+const RULES = 16;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);

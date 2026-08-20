@@ -102,7 +102,8 @@ export function createBackdrop(canvas, THREE, opts = {}) {
   } catch {
     return inertHandle("no webgl context"); // fail soft — decoration must never break a page
   }
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); // 2 is plenty; 3 is battery for nothing
+  // Pixel ratio is owned by resize(), which runs before the first frame and again on every change.
+  // One owner: a second setPixelRatio here would be the copy that stops matching.
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
@@ -110,8 +111,24 @@ export function createBackdrop(canvas, THREE, opts = {}) {
   // ONE InstancedMesh for the whole field. See the header: this is the only kind worth shipping.
   const base = Math.max(0, Math.round((opts.count ?? 140) * cfg.density));
   const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+  /**
+   * WHITE IS THE IDENTITY ELEMENT, AND THAT IS THE WHOLE POINT.
+   *
+   * InstancedMesh MULTIPLIES each instance's colour by the material's. Setting the material to one
+   * theme token and the instances to another multiplies two theme colours together, and a product
+   * of two colours can only ever be darker than either — so a light theme could not produce a light
+   * scene no matter what its tokens said.
+   *
+   * Measured across this repo's own themes before the fix, decoration against its own page:
+   * swiss 3.62, blueprint 3.24, editorial 2.75 — all three light themes rendered at or near TEXT
+   * contrast, far too loud for something sitting behind content — while bento, the dark one, came
+   * out at 2.47 and nearly vanished. Wrong in both directions, from one multiply.
+   *
+   * So the material is the identity colour and every theme colour is carried by the instance
+   * colours in paint(). Rule 16 of `npm run check` holds this line.
+   */
   const material = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(cfg.form),
+    color: 0xffffff,
     wireframe: true,
     transparent: true,
     opacity: 0.9,
@@ -137,18 +154,50 @@ export function createBackdrop(canvas, THREE, opts = {}) {
   }));
 
   const dummy = new THREE.Object3D();
-  const colorA = new THREE.Color(cfg.accent);
-  const colorB = new THREE.Color(cfg.accent2);
-  const tmp = new THREE.Color();
-  for (let i = 0; i < base; i++) {
-    tmp.copy(colorA).lerp(colorB, i / Math.max(base - 1, 1));
-    mesh.setColorAt?.(i, tmp);
+
+  /**
+   * How far the accent gradient pulls the field away from the theme's structural line colour.
+   * Not a magic number: at 0 the field is exactly `--i-3d-form` and a theme's accents never appear;
+   * at 1 the structural colour has no say at all. 0.6 keeps the accents legible as the theme's
+   * identity while the wireframe still reads as the same family as the 2D rules it sits behind.
+   */
+  const ACCENT_PULL = 0.6;
+
+  const colorForm = new THREE.Color();
+  const colorA = new THREE.Color();
+  const colorB = new THREE.Color();
+  const grad = new THREE.Color();
+  const out = new THREE.Color();
+
+  /**
+   * Recompute every instance colour from the CURRENT cascade — on create, and again on refresh()
+   * after a theme switch. Colour lives here and nowhere else (see the material above).
+   *
+   * A token carrying alpha (`rgba(…, .13)`) loses it at this boundary: THREE.Color is RGB only.
+   * That is why the mix below, rather than a token's own transparency, decides how present the
+   * field is — a theme that expressed subtlety through alpha would otherwise be ignored silently.
+   */
+  function paint() {
+    colorForm.set(cfg.form);
+    colorA.set(cfg.accent);
+    colorB.set(cfg.accent2);
+    for (let i = 0; i < base; i++) {
+      grad.copy(colorA).lerp(colorB, i / Math.max(base - 1, 1));
+      out.copy(colorForm).lerp(grad, ACCENT_PULL);
+      mesh.setColorAt?.(i, out);
+    }
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  paint();
 
   function resize() {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
+    // Re-read the pixel ratio EVERY resize rather than once at create. A window dragged to a
+    // different-DPI monitor, or a browser zoom, changes it; reading it once left the buffer over-
+    // or under-sampled for the rest of the session. Over-sampled is precisely the "battery for
+    // nothing" the cap below exists to prevent, so it must not arrive through the back door.
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.position.z = 12 * cfg.depth;
@@ -170,12 +219,17 @@ export function createBackdrop(canvas, THREE, opts = {}) {
   }
 
   let raf = 0;
+  // `running` is what the CALLER asked for, deliberately separate from what the theme allows. Two
+  // different questions: a caller can want animation while a theme has switched the layer off, and
+  // collapsing them into one flag is how a theme switch silently became permanent.
   let running = false;
+  const loopWanted = () => running && cfg.enabled && cfg.motion > 0;
   function frame(t) {
+    if (!cfg.enabled) return; // `none` means none at every moment, not only at create time
     write(t);
     renderer.render(scene, camera);
     // A still scene renders once per resize, not 60 times a second for an identical image.
-    if (running && cfg.motion > 0) raf = requestAnimationFrame(frame);
+    if (loopWanted()) raf = requestAnimationFrame(frame);
   }
 
   const onResize = () => {
@@ -185,30 +239,55 @@ export function createBackdrop(canvas, THREE, opts = {}) {
 
   resize();
   frame(performance.now());
+
+  // TWO triggers, because they catch different things. `resize` fires for a window or DPI change
+  // that can leave the element the same CSS size; ResizeObserver fires for a layout change — a
+  // sidebar collapsing, a panel opening — that never touches the window at all. Watching only the
+  // window stretched a stale buffer across the canvas whenever its host changed shape on its own.
+  // No feedback loop: setSize(w, h, false) writes the drawing buffer and never the CSS box.
   addEventListener("resize", onResize, { passive: true });
+  const observer = typeof ResizeObserver === "function" ? new ResizeObserver(onResize) : null;
+  observer?.observe(canvas);
 
   return {
     ok: true,
     reason: "",
     start() {
-      if (running) return;
       running = true;
-      if (cfg.motion > 0) raf = requestAnimationFrame(frame);
+      cancelAnimationFrame(raf); // never two loops, whatever order start/refresh arrive in
+      if (loopWanted()) raf = requestAnimationFrame(frame);
     },
     stop() {
       running = false;
       cancelAnimationFrame(raf);
     },
-    /** Re-read the cascade — call after a theme switch. */
+    /**
+     * Re-read the cascade — call after a theme switch.
+     *
+     * A THEME MAY SWITCH THE LAYER OFF AFTER MOUNT, and until this handled that, `--i-3d: none` was
+     * honoured only at create time: loading under Swiss and switching to Terminal left the scene
+     * rendering behind a theme whose entire claim is that it deletes such things. The layer's
+     * headline promise cannot be true only at first paint.
+     *
+     * Off means hidden and not rendering, not disposed: the caller may switch back, and a handle
+     * that destroyed its own renderer could not honour that. The cost is a retained WebGL context
+     * while a `none` theme is active — real, and the reason to prefer not mounting at all when the
+     * theme is known up front, which is exactly what the consumer's cheap-module-first check does.
+     */
     refresh() {
       cfg = readThemeConfig(themeEl);
-      material.color.set(cfg.form);
+      cancelAnimationFrame(raf);
+      canvas.style.display = cfg.enabled ? "" : "none";
+      if (!cfg.enabled) return;
+      paint();
       resize();
-      if (!running || cfg.motion === 0) frame(performance.now());
+      if (loopWanted()) raf = requestAnimationFrame(frame);
+      else frame(performance.now());
     },
     dispose() {
       this.stop();
       removeEventListener("resize", onResize);
+      observer?.disconnect();
       geometry.dispose();
       material.dispose();
       mesh.dispose?.();
