@@ -124,7 +124,8 @@ npm run check
 Zero dependencies, runs anywhere Node does, and verifies the promises this README makes rather than
 leaving them as prose: no colour literal outside the token layer, every theme fills every core role,
 no theme reaches into a consuming app's classes, every theme is both registered *and* imported, every
-`@import` resolves, no `box-shadow` anywhere. CI runs the same script — there is no looser second gate.
+`@import` resolves, no `box-shadow` anywhere, and **every module imports cleanly in Node** — so an app
+that server-renders is never broken by a component it does not use. CI runs the same script — there is no looser second gate.
 
 A design system's claims rot exactly as fast as nobody checks them, which is why these are executable.
 
@@ -157,7 +158,7 @@ front — a library designed in advance guesses at what screens need; one extrac
 | `gallery/*.html` | framework-free pages: components · foundations · themes · patterns · compare |
 | `gallery/screens/` | real screens, theme-parameterised — the panes the compare wall shows |
 | `sheets/` | direction sheets: where a look starts, before it is a theme |
-| `scripts/check.mjs` | the library's own gate — 8 invariants, zero dependencies |
+| `scripts/check.mjs` | the library's own gate — 16 invariants, zero dependencies |
 
 ## Consumers
 

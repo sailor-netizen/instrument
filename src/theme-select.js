@@ -20,7 +20,27 @@
 
 import { THEMES, applyTheme, storedTheme } from "./themes.js";
 
-export class InstrumentThemeSelect extends HTMLElement {
+/**
+ * WHY THE BASE CLASS IS A VARIABLE.
+ *
+ * `class X extends HTMLElement` EVALUATES HTMLElement at import time. In Node — server-side
+ * rendering, a build step, a test runner — that global does not exist, so merely importing this
+ * module threw `HTMLElement is not defined`, and because src/index.js re-exports this class, so did
+ * importing the bare "instrument" specifier. Every consumer that renders on a server inherited the
+ * throw from a component it may never use.
+ *
+ * The registration below was ALREADY guarded with `typeof customElements !== "undefined"`, which is
+ * the tell: the DOM dependency was noticed and one of its two routes was closed. `define()` was
+ * guarded; `extends` was not. A guard on one entry point is a speed bump next to an open door —
+ * enumerate every route to the thing you are guarding, or the guard is decoration.
+ *
+ * Extending an empty class off-DOM keeps this module's public API byte-identical: same export, same
+ * name, same shape, still registered on import in a browser. Off-DOM the class is inert, which is
+ * correct — nothing can construct a custom element where custom elements do not exist.
+ */
+const ElementBase = typeof HTMLElement !== "undefined" ? HTMLElement : class {};
+
+export class InstrumentThemeSelect extends ElementBase {
   connectedCallback() {
     if (this._select) return; // re-connects must not duplicate the control
     const select = document.createElement("select");

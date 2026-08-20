@@ -14,7 +14,7 @@
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "src");
@@ -345,8 +345,72 @@ for (const f of readdirSync(SRC).filter((f) => f.endsWith(".css"))) {
   }
 }
 
+/* 16. Every plain-JS module in src/ can be IMPORTED in Node, with no DOM present.
+       Instrument is consumed by apps that server-render, and an ES module runs its top level on
+       import — so a browser global evaluated at module scope throws for a consumer that never uses
+       the component it belongs to. That is not hypothetical: `theme-select.js` declared
+       `class InstrumentThemeSelect extends HTMLElement` at module scope, src/index.js re-exports it,
+       and so importing the bare "instrument" specifier threw `HTMLElement is not defined` in Node.
+       Flightdeck's SSR render gate had been red because of it since the component shipped, which
+       means everything THAT gate was meant to catch went unguarded too. One line, two gates down.
+
+       The tell was already in the file: `customElements.define` was guarded with
+       `typeof customElements !== "undefined"`, so the DOM dependency had been noticed and ONE of its
+       two routes closed. `define()` was guarded; `extends` was not. Enumerate every route to the
+       thing you are guarding, or the guard is decoration.
+
+       This rule actually imports the modules rather than pattern-matching them, which is the whole
+       point: a regex catches the globals someone thought of, an import catches every one. Node has
+       no JSX loader, so a module that reaches a .jsx file is reported and skipped — that is a limit
+       of the RUNNER, not a DOM dependency, and only that exact error is forgiven. The static check
+       after it covers the .jsx files the import cannot reach. */
+{
+  const jsFiles = readdirSync(SRC).filter((f) => f.endsWith(".js"));
+  if (!jsFiles.length) {
+    // Same reasoning as rules 14 and 15: emptying the directory must not satisfy the gate.
+    fail("node-importable", "no .js modules found in src/ — this gate cannot be satisfied by deleting them");
+  }
+  const skipped = [];
+  for (const f of jsFiles) {
+    try {
+      // Side effects run. That is deliberate — a module whose top level misbehaves is exactly what
+      // this rule exists to catch, and it cannot be caught without executing it.
+      await import(pathToFileURL(join(SRC, f)).href);
+    } catch (err) {
+      const msg = String((err && err.message) || err).split("\n")[0];
+      if (/Unknown file extension ["'`]?\.jsx/.test(msg)) { skipped.push(f); continue; }
+      fail("node-importable",
+           `src/${f} cannot be imported without a DOM: ${msg}\n` +
+           `        A module's top level runs on import. Guard the browser global (see theme-select.js's\n` +
+           `        ElementBase) rather than assuming a window.`);
+    }
+  }
+  if (skipped.length) {
+    console.log(`  · rule 16: ${skipped.join(", ")} reaches JSX and cannot be Node-imported — covered statically below`);
+  }
+
+  // The static half, for the files the import above cannot reach. `class X extends <BrowserGlobal>`
+  // is the specific shape that kills an import, and it is exactly detectable without parsing.
+  //
+  // COMMENTS ARE STRIPPED FIRST, because the first version of this rule failed on theme-select.js —
+  // not on its code, which is fixed, but on the COMMENT explaining the fix, which naturally quotes
+  // the very phrase being hunted. A linter that flags the documentation of its own rule is one
+  // somebody switches off, which is the same argument rule 1 makes about the ✕ glyph.
+  const stripComments = (src) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+  const DOM_BASE = /\bclass\s+\w+\s+extends\s+(HTMLElement|SVGElement|Element|Node|ShadowRoot|HTML\w+Element)\b/;
+  for (const f of readdirSync(SRC).filter((n) => n.endsWith(".js") || n.endsWith(".jsx"))) {
+    const hit = stripComments(read(join(SRC, f))).match(DOM_BASE);
+    if (hit) {
+      fail("node-importable",
+           `src/${f} extends ${hit[1]} directly, which is evaluated at import time and does not ` +
+           `exist in Node. Extend a guarded base instead.`);
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------- */
-const RULES = 15;
+const RULES = 16;
 if (failures.length) {
   console.error(`\n✗ instrument check — ${failures.length} failure(s)\n`);
   for (const { rule, detail } of failures) console.error(`  [${rule}] ${detail}`);

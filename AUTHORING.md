@@ -28,6 +28,25 @@ invariant.
 
 ## Adding a component
 
+### It must import without a browser
+
+An ES module runs its top level on import, and consumers server-render. So nothing at module scope
+may touch a browser global — `HTMLElement`, `window`, `document`, `customElements`, `localStorage`.
+Inside a function body is fine; that code only runs when something calls it.
+
+The trap is subtler than it sounds, and it cost this repo a downstream gate. `theme-select.js`
+guarded its `customElements.define` with `typeof customElements !== "undefined"` — and then declared
+`class InstrumentThemeSelect extends HTMLElement`, which evaluates `HTMLElement` at import time all
+the same. One of two routes closed reads as handled. Extend a guarded base instead:
+
+```js
+const ElementBase = typeof HTMLElement !== "undefined" ? HTMLElement : class {};
+export class Thing extends ElementBase { /* … */ }
+```
+
+`npm run check` rule 16 enforces this by actually importing every plain-JS module in Node, which
+catches browser globals nobody thought to grep for.
+
 ### First: does it earn a place?
 
 A pattern is admitted when it appears in **three** screens, or when getting it wrong carries a real
