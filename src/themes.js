@@ -28,6 +28,25 @@ export const THEMES = [
     hero: 0,
   },
   {
+    // A sticker sheet: cream plates drawn with an ink outline on a pastel field. "outline" is the
+    // one surface mode that draws every edge, which is the whole look; the hard offset shadow the
+    // hub also uses has no role here yet — see themes/y2k.css for why it was left out, not hidden.
+    id: "y2k",
+    name: "Y2K",
+    blurb: "A sticker sheet. Cream plates with an ink outline on a pastel field; hot pink wants you.",
+    surface: "outline",
+    shell: "topbar",
+    scheme: "light",
+    grid: "none",
+    annotate: 0,
+    hover: "lift",
+    sectionRule: "none",
+    band: "none",
+    leader: 0,
+    emphasis: "fill",
+    hero: 1,
+  },
+  {
     id: "arcade",
     name: "Arcade",
     blurb: "Depth by emitted light. A dark violet field, and only what matters glows.",

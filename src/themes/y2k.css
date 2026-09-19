@@ -1,0 +1,78 @@
+/* ==============================================================================================
+   Y2K — a sticker sheet: cream plates with an ink outline, on a pastel field.
+
+   WHERE IT CAME FROM. The watch media hub's third theme, brought here the same day it shipped
+   there (2026-09-20). The owner arrived with four references — cream windows with thick dark
+   outlines and hard offset shadows, candy title bars, pastel pills, stars and clouds on a sunset —
+   and the hub grew a theme that owns structure to match. This file is the part of that look which
+   can be said in Instrument's vocabulary, so a dashboard can wear it without a private stylesheet.
+
+   THE ONE REAL DIFFERENCE. Every other light theme here separates a plate from the page by tone —
+   a plane a shade off the page, a hairline to say where it ends. Y2K separates by OUTLINE: the
+   line is the ink itself, at full strength, on every edge. That is why --i-line, --i-line-hi and
+   --i-rail are the same colour — there are not three weights of edge in a sticker, there is the
+   outline. It pairs with surface "outline", which is the only surface mode that draws every edge.
+
+   WHAT IT CANNOT SAY YET. The hub's version also sets each plate down on a hard, unblurred shadow
+   offset to the bottom-right — the thing that makes it read as a sticker rather than a bordered
+   box. Instrument has no role for a shadow, and a theme may not reach past --i-*/--x-*, so that
+   part is left out here rather than smuggled in. If a second theme wants a hard shadow, that is
+   the day it earns an axis (see the authoring guide: structure axes, added in exactly one place).
+
+   WHAT IT REFUSES TO DO. The palette has five candy colours and the temptation is to spend them.
+   Roles are mapped by MEANING — hot pink is "this wants you" because on the hub it is the focus
+   ring and the selected thing; violet is the machine because it is the field the sky ends in;
+   red stays red; a green deep enough to read on cream is "having". Lavender, mint and butter get
+   NO role: they are the title bars taking turns, a rhythm rather than a claim.
+   ============================================================================================== */
+
+[data-theme="y2k"] {
+  color-scheme: light;
+
+  /* TYPE. The house split, mono for machine text; the prose stack lists the hub's own heavy
+     rounded face first for a host that has it and falls back to the system sans everywhere else. */
+  --i-mono: ui-monospace, Consolas, "Cascadia Code", "JetBrains Mono", "Lucida Console",
+            "DejaVu Sans Mono", monospace;
+  --i-prose: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+             "Helvetica Neue", sans-serif;
+
+  /* SURFACES. A pastel field and cream plates: the page is pink, not white, because a sticker sheet
+     is never white. The well is the lavender an input sits in. */
+  --i-page:    #f2c4d8;
+  --i-plane:   #fff6ea;
+  --i-plane-2: #fbeee0;
+  --i-well:    #f3e7ff;
+
+  /* Atmosphere: the two corner lights of the hub's sunset, butter and lavender, faint. */
+  --i-wash-signal:  rgba(255, 216, 77, 0.16);
+  --i-wash-machine: rgba(217, 198, 255, 0.28);
+
+  /* BOUNDARIES. One weight. The outline IS the ink; see the header. */
+  --i-line:    #3b2a4a;
+  --i-line-hi: #3b2a4a;
+  --i-rail:    #3b2a4a;
+
+  /* INK. Plum, not black: the outline colour and the text colour are one thing, which is what
+     makes a labelled box read as a single drawn object. Literal hexes, not rgba over cream: the
+     launcher tiles are standalone SVGs with no cascade to resolve an alpha against. */
+  --i-ink:   #2f2140;
+  --i-dim:   #6a5878;
+  --i-faint: #9a8aa6;
+
+  /* THE FOUR CLAIMS. */
+  --i-signal:  #ff4f8b;
+  --i-machine: #8a5cf5;
+  --i-crit:    #d9342b;
+  --i-ok:      #1f9e6a;
+
+  --i-signal-wash:  rgba(255, 79, 139, 0.14);
+  --i-machine-wash: rgba(138, 92, 245, 0.12);
+  --i-crit-wash:    rgba(217, 52, 43, 0.1);
+
+  /* SCALARS. Roomy, and round: a sticker has a radius you can feel, and a figure that is allowed
+     to be big because the plate around it is drawn, not implied. */
+  --i-density: 0.94;
+  --x-figure: 1.7rem;
+  --x-title: var(--i-h2);
+  --x-radius: 14px;
+}
